@@ -114,7 +114,9 @@ class IncludeNode(base.Node):
 
   def GetHtmlResourceFilenames(self):
     """Returns a set of all filenames inlined by this file."""
-    return grit.format.html_inline.GetResourceFilenames(self.FilenameToOpen())
+    allow_external_script = self.attrs['allowexternalscript'] == 'true'
+    return grit.format.html_inline.GetResourceFilenames(self.FilenameToOpen(),
+         allow_external_script=allow_external_script)
 
   # static method
   def Construct(parent, name, type, file, translateable=True,
