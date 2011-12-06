@@ -132,14 +132,25 @@ class ADMLWriter(xml_formatted_writer.XMLFormattedWriter):
     '''
     self._AddString(string_table_elem, self.config['win_supported_os'],
                     self.messages['win_supported_winxpsp2']['text'])
+    recommended_name = '%s (%s)' % \
+        (self.config['app_name'], self.messages['doc_recommended']['text'])
     if build == 'chrome':
-      self._AddString(string_table_elem, self.config['win_category_path'][0],
+      self._AddString(string_table_elem,
+                      self.config['win_mandatory_category_path'][0],
                       'Google')
-      self._AddString(string_table_elem, self.config['win_category_path'][1],
+      self._AddString(string_table_elem,
+                      self.config['win_mandatory_category_path'][1],
                       self.config['app_name'])
+      self._AddString(string_table_elem,
+                      self.config['win_recommended_category_path'][1],
+                      recommended_name)
     elif build == 'chromium':
-      self._AddString(string_table_elem, self.config['win_category_path'][0],
+      self._AddString(string_table_elem,
+                      self.config['win_mandatory_category_path'][0],
                       self.config['app_name'])
+      self._AddString(string_table_elem,
+                      self.config['win_recommended_category_path'][0],
+                      recommended_name)
 
   def BeginTemplate(self):
     dom_impl = minidom.getDOMImplementation('')

@@ -23,6 +23,7 @@ class AdmlWriterTest(xml_writer_base_unittest.XmlWriterBaseTest):
 
   def setUp(self):
     config = {
+      'app_name': 'test',
       'build': 'test',
       'win_supported_os': 'SUPPORTED_TESTOS',
     }
@@ -31,7 +32,11 @@ class AdmlWriterTest(xml_writer_base_unittest.XmlWriterBaseTest):
       'win_supported_winxpsp2': {
         'text': 'Supported on Test OS or higher',
         'desc': 'blah'
-      }
+      },
+      'doc_recommended': {
+        'text': 'Recommended',
+        'desc': 'bleh'
+      },
     }
     self.writer.Init()
 
