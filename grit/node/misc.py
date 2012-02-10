@@ -332,7 +332,6 @@ class GritNode(base.Node):
         if not first_ids:
           src_root_dir, first_ids = _ReadFirstIdsFromFile(first_id_filename,
                                                           defines)
-        print "First: %s" % filename_or_stream
         filename = os.path.abspath(filename_or_stream)[
             len(src_root_dir) + 1:]
         filename = filename.replace('\\', '/')
