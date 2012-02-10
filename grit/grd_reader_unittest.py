@@ -149,7 +149,7 @@ class GrdReaderUnittest(unittest.TestCase):
         # This file does not actually exist, but must use absolute
         # path as resource_ids has '' for SRCDIR (see special handling
         # in grit.node.misc).
-        os.path.join(grit_root_dir, "/test.grd"),
+        os.path.join(grit_root_dir, "grit/testdata/test.grd"),
         os.path.join(grit_root_dir, "grit/testdata/resource_ids"),
         {})
     messages_node = root.children[0].children[0]
