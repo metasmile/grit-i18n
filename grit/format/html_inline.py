@@ -19,16 +19,18 @@ import base64
 import mimetypes
 
 from grit.node import base
+from grit import lazy_re
 
 DIST_DEFAULT = 'chromium'
 DIST_ENV_VAR = 'CHROMIUM_BUILD'
 DIST_SUBSTR = '%DISTRIBUTION%'
 
 # Matches beginning of an "if" block with trailing spaces.
-_BEGIN_IF_BLOCK = re.compile('<if [^>]*?expr="(?P<expression>[^"]*)"[^>]*?>\s*')
+_BEGIN_IF_BLOCK = lazy_re.compile(
+    '<if [^>]*?expr="(?P<expression>[^"]*)"[^>]*?>\s*')
 
 # Matches ending of an "if" block with preceding spaces.
-_END_IF_BLOCK = re.compile('\s*</if>')
+_END_IF_BLOCK = lazy_re.compile('\s*</if>')
 
 def ReadFile(input_filename):
   """Helper function that returns input_filename as a string.

@@ -10,11 +10,12 @@ import os
 import types
 import re
 
+from grit import lazy_re
 from grit import util
 from grit.format import interface
 
 # Matches all different types of linebreaks.
-_LINEBREAKS = re.compile('\r\n|\n|\r')
+_LINEBREAKS = lazy_re.compile('\r\n|\n|\r')
 
 '''
 This dictionary defines the langauge charset pair lookup table, which is used

@@ -6,6 +6,7 @@
 import re
 
 from xml.dom import minidom
+from grit import lazy_re
 from grit.format.policy_templates.writers import xml_formatted_writer
 
 
@@ -535,7 +536,7 @@ class DocWriter(xml_formatted_writer.XMLFormattedWriter):
     }
 
     # A simple regexp to search for URLs. It is enough for now.
-    self._url_matcher = re.compile('(http://[^\\s]*[^\\s\\.])')
+    self._url_matcher = lazy_re.compile('(http://[^\\s]*[^\\s\\.])')
 
   def GetTemplateText(self):
     # Return the text representation of the main <div> tag.

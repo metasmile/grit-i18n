@@ -12,6 +12,7 @@ in the generated grh file.
 import sys
 import re
 import postprocess_interface
+from grit import lazy_re
 import grit.node.empty
 from grit.node import misc
 
@@ -20,8 +21,9 @@ class ToolbarPostProcessor(postprocess_interface.PostProcessor):
   IDS_COMMAND stuff.
   '''
 
-  _IDS_COMMAND = re.compile(r'IDS_COMMAND_')
-  _GRAB_PARAMETERS = re.compile(r'(IDS_COMMAND_[a-zA-Z0-9]+)_([a-zA-z0-9]+)')
+  _IDS_COMMAND = lazy_re.compile(r'IDS_COMMAND_')
+  _GRAB_PARAMETERS = lazy_re.compile(
+      r'(IDS_COMMAND_[a-zA-Z0-9]+)_([a-zA-z0-9]+)')
 
   def Process(self, rctext, rcpath, grdnode):
     ''' Processes the data in rctext and grdnode.

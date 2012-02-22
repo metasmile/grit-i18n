@@ -18,49 +18,78 @@ from grit import util
 
 import grit.exception
 
-import grit.tool.build
-import grit.tool.count
-import grit.tool.diff_structures
-import grit.tool.menu_from_parts
-import grit.tool.newgrd
-import grit.tool.resize
-import grit.tool.rc2grd
-import grit.tool.test
-import grit.tool.transl2tc
-import grit.tool.unit
-
-
 # Copyright notice
 _COPYRIGHT = '''\
 GRIT - the Google Resource and Internationalization Tool
 Copyright (c) Google Inc. %d
 ''' % util.GetCurrentYear()
 
+# Tool info factories; these import only within each factory to avoid
+# importing most of the GRIT code until required.
+def ToolFactoryBuild():
+  import grit.tool.build
+  return grit.tool.build.RcBuilder()
+
+def ToolFactoryCount():
+  import grit.tool.count
+  return grit.tool.count.CountMessage()
+
+def ToolFactoryDiffStructures():
+  import grit.tool.diff_structures
+  return grit.tool.diff_structures.DiffStructures()
+
+def ToolFactoryMenuTranslationsFromParts():
+  import grit.tool.menu_from_parts
+  return grit.tool.menu_from_parts.MenuTranslationsFromParts()
+
+def ToolFactoryNewGrd():
+  import grit.tool.newgrd
+  return grit.tool.newgrd.NewGrd()
+
+def ToolFactoryResizeDialog():
+  import grit.tool.resize
+  return grit.tool.resize.ResizeDialog()
+
+def ToolFactoryRc2Grd():
+  import grit.tool.rc2grd
+  return grit.tool.rc2grd.Rc2Grd()
+
+def ToolFactoryTest():
+  import grit.tool.test
+  return grit.tool.test.TestTool()
+
+def ToolFactoryTranslationToTc():
+  import grit.tool.transl2tc
+  return grit.tool.transl2tc.TranslationToTc()
+
+def ToolFactoryUnit():
+  import grit.tool.unit
+  return grit.tool.unit.UnitTestTool()
+
 # Keys for the following map
-_CLASS = 1
+_FACTORY = 1
 _REQUIRES_INPUT = 2
 _HIDDEN = 3  # optional key - presence indicates tool is hidden
-
 
 # Maps tool names to the tool's module.  Done as a list of (key, value) tuples
 # instead of a map to preserve ordering.
 _TOOLS = [
-  ['build', { _CLASS : grit.tool.build.RcBuilder, _REQUIRES_INPUT : True }],
-  ['newgrd', { _CLASS  : grit.tool.newgrd.NewGrd, _REQUIRES_INPUT : False }],
-  ['rc2grd', { _CLASS : grit.tool.rc2grd.Rc2Grd, _REQUIRES_INPUT : False }],
-  ['transl2tc', { _CLASS : grit.tool.transl2tc.TranslationToTc,
-                 _REQUIRES_INPUT : False }],
-  ['sdiff', { _CLASS : grit.tool.diff_structures.DiffStructures,
-                       _REQUIRES_INPUT : False }],
+  ['build', { _FACTORY : ToolFactoryBuild, _REQUIRES_INPUT : True }],
+  ['newgrd', { _FACTORY  : ToolFactoryNewGrd, _REQUIRES_INPUT : False }],
+  ['rc2grd', { _FACTORY : ToolFactoryRc2Grd, _REQUIRES_INPUT : False }],
+  ['transl2tc', { _FACTORY : ToolFactoryTranslationToTc,
+                  _REQUIRES_INPUT : False }],
+  ['sdiff', { _FACTORY : ToolFactoryDiffStructures,
+              _REQUIRES_INPUT : False }],
   ['resize', {
-      _CLASS : grit.tool.resize.ResizeDialog, _REQUIRES_INPUT : True }],
-  ['unit', { _CLASS : grit.tool.unit.UnitTestTool, _REQUIRES_INPUT : False }],
-  ['count', { _CLASS : grit.tool.count.CountMessage, _REQUIRES_INPUT : True }],
+      _FACTORY : ToolFactoryResizeDialog, _REQUIRES_INPUT : True }],
+  ['unit', { _FACTORY : ToolFactoryUnit, _REQUIRES_INPUT : False }],
+  ['count', { _FACTORY : ToolFactoryCount, _REQUIRES_INPUT : True }],
   ['test', {
-      _CLASS: grit.tool.test.TestTool, _REQUIRES_INPUT : True,
+      _FACTORY: ToolFactoryTest, _REQUIRES_INPUT : True,
       _HIDDEN : True }],
   ['menufromparts', {
-      _CLASS: grit.tool.menu_from_parts.MenuTranslationsFromParts,
+      _FACTORY: ToolFactoryMenuTranslationsFromParts,
       _REQUIRES_INPUT : True, _HIDDEN : True }],
 ]
 
@@ -71,7 +100,7 @@ def PrintUsage():
   tool_list = ''
   for (tool, info) in _TOOLS:
     if not _HIDDEN in info.keys():
-      tool_list += '    %-12s %s\n' % (tool, info[_CLASS]().ShortDescription())
+      tool_list += '    %-12s %s\n' % (tool, info[_FACTORY]().ShortDescription())
 
   # TODO(joi) Put these back into the usage when appropriate:
   #
@@ -171,7 +200,7 @@ def Main(args):
 
     print ("Help for 'grit %s' (for general help, run 'grit help'):\n"
            % (tool))
-    print _GetToolInfo(tool)[_CLASS].__doc__
+    print _GetToolInfo(tool)[_FACTORY]().__doc__
     return 0
   else:
     options = Options()
@@ -198,7 +227,7 @@ def Main(args):
              '     from the current directory.' % options.input)
       return 2
 
-    toolobject = _GetToolInfo(tool)[_CLASS]()
+    toolobject = _GetToolInfo(tool)[_FACTORY]()
     if options.profile_dest:
       import hotshot
       prof = hotshot.Profile(options.profile_dest)

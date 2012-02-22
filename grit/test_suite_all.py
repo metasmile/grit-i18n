@@ -22,61 +22,63 @@ class TestSuiteAll(unittest.TestSuite):
   def __init__(self):
     super(type(self), self).__init__()
     # Imports placed here to prevent circular imports.
+    from grit import clique_unittest
     from grit import grd_reader_unittest
     from grit import grit_runner_unittest
-    from grit.node import base_unittest
-    from grit.node import io_unittest
-    from grit import clique_unittest
-    from grit.node import misc_unittest
-    from grit.gather import rc_unittest
-    from grit.gather import tr_html_unittest
-    from grit.node import message_unittest
-    from grit import tclib_unittest
-    import grit.format.rc_unittest
-    import grit.format.data_pack_unittest
-    from grit.tool import rc2grd_unittest
-    from grit.tool import transl2tc_unittest
-    from grit.gather import txt_unittest
-    from grit.gather import admin_template_unittest
-    from grit import xtb_reader_unittest
-    from grit import util_unittest
-    from grit.tool import preprocess_unittest
-    from grit.tool import postprocess_unittest
+    from grit import lazy_re_unittest
     from grit import shortcuts_unittests
+    from grit import tclib_unittest
+    from grit import util_unittest
+    from grit import xtb_reader_unittest
+    from grit.gather import admin_template_unittest
     from grit.gather import muppet_strings_unittest
     from grit.gather import policy_json_unittest
+    from grit.gather import rc_unittest
+    from grit.gather import tr_html_unittest
+    from grit.gather import txt_unittest
+    from grit.node import base_unittest
+    from grit.node import io_unittest
+    from grit.node import message_unittest
+    from grit.node import misc_unittest
     from grit.node.custom import filename_unittest
+    from grit.tool import postprocess_unittest
+    from grit.tool import preprocess_unittest
+    from grit.tool import rc2grd_unittest
+    from grit.tool import transl2tc_unittest
+    import grit.format.data_pack_unittest
     import grit.format.js_map_format_unittest
+    import grit.format.rc_unittest
 
     test_classes = [
+      admin_template_unittest.AdmGathererUnittest,
       base_unittest.NodeUnittest,
-      io_unittest.FileNodeUnittest,
-      grit_runner_unittest.OptionArgsUnittest,
-      grd_reader_unittest.GrdReaderUnittest,
       clique_unittest.MessageCliqueUnittest,
+      filename_unittest.WindowsFilenameUnittest,
+      grd_reader_unittest.GrdReaderUnittest,
+      grit.format.data_pack_unittest.FormatDataPackUnittest,
+      grit.format.js_map_format_unittest.JsMapFormatUnittest,
+      grit.format.rc_unittest.FormatRcUnittest,
+      grit_runner_unittest.OptionArgsUnittest,
+      io_unittest.FileNodeUnittest,
+      lazy_re_unittest.LazyReUnittest,
+      message_unittest.MessageUnittest,
       misc_unittest.GritNodeUnittest,
+      misc_unittest.IfNodeUnittest,
+      misc_unittest.ReleaseNodeUnittest,
+      muppet_strings_unittest.MuppetStringsUnittest,
+      policy_json_unittest.PolicyJsonUnittest,
+      postprocess_unittest.PostProcessingUnittest,
+      preprocess_unittest.PreProcessingUnittest,
+      rc2grd_unittest.Rc2GrdUnittest,
       rc_unittest.RcUnittest,
+      shortcuts_unittests.ShortcutsUnittest,
+      tclib_unittest.TclibUnittest,
       tr_html_unittest.ParserUnittest,
       tr_html_unittest.TrHtmlUnittest,
-      message_unittest.MessageUnittest,
-      tclib_unittest.TclibUnittest,
-      grit.format.rc_unittest.FormatRcUnittest,
-      grit.format.data_pack_unittest.FormatDataPackUnittest,
-      rc2grd_unittest.Rc2GrdUnittest,
       transl2tc_unittest.TranslationToTcUnittest,
       txt_unittest.TxtUnittest,
-      admin_template_unittest.AdmGathererUnittest,
-      xtb_reader_unittest.XtbReaderUnittest,
-      misc_unittest.IfNodeUnittest,
       util_unittest.UtilUnittest,
-      preprocess_unittest.PreProcessingUnittest,
-      postprocess_unittest.PostProcessingUnittest,
-      misc_unittest.ReleaseNodeUnittest,
-      shortcuts_unittests.ShortcutsUnittest,
-      muppet_strings_unittest.MuppetStringsUnittest,
-      filename_unittest.WindowsFilenameUnittest,
-      grit.format.js_map_format_unittest.JsMapFormatUnittest,
-      policy_json_unittest.PolicyJsonUnittest,
+      xtb_reader_unittest.XtbReaderUnittest,
       # add test classes here...
     ]
 

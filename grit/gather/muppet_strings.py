@@ -13,12 +13,13 @@ import xml.sax.handler
 import xml.sax.saxutils
 
 from grit.gather import regexp
+from grit import lazy_re
 from grit import util
 from grit import tclib
 
 # Placeholders can be defined in strings.xml files by putting the name of the
 # placeholder between [![ and ]!] e.g. <MSG>Hello [![USER]!] how are you<MSG>
-PLACEHOLDER_RE = re.compile('(\[!\[|\]!\])')
+PLACEHOLDER_RE = lazy_re.compile('(\[!\[|\]!\])')
 
 
 class MuppetStringsContentHandler(xml.sax.handler.ContentHandler):

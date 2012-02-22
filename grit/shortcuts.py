@@ -8,6 +8,7 @@
 
 import re
 
+from grit import lazy_re
 from grit import util
 
 
@@ -17,7 +18,7 @@ class ShortcutGroup(object):
   '''
 
   # Matches shortcut keys, e.g. &J
-  SHORTCUT_RE = re.compile('([^&]|^)(&[A-Za-z])')
+  SHORTCUT_RE = lazy_re.compile('([^&]|^)(&[A-Za-z])')
 
   def __init__(self, name):
     self.name = name

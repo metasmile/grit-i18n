@@ -8,6 +8,7 @@
 import re
 
 from grit import clique
+from grit import lazy_re
 
 
 class WindowsFilename(clique.CustomType):
@@ -15,7 +16,7 @@ class WindowsFilename(clique.CustomType):
   illegal characters out of translations.
   '''
 
-  BANNED = re.compile('\+|:|\/|\\\\|\*|\?|\"|\<|\>|\|')
+  BANNED = lazy_re.compile('\+|:|\/|\\\\|\*|\?|\"|\<|\>|\|')
 
   def Validate(self, message):
     return not self.BANNED.search(message.GetPresentableContent())
