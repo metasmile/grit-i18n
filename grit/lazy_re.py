@@ -34,7 +34,7 @@ class LazyRegexObject(object):
       return object.__getattribute__(self, name)
     else:
       self._LazyInit()
-      return self._lazy_re.__getattribute__(name)
+      return getattr(self._lazy_re, name)
 
 
 def compile(*args, **kwargs):
