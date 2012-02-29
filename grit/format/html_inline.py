@@ -198,9 +198,12 @@ def DoInline(
     """Helper function to inline external script files"""
     return InlineFileContents(src_match, '%s')
 
-  def InlineScript(src_match):
+  def InlineScript(match):
     """Helper function to inline external script files"""
-    return InlineFileContents(src_match, '<script>%s</script>')
+    attrs = (match.group('attrs1') + match.group('attrs2')).strip()
+    if attrs:
+       attrs = ' ' + attrs
+    return InlineFileContents(match, '<script' + attrs + '>%s</script>')
 
   def InlineCSSText(text, css_filepath):
     """Helper function that inlines external resources in CSS text"""
@@ -241,7 +244,8 @@ def DoInline(
   if not allow_external_script:
     # We need to inline css and js before we inline images so that image
     # references gets inlined in the css and js
-    flat_text = re.sub('<script .*?src="(?P<filename>[^"\']*)".*?></script>',
+    flat_text = re.sub('<script (?P<attrs1>.*?)src="(?P<filename>[^"\']*)"' +
+                       '(?P<attrs2>.*?)></script>',
                        InlineScript,
                        flat_text)
 
