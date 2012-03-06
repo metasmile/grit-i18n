@@ -1,5 +1,5 @@
-#!/usr/bin/python2.4
-# Copyright (c) 2006-2008 The Chromium Authors. All rights reserved.
+#!/usr/bin/env python
+# Copyright (c) 2012 The Chromium Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -189,7 +189,10 @@ def Main(args):
   '''Parses arguments and does the appropriate thing.'''
   util.ChangeStdoutEncoding()
 
-  if not len(args) or len(args) == 1 and args[0] == 'help':
+  if sys.version_info < (2, 6):
+    print "GRIT requires Python 2.6 or later."
+    return 2
+  elif not len(args) or len(args) == 1 and args[0] == 'help':
     PrintUsage()
     return 0
   elif len(args) == 2 and args[0] == 'help':
