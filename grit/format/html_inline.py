@@ -7,9 +7,7 @@
 
 This is a small script that takes a HTML file, looks for src attributes
 and inlines the specified file, producing one HTML file with no external
-dependencies.
-
-This does not inline anything referenced from an inlined file.
+dependencies. It recursively inlines the included files.
 """
 
 import os
@@ -181,7 +179,7 @@ def DoInline(
         str = leading + trailing
 
   def InlineFileContents(src_match, pattern, inlined_files=inlined_files):
-    """Helper function to inline external script and css files"""
+    """Helper function to inline external files of various types"""
     filepath = GetFilepath(src_match)
     if filepath is None:
       return src_match.group(0)
@@ -192,10 +190,12 @@ def DoInline(
     if names_only and not filepath.endswith('.html'):
       return ""
 
-    return pattern % ReadFile(filepath)
+    return pattern % InlineToString(filepath, grd_node, allow_external_script)
 
   def InlineIncludeFiles(src_match):
-    """Helper function to inline external script files"""
+    """Helper function to directly inline generic external files (without
+       wrapping them with any kind of tags).
+    """
     return InlineFileContents(src_match, '%s')
 
   def InlineScript(match):
