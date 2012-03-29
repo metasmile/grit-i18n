@@ -29,9 +29,6 @@ def _ReadFirstIdsFromFile(filename, defines):
   first_ids dictionary.
   '''
   first_ids_dict = eval(open(filename).read())
-
-  # TODO(joi@chromium.org): It might make sense to make this a
-  # parameter of the .grd file rather than of the resource_ids file.
   src_root_dir = os.path.abspath(os.path.join(os.path.dirname(filename),
                                               first_ids_dict['SRCDIR']))
 
@@ -137,7 +134,7 @@ class GritNode(base.Node):
                               empty.OutputsNode))
 
   def _IsValidAttribute(self, name, value):
-    if name not in ['base_dir', 'source_lang_id',
+    if name not in ['base_dir', 'first_ids_file', 'source_lang_id',
                     'latest_public_release', 'current_release',
                     'enc_check', 'tc_project']:
       return False
@@ -152,6 +149,7 @@ class GritNode(base.Node):
   def DefaultAttributes(self):
     return {
       'base_dir' : '.',
+      'first_ids_file': '',
       'source_lang_id' : 'en',
       'enc_check' : constants.ENCODING_CHECK,
       'tc_project' : 'NEED_TO_SET_tc_project_ATTRIBUTE',
@@ -247,6 +245,25 @@ class GritNode(base.Node):
     '''
     return self.attrs['base_dir']
 
+  def GetFirstIdsFile(self):
+    '''Returns a usable path to the first_ids file, if set, otherwise
+    returns None.
+
+    The first_ids_file attribute is by default relative to the
+    base_dir of the .grd file, but may be prefixed by GRIT_DIR/,
+    which makes it relative to the directory of grit.py
+    (e.g. GRIT_DIR/../gritsettings/resource_ids).
+    '''
+    if not self.attrs['first_ids_file']:
+      return None
+
+    path = self.attrs['first_ids_file']
+    GRIT_DIR_PREFIX = 'GRIT_DIR/'
+    if path.startswith(GRIT_DIR_PREFIX):
+      return util.PathFromRoot(path[len(GRIT_DIR_PREFIX):])
+    else:
+      return self.ToRealPath(path)
+
   def _CollectOutputFiles(self, nodes, output_files):
     '''Recursively filters the list of nodes that may contain other lists
     in <if> nodes, and collects all the nodes that are not enclosed by
@@ -304,45 +321,34 @@ class GritNode(base.Node):
   def SetDefines(self, defines):
     self.defines = defines
 
-  def AssignFirstIds(self, filename_or_stream, first_id_filename, defines):
-    '''Assign first ids to each grouping node based on values from
-    tools/grit/resource_ids.'''
+  def AssignFirstIds(self, filename_or_stream, defines):
+    '''Assign first ids to each grouping node based on values from the
+    first_ids file (if specified on the <grit> node).
+    '''
     # If the input is a stream, then we're probably in a unit test and
     # should skip this step.
     if type(filename_or_stream) not in (str, unicode):
       return
 
-    # TODO(joi@chromium.org): Get rid of this hack by making it
-    # possible to specify the resource_ids file to use as an attribute
-    # of the <grit> node in the .grd file, and doing so in all Chrome
-    # .grd files.
-    #
-    # For now, by default, we use the the file
-    # ../gritsettings/resource_ids relative to grit.py.
-    if not first_id_filename:
-      first_id_filename = os.path.join(
-          os.path.dirname(__file__),
-          '..', '..', '..',
-          'gritsettings', 'resource_ids')
+    # Nothing to do if the first_ids_filename attribute isn't set.
+    first_ids_filename = self.GetFirstIdsFile()
+    if not first_ids_filename:
+      return
 
-    first_ids = None
+    src_root_dir, first_ids = _ReadFirstIdsFromFile(first_ids_filename,
+                                                    defines)
     from grit.node import empty
     for node in self.inorder():
       if isinstance(node, empty.GroupingNode):
-        if not first_ids:
-          src_root_dir, first_ids = _ReadFirstIdsFromFile(first_id_filename,
-                                                          defines)
         filename = os.path.abspath(filename_or_stream)[
-            len(src_root_dir) + 1:]
+          len(src_root_dir) + 1:]
         filename = filename.replace('\\', '/')
 
-        # TODO(joi@chromium.org): Generalize this; users other than
-        # Chrome might want to use the first_id attribute; could check
-        # for first_ids == None to indicate not loaded, first_ids ==
-        # {} to indicate tried to load but found no resource_ids file.
         if node.attrs['first_id'] != '':
-          raise Exception("Don't set the first_id attribute, update "
-              "%s instead." % first_id_filename)
+          raise Exception(
+              "Don't set the first_id attribute when using the first_ids_file "
+              "attribute on the <grit> node, update %s instead." %
+              first_ids_filename)
 
         try:
           id_list = first_ids[filename][node.name]
@@ -350,8 +356,8 @@ class GritNode(base.Node):
           print '-' * 78
           print 'Resource id not set for %s (%s)!' % (filename, node.name)
           print ('Please update %s to include an entry for %s.  See the '
-              'comments in resource_ids for information on why you need to '
-              'update that file.' % (first_id_filename, filename))
+                 'comments in resource_ids for information on why you need to '
+                 'update that file.' % (first_ids_filename, filename))
           print '-' * 78
           raise e
 
@@ -359,7 +365,7 @@ class GritNode(base.Node):
           node.attrs['first_id'] = str(id_list.pop(0))
         except IndexError, e:
           raise Exception('Please update %s and add a first id for %s (%s).'
-              % (first_id_filename, filename, node.name))
+                          % (first_ids_filename, filename, node.name))
 
 
 class IdentifierNode(base.Node):

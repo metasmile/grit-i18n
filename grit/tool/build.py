@@ -56,10 +56,10 @@ Options:
 
   -E NAME=VALUE     Set environment variable NAME to VALUE (within grit).
 
-  -f FIRSTIDFILE    Path to a python file that specifies the first id of
-                    value to use for resources.  Defaults to the file
-                    resources_ids next to grit.py.  Set to an empty string
-                    if you don't want to use a first id file.
+  -f FIRSTIDSFILE   Path to a python file that specifies the first id of
+                    value to use for resources.  A non-empty value here will
+                    override the value specified in the <grit> node's
+                    first_ids_file.
 
   -w WHITELISTFILE  Path to a file containing the string names of the
                     resources to include.  Anything not listed is dropped.
@@ -77,7 +77,7 @@ are exported to translation interchange files (e.g. XMB files), etc.
 
   def Run(self, opts, args):
     self.output_directory = '.'
-    first_id_filename = None
+    first_ids_file = None
     whitelist_filenames = []
     (own_opts, args) = getopt.getopt(args, 'o:D:E:f:w:')
     for (key, val) in own_opts:
@@ -90,7 +90,10 @@ are exported to translation interchange files (e.g. XMB files), etc.
         (env_name, env_value) = val.split('=')
         os.environ[env_name] = env_value
       elif key == '-f':
-        first_id_filename = val
+        # TODO(joi@chromium.org): Remove this override once change
+        # lands in WebKit.grd to specify the first_ids_file in the
+        # .grd itself.
+        first_ids_file = val
       elif key == '-w':
         whitelist_filenames.append(val)
 
@@ -113,8 +116,10 @@ are exported to translation interchange files (e.g. XMB files), etc.
         self.whitelist_names |= set(whitelist_file.read().strip().split('\n'))
         whitelist_file.close()
 
-    self.res = grd_reader.Parse(opts.input, first_id_filename=first_id_filename,
-                                debug=opts.extra_verbose, defines=self.defines)
+    self.res = grd_reader.Parse(opts.input,
+                                debug=opts.extra_verbose,
+                                first_ids_file=first_ids_file,
+                                defines=self.defines)
     self.res.RunGatherers(recursive = True)
     self.Process()
     return 0

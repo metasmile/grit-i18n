@@ -20,8 +20,15 @@ class WrongNumberOfArguments(Exception):
 
 
 def Outputs(filename, defines):
+  # TODO(joi@chromium.org): The first_ids_file can now be specified
+  # via an attribute on the <grit> node.  Once a change lands in
+  # WebKit to use this attribute, we can stop specifying the
+  # first_ids_file parameter here and instead specify it in all grd
+  # files.  For now, since Chrome is the only user of grit_info.py,
+  # this is fine.
   grd = grd_reader.Parse(
-      filename, defines=defines, tags_to_ignore=set(['messages']))
+      filename, defines=defines, tags_to_ignore=set(['messages']),
+      first_ids_file='GRIT_DIR/../gritsettings/resource_ids')
 
   target = []
   lang_folders = {}
@@ -58,26 +65,29 @@ def GritSourceFiles():
     grit_src = [os.path.join(root, f) for f in filenames
                 if f.endswith('.py')]
     files.extend(grit_src)
-  # TODO(joi@chromium.org): Once we switch to specifying the
-  # resource_ids file via a .grd attribute, it should be considered an
-  # input of grit and this bit should no longer be necessary.
-  default_resource_ids = os.path.relpath(
-      os.path.join(grit_root_dir, '..', 'gritsettings', 'resource_ids'),
-      os.getcwd())
-  if os.path.exists(default_resource_ids):
-    files.append(default_resource_ids)
   return files
 
 
 def Inputs(filename, defines):
+  # TODO(joi@chromium.org): The first_ids_file can now be specified
+  # via an attribute on the <grit> node.  Once a change lands in
+  # WebKit to use this attribute, we can stop specifying the
+  # first_ids_file parameter here and instead specify it in all grd
+  # files.  For now, since Chrome is the only user of grit_info.py,
+  # this is fine.
   grd = grd_reader.Parse(
-      filename, debug=False, defines=defines, tags_to_ignore=set(['messages']))
+      filename, debug=False, defines=defines, tags_to_ignore=set(['messages']),
+      first_ids_file='GRIT_DIR/../gritsettings/resource_ids')
   files = []
   for node in grd:
     if (node.name == 'structure' or node.name == 'skeleton' or
         (node.name == 'file' and node.parent and
          node.parent.name == 'translations')):
       files.append(node.GetFilePath())
+    elif node.name == 'grit':
+      first_ids_file = node.GetFirstIdsFile()
+      if first_ids_file:
+        files.append(first_ids_file)
     elif node.name == 'include':
       # Only include files that we actually plan on using.
       if node.SatisfiesOutputCondition():
