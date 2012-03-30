@@ -69,7 +69,8 @@ _BLOCK_TAGS = ['script', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'br',
               'html', 'link', 'form', 'select', 'textarea',
               'button', 'option', 'map', 'area', 'blockquote', 'pre',
               'meta', 'xmp', 'noscript', 'label', 'tbody', 'thead',
-              'script', 'style', 'pre', 'iframe', 'img', 'input', 'nowrap']
+              'script', 'style', 'pre', 'iframe', 'img', 'input', 'nowrap',
+              'fieldset', 'legend']
 
 # HTML tags which may appear within a chunk.
 _INLINE_TAGS = ['b', 'i', 'u', 'tt', 'code', 'font', 'a', 'span', 'small',
@@ -97,6 +98,11 @@ _SUFFIXES = '123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 # treated as whitespace.
 _WHITESPACE = lazy_re.compile(r'(\s|&nbsp;|\\n|\\r|<!--\s*desc\s*=.*?-->)+',
                               re.DOTALL)
+
+# Matches whitespace sequences which can be folded into a single whitespace
+# character.  This matches single characters so that non-spaces are replaced
+# with spaces.
+_FOLD_WHITESPACE = lazy_re.compile(r'\s+')
 
 # Finds a non-whitespace character
 _NON_WHITESPACE = lazy_re.compile(r'\S')
@@ -191,6 +197,10 @@ _SILLY_HEADER = lazy_re.compile(r'\[!\]\ntitle\t(?P<title>[^\n]+?)\n.+?\n\n',
 _DESCRIPTION_COMMENT = lazy_re.compile(
   r'<!--\s*desc\s*=\s*(?P<description>.+?)\s*-->', re.DOTALL)
 
+# Matches a comment which is used to break apart multiple messages.
+_MESSAGE_BREAK_COMMENT = lazy_re.compile(r'<!--\s*message-break\s*-->',
+                                         re.DOTALL)
+
 
 _DEBUG = 0
 def _DebugPrint(text):
@@ -238,17 +248,30 @@ class HtmlChunks(object):
     '''Adds a chunk to self, removing linebreaks and duplicate whitespace
     if appropriate.
     '''
-    if translateable and not self.last_element_ in _PREFORMATTED_TAGS:
-      text = text.replace('\n', ' ')
-      text = text.replace('\r', ' ')
-      text = text.replace('   ', ' ')
-      text = text.replace('  ', ' ')
-
     m = _DESCRIPTION_COMMENT.search(text)
     if m:
       self.last_description = m.group('description')
-      # remove the description from the output text
+      # Remove the description from the output text
       text = _DESCRIPTION_COMMENT.sub('', text)
+
+    m = _MESSAGE_BREAK_COMMENT.search(text)
+    if m:
+      # Remove the coment from the output text.  It should already effectively
+      # break apart messages.
+      text = _MESSAGE_BREAK_COMMENT.sub('', text)
+
+    if translateable and not self.last_element_ in _PREFORMATTED_TAGS:
+      if self.fold_whitespace_:
+        # Fold whitespace sequences if appropriate.  This is optional because it
+        # alters the output strings.
+        text = _FOLD_WHITESPACE.sub(' ', text)
+      else:
+        text = text.replace('\n', ' ')
+        text = text.replace('\r', ' ')
+        # This whitespace folding doesn't work in all cases, thus the
+        # fold_whitespace flag to support backwards compatibility.
+        text = text.replace('   ', ' ')
+        text = text.replace('  ', ' ')
 
     if translateable:
       description = self.last_description
@@ -259,10 +282,15 @@ class HtmlChunks(object):
     if text != '':
       self.chunks_.append((translateable, text, description))
 
-  def Parse(self, text):
+  def Parse(self, text, fold_whitespace):
     '''Parses self.text_ into an intermediate format stored in self.chunks_
     which is translateable and nontranslateable chunks.  Also returns
     self.chunks_
+
+    Args:
+      text: The HTML for parsing.
+      fold_whitespace: Whether whitespace sequences should be folded into a
+        single space.
 
     Return:
       [chunk1, chunk2, chunk3, ...]  (instances of class Chunk)
@@ -272,6 +300,7 @@ class HtmlChunks(object):
     #
 
     self.text_ = text
+    self.fold_whitespace_ = fold_whitespace
 
     # A list of tuples (is_translateable, text) which represents the document
     # after chunking.
@@ -555,6 +584,18 @@ class TrHtml(interface.GathererBase):
     self.text_ = text
     self.have_parsed_ = False
     self.skeleton_ = []  # list of strings and MessageClique objects
+    self.fold_whitespace_ = False
+
+  def SetAttributes(self, attrs):
+    '''Sets node attributes used by the gatherer.
+
+    This checks the fold_whitespace attribute.
+
+    Args:
+      attrs: The mapping of node attributes.
+    '''
+    self.fold_whitespace_ = ('fold_whitespace' in attrs and
+                             attrs['fold_whitespace'] == 'true')
 
   def GetText(self):
     '''Returns the original text of the HTML document'''
@@ -628,7 +669,7 @@ class TrHtml(interface.GathererBase):
       self.skeleton_.append(text[m.end('title') : m.end()])
       text = text[m.end():]
 
-    chunks = HtmlChunks().Parse(text)
+    chunks = HtmlChunks().Parse(text, self.fold_whitespace_)
 
     for chunk in chunks:
       if chunk[0]:  # Chunk is translateable

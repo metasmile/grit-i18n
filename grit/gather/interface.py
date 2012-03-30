@@ -22,6 +22,17 @@ class GathererBase(object):
     # we should not do some types of processing on the translateable bits.
     self.is_skeleton = False
 
+  def SetAttributes(self, attrs):
+    '''Sets node attributes used by the gatherer.
+
+    By default, this does nothing.  If special handling is desired, it should be
+    overridden by the child gatherer.
+
+    Args:
+      attrs: The mapping of node attributes.
+    '''
+    pass
+
   def SetUberClique(self, uberclique):
     '''Overrides the default uberclique so that cliques created by this object
     become part of the uberclique supplied by the user.

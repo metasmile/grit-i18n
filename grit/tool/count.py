@@ -3,8 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-'''Count number of occurrences of a given message ID
-'''
+'''Count number of occurrences of a given message ID.'''
 
 import getopt
 import os
@@ -18,14 +17,13 @@ from grit.extern import tclib
 
 
 class CountMessage(interface.Tool):
-  '''Count the number of times a given message ID is used.
-'''
+  '''Count the number of times a given message ID is used.'''
 
   def __init__(self):
     pass
 
   def ShortDescription(self):
-    return 'Exports all translateable messages into an XMB file.'
+    return 'Count the number of times a given message ID is used.'
 
   def Run(self, opts, args):
     self.SetOptions(opts)

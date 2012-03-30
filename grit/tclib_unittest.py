@@ -22,9 +22,11 @@ import grit.extern.tclib
 
 class TclibUnittest(unittest.TestCase):
   def testInit(self):
-    msg = tclib.Message(text=u'Hello Earthlings')
-    self.failUnless(msg.GetPresentableContent() == 'Hello Earthlings')
+    msg = tclib.Message(text=u'Hello Earthlings',
+                        description='Greetings\n\t      message')
+    self.failUnlessEqual(msg.GetPresentableContent(), 'Hello Earthlings')
     self.failUnless(isinstance(msg.GetPresentableContent(), types.StringTypes))
+    self.failUnlessEqual(msg.GetDescription(), 'Greetings message')
 
   def testGetAttr(self):
     msg = tclib.Message()

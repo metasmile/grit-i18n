@@ -14,6 +14,13 @@ from grit import exception
 from grit import lazy_re
 import grit.extern.tclib
 
+
+# Matches whitespace sequences which can be folded into a single whitespace
+# character.  This matches single characters so that non-spaces are replaced
+# with spaces.
+_FOLD_WHITESPACE = re.compile(r'\s+')
+
+
 def Identity(i):
   return i
 
@@ -25,10 +32,10 @@ class BaseMessage(object):
   def __init__(self, text='', placeholders=[], description='', meaning=''):
     self.parts = []
     self.placeholders = []
-    self.description = description
     self.meaning = meaning
     self.dirty = True  # True if self.id is (or might be) wrong
     self.id = 0
+    self.SetDescription(description)
 
     if text != '':
       if not placeholders or placeholders == []:
@@ -105,7 +112,7 @@ class BaseMessage(object):
     return self.description
 
   def SetDescription(self, description):
-    self.description = description
+    self.description = _FOLD_WHITESPACE.sub(' ', description)
 
   def GetMeaning(self):
     return self.meaning
