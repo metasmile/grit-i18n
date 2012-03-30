@@ -45,6 +45,7 @@ class TestSuiteAll(unittest.TestSuite):
     from grit.tool import preprocess_unittest
     from grit.tool import rc2grd_unittest
     from grit.tool import transl2tc_unittest
+    import grit.format.c_format_unittest
     import grit.format.data_pack_unittest
     import grit.format.js_map_format_unittest
     import grit.format.rc_unittest
@@ -55,6 +56,7 @@ class TestSuiteAll(unittest.TestSuite):
       clique_unittest.MessageCliqueUnittest,
       filename_unittest.WindowsFilenameUnittest,
       grd_reader_unittest.GrdReaderUnittest,
+      grit.format.c_format_unittest.CFormatUnittest,
       grit.format.data_pack_unittest.FormatDataPackUnittest,
       grit.format.js_map_format_unittest.JsMapFormatUnittest,
       grit.format.rc_unittest.FormatRcUnittest,

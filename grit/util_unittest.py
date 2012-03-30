@@ -55,6 +55,28 @@ class UtilUnittest(unittest.TestCase):
     self.failUnless(util.UnescapeHtml('&#1010;') == unichr(1010))
     self.failUnless(util.UnescapeHtml('&#xABcd;') == unichr(43981))
 
+  def testRelativePath(self):
+    """ Verify that MakeRelativePath works in some tricky cases."""
+
+    def TestRelativePathCombinations(base_path, other_path, expected_result):
+      """ Verify that the relative path function works for
+      the given paths regardless of whether or not they end with
+      a trailing slash."""
+      for path1 in [base_path, base_path + os.path.sep]:
+        for path2 in [other_path, other_path + os.path.sep]:
+          result = util.MakeRelativePath(path1, path2)
+          self.failUnless(result == expected_result)
+
+    # set-up variables
+    root_dir = 'c:%sa' % os.path.sep
+    result1 = '..%sabc' % os.path.sep
+    path1 = root_dir + 'bc'
+    result2 = 'bc'
+    path2 = '%s%s%s' % (root_dir, os.path.sep, result2)
+    # run the tests
+    TestRelativePathCombinations(root_dir, path1, result1)
+    TestRelativePathCombinations(root_dir, path2, result2)
+
 class TestBaseClassToLoad(object):
   pass
 

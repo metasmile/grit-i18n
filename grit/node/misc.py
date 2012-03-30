@@ -298,6 +298,9 @@ class GritNode(base.Node):
     elif t in ['rc_all', 'rc_translateable', 'rc_nontranslateable']:
       from grit.format import rc  # avoid circular dep
       return rc.TopLevel()
+    elif t == 'c_format':
+      from grit.format import c_format
+      return c_format.TopLevel()
     elif t == 'resource_map_header':
       from grit.format import resource_map
       return resource_map.HeaderTopLevel()

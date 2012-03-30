@@ -19,6 +19,103 @@ from grit import lazy_re
 _root_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
 
 
+# Matches all different types of linebreaks.
+LINEBREAKS = re.compile('\r\n|\n|\r')
+
+def MakeRelativePath(base_path, path_to_make_relative):
+  """Returns a relative path such from the base_path to
+  the path_to_make_relative.
+
+  In other words, os.join(base_path,
+    MakeRelativePath(base_path, path_to_make_relative))
+  is the same location as path_to_make_relative.
+
+  Args:
+    base_path: the root path
+    path_to_make_relative: an absolute path that is on the same drive
+      as base_path
+  """
+
+  def _GetPathAfterPrefix(prefix_path, path_with_prefix):
+    """Gets the subpath within in prefix_path for the path_with_prefix
+    with no beginning or trailing path separators.
+
+    Args:
+      prefix_path: the base path
+      path_with_prefix: a path that starts with prefix_path
+    """
+    assert path_with_prefix.startswith(prefix_path)
+    path_without_prefix = path_with_prefix[len(prefix_path):]
+    normalized_path = os.path.normpath(path_without_prefix.strip(os.path.sep))
+    if normalized_path == '.':
+      normalized_path = ''
+    return normalized_path
+
+  def _GetCommonBaseDirectory(*args):
+    """Returns the common prefix directory for the given paths
+
+    Args:
+      The list of paths (at least one of which should be a directory)
+    """
+    prefix = os.path.commonprefix(args)
+    # prefix is a character-by-character prefix (i.e. it does not end
+    # on a directory bound, so this code fixes that)
+
+    # if the prefix ends with the separator, then it is prefect.
+    if len(prefix) > 0 and prefix[-1] == os.path.sep:
+      return prefix
+
+    # We need to loop through all paths or else we can get
+    # tripped up by "c:\a" and "c:\abc".  The common prefix
+    # is "c:\a" which is a directory and looks good with
+    # respect to the first directory but it is clear that
+    # isn't a common directory when the second path is
+    # examined.
+    for path in args:
+      assert len(path) >= len(prefix)
+      # If the prefix the same length as the path,
+      # then the prefix must be a directory (since one
+      # of the arguements should be a directory).
+      if path == prefix:
+        continue
+      # if the character after the prefix in the path
+      # is the separator, then the prefix appears to be a
+      # valid a directory as well for the given path
+      if path[len(prefix)] == os.path.sep:
+        continue
+      # Otherwise, the prefix is not a directory, so it needs
+      # to be shortened to be one
+      index_sep = prefix.rfind(os.path.sep)
+      # The use "index_sep + 1" because it includes the final sep
+      # and it handles the case when the index_sep is -1 as well
+      prefix = prefix[:index_sep + 1]
+      # At this point we backed up to a directory bound which is
+      # common to all paths, so we can quit going through all of
+      # the paths.
+      break
+    return prefix
+
+  prefix =  _GetCommonBaseDirectory(base_path, path_to_make_relative)
+  # If the paths had no commonality at all, then return the absolute path
+  # because it is the best that can be done.  If the path had to be relative
+  # then eventually this absolute path will be discovered (when a build breaks)
+  # and an appropriate fix can be made, but having this allows for the best
+  # backward compatibility with the absolute path behavior in the past.
+  if len(prefix) <= 0:
+    return path_to_make_relative
+  # Build a path from the base dir to the common prefix
+  remaining_base_path = _GetPathAfterPrefix(prefix, base_path)
+
+  #  The follow handles two case: "" and "foo\\bar"
+  path_pieces = remaining_base_path.split(os.path.sep)
+  base_depth_from_prefix = len([d for d in path_pieces if len(d)])
+  base_to_prefix = (".." + os.path.sep) * base_depth_from_prefix
+
+  # Put add in the path from the prefix to the path_to_make_relative
+  remaining_other_path = _GetPathAfterPrefix(prefix, path_to_make_relative)
+  return base_to_prefix + remaining_other_path
+
+
 # Matches all of the resource IDs predefined by Windows.
 # The '\b' before and after each word makes sure these match only whole words and
 # not the beginning of any word.. eg. ID_FILE_NEW will not match ID_FILE_NEW_PROJECT
