@@ -124,14 +124,17 @@ are exported to translation interchange files (e.g. XMB files), etc.
     self.Process()
     return 0
 
-  def __init__(self):
+  def __init__(self, defines=None):
     # Default file-creation function is built-in file().  Only done to allow
     # overriding by unit test.
     self.fo_create = file
 
     # key/value pairs of C-preprocessor like defines that are used for
     # conditional output of resources
-    self.defines = {}
+    if defines:
+      self.defines = defines
+    else:
+      self.defines = {}
 
     # self.res is a fully-populated resource tree if Run()
     # has been called, otherwise None.

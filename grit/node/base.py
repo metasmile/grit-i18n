@@ -212,8 +212,8 @@ class Node(grit.format.interface.ItemFormatter):
   def GetCdata(self):
     '''Returns all CDATA of this element, concatenated into a single
     string.  Note that this ignores any elements embedded in CDATA.'''
-    return ''.join(filter(lambda c: isinstance(c, types.StringTypes),
-                          self.mixed_content))
+    return ''.join([c for c in self.mixed_content
+                    if isinstance(c, types.StringTypes)])
 
   def __unicode__(self):
     '''Returns this node and all nodes below it as an XML document in a Unicode
@@ -447,6 +447,18 @@ class Node(grit.format.interface.ItemFormatter):
       if 'name' in node.attrs and node.attrs['name'] == id:
         return node
     return None
+
+  def GetChildrenOfType(self, type):
+    '''Returns a list of all subnodes (recursing to all leaves) of this node
+    that are of the indicated type.
+
+    Args:
+      type: A type you could use with isinstance().
+
+    Return:
+      A list, possibly empty.
+    '''
+    return [child for child in self if isinstance(child, type)]
 
   def GetTextualIds(self):
     '''Returns the textual ids of this node, if it has some.

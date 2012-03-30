@@ -11,12 +11,17 @@ import sys
 if __name__ == '__main__':
   sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '../..'))
 
+import StringIO
 import unittest
 
 from grit.node import base
 from grit.node import message
 from grit.node import structure
 from grit.node import variant
+
+from grit import grd_reader
+from grit import util
+
 
 def MakePlaceholder(phname='BINGO'):
   ph = message.PhNode()
@@ -163,6 +168,32 @@ class NodeUnittest(unittest.TestCase):
       order = order[1:]
     self.failUnless(len(order) == 0)
 
+  def testGetChildrenOfType(self):
+    xml = '''<?xml version="1.0" encoding="UTF-8"?>
+      <grit latest_public_release="2" source_lang_id="en-US"
+            current_release="3" base_dir=".">
+        <outputs>
+          <output filename="resource.h" type="rc_header" />
+          <output filename="en/generated_resources.rc" type="rc_all"
+                  lang="en" />
+          <if expr="pp_if('NOT_TRUE')">
+            <output filename="de/generated_resources.rc" type="rc_all"
+                    lang="de" />
+          </if>
+        </outputs>
+        <release seq="3">
+          <messages>
+            <message name="ID_HELLO">Hello!</message>
+          </messages>
+        </release>
+      </grit>'''
+    grd = grd_reader.Parse(StringIO.StringIO(xml),
+                           util.PathFromRoot('grit/test/data'))
+    from grit.node import io
+    output_nodes = grd.GetChildrenOfType(io.OutputNode)
+    self.failUnlessEqual(len(output_nodes), 3)
+    self.failUnlessEqual(output_nodes[2].attrs['filename'],
+                         'de/generated_resources.rc')
 
 if __name__ == '__main__':
   unittest.main()

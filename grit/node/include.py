@@ -45,6 +45,7 @@ class IncludeNode(base.Node):
     return {'translateable' : 'true',
       'generateid': 'true',
       'filenameonly': 'false',
+      'mkoutput': 'false',
       'flattenhtml': 'false',
       'allowexternalscript': 'false',
       'relativepath': 'false',
@@ -120,13 +121,14 @@ class IncludeNode(base.Node):
 
   # static method
   def Construct(parent, name, type, file, translateable=True,
-      filenameonly=False, relativepath=False):
+      filenameonly=False, mkoutput=False, relativepath=False):
     '''Creates a new node which is a child of 'parent', with attributes set
     by parameters of the same name.
     '''
     # Convert types to appropriate strings
     translateable = util.BoolToString(translateable)
     filenameonly = util.BoolToString(filenameonly)
+    mkoutput = util.BoolToString(mkoutput)
     relativepath = util.BoolToString(relativepath)
 
     node = IncludeNode()
@@ -136,6 +138,7 @@ class IncludeNode(base.Node):
     node.HandleAttribute('file', file)
     node.HandleAttribute('translateable', translateable)
     node.HandleAttribute('filenameonly', filenameonly)
+    node.HandleAttribute('mkoutput', mkoutput)
     node.HandleAttribute('relativepath', relativepath)
     node.EndParsing()
     return node

@@ -144,10 +144,11 @@ class Options(object):
     self.extra_verbose = False
     self.output_stream = sys.stdout
     self.profile_dest = None
+    self.psyco = False
 
   def ReadOptions(self, args):
     '''Reads options from the start of args and returns the remainder.'''
-    (opts, args) = getopt.getopt(args, 'g:dvxc:i:p:')
+    (opts, args) = getopt.getopt(args, 'g:dvxc:i:p:', ('psyco',))
     for (key, val) in opts:
       if key == '-d': self.disconnected = True
       elif key == '-c': self.client = val
@@ -161,6 +162,7 @@ class Options(object):
         self.extra_verbose = True
         util.extra_verbose = True
       elif key == '-p': self.profile_dest = val
+      elif key == '--psyco': self.psyco = True
 
     if not self.input:
       if 'GRIT_INPUT' in os.environ:
@@ -178,7 +180,7 @@ class Options(object):
 def _GetToolInfo(tool):
   '''Returns the info map for the tool named 'tool' or None if there is no
   such tool.'''
-  matches = filter(lambda t: t[0] == tool, _TOOLS)
+  matches = [t for t in _TOOLS if t[0] == tool]
   if not len(matches):
     return None
   else:
@@ -229,6 +231,13 @@ def Main(args):
              "'resource.grd'\n"
              '     from the current directory.' % options.input)
       return 2
+
+    if options.psyco:
+      # Psyco is a specializing JIT for Python.  Early tests indicate that it
+      # could speed up GRIT (at the expense of more memory) for large GRIT
+      # compilations.  See http://psyco.sourceforge.net/
+      import psyco
+      psyco.profile()
 
     toolobject = _GetToolInfo(tool)[_FACTORY]()
     if options.profile_dest:

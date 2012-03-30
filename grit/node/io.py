@@ -77,7 +77,10 @@ class OutputNode(base.Node):
              }
 
   def GetType(self):
-    return self.attrs['type']
+    if self.SatisfiesOutputCondition():
+      return self.attrs['type']
+    else:
+      return 'output_condition_not_satisfied_%s' % self.attrs['type']
 
   def GetLanguage(self):
     '''Returns the language ID, default 'en'.'''

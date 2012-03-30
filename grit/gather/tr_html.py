@@ -563,7 +563,7 @@ class TrHtml(interface.GathererBase):
   def GetCliques(self):
     '''Returns the message cliques for each translateable message in the
     document.'''
-    return filter(lambda x: isinstance(x, clique.MessageClique), self.skeleton_)
+    return [x for x in self.skeleton_ if isinstance(x, clique.MessageClique)]
 
   def Translate(self, lang, pseudo_if_not_available=True,
                 skeleton_gatherer=None, fallback_to_english=False):

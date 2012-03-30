@@ -283,8 +283,8 @@ bla
     # one of the MessageClique objects (it would be a placeholder-only message
     # and we're supposed to have stripped those).
 
-    for item in filter(lambda x: isinstance(x, clique.MessageClique),
-                       html.skeleton_):
+    for item in [x for x in html.skeleton_
+                 if isinstance(x, clique.MessageClique)]:
       if (item.GetMessage().GetRealContent() == '[STATUS-MESSAGE]' or
           item.GetMessage().GetRealContent() == '[ADDIN-DO] [ADDIN-OPTIONS]'):
         self.fail()
