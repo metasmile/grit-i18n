@@ -96,7 +96,8 @@ def Inputs(filename, defines):
         if node.attrs['flattenhtml'] == 'true':
           files.extend(node.GetHtmlResourceFilenames())
 
-  return files
+  cwd = os.getcwd()
+  return [os.path.relpath(f, cwd) for f in files]
 
 
 def PrintUsage():
