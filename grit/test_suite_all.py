@@ -31,6 +31,7 @@ class TestSuiteAll(unittest.TestSuite):
     from grit import util_unittest
     from grit import xtb_reader_unittest
     from grit.gather import admin_template_unittest
+    from grit.gather import igoogle_strings_unittest
     from grit.gather import muppet_strings_unittest
     from grit.gather import policy_json_unittest
     from grit.gather import rc_unittest
@@ -61,6 +62,7 @@ class TestSuiteAll(unittest.TestSuite):
       grit.format.js_map_format_unittest.JsMapFormatUnittest,
       grit.format.rc_unittest.FormatRcUnittest,
       grit_runner_unittest.OptionArgsUnittest,
+      igoogle_strings_unittest.IgoogleStringsUnittest,
       io_unittest.FileNodeUnittest,
       lazy_re_unittest.LazyReUnittest,
       message_unittest.MessageUnittest,
