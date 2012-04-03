@@ -26,15 +26,6 @@ import grit.gather.txt
 import grit.format.rc
 import grit.format.rc_header
 
-# RTL languages
-# TODO(jennyz): remove this fixed set of RTL language array
-# when generic expand_variable code is added by grit team.
-_RTL_LANGS = [
-  'ar',
-  'iw',
-  'ur',
-]
-
 # Type of the gatherer to use for each type attribute
 _GATHERERS = {
   'accelerators' : grit.gather.rc.Accelerators,
@@ -185,6 +176,21 @@ class StructureNode(base.Node):
     return self.attrs['type'] in [
         'tr_html', 'admin_template', 'txt', 'muppet', 'igoogle']
 
+  def ExpandVariables(self):
+    '''Variable expansion on structures is controlled by an XML attribute.
+
+    However, old files assume that expansion is always on for Rc files.
+
+    Returns:
+      A boolean.
+    '''
+    attrs = self.GetRoot().attrs
+    if 'grit_version' in attrs and attrs['grit_version'] > 1:
+      return self.attrs['expand_variables'] == 'true'
+    else:
+      return (self.attrs['expand_variables'] == 'true' or
+              self.attrs['file'].lower().endswith('.rc'))
+
   def FileForLanguage(self, lang, output_dir, create_file=True,
                       return_if_not_generated=True):
     '''Returns the filename of the file associated with this structure,
@@ -225,15 +231,11 @@ class StructureNode(base.Node):
       file_object = util.WrapOutputStream(file(filename, 'wb'),
                                           self._GetOutputEncoding())
       file_contents = util.FixLineEnd(text, self.GetLineEnd())
-      if self.attrs['expand_variables'] == 'true':
-        file_contents = file_contents.replace('[GRITLANGCODE]', lang)
-        # TODO(jennyz): remove this hard coded logic for expanding
-        # [GRITDIR] variable for RTL languages when the generic
-        # expand_variable code is added by grit team.
-        if lang in _RTL_LANGS :
-          file_contents = file_contents.replace('[GRITDIR]', 'dir="RTL"')
-        else :
-          file_contents = file_contents.replace('[GRITDIR]', 'dir="LTR"')
+      if self.ExpandVariables():
+        # Note that we reapply substitution a second time here.
+        # This is because a) we need to look inside placeholders
+        # b) the substitution values are language-dependent
+        file_contents = self.GetRoot().substituter.Substitute(file_contents)
       if self._ShouldAddBom():
         file_object.write(constants.BOM)
       file_object.write(file_contents)
@@ -264,7 +266,7 @@ class StructureNode(base.Node):
     '''
     return self.attrs['output_encoding'].endswith('-sig')
 
-  # static method
+  @staticmethod
   def Construct(parent, name, type, file, encoding='cp1252'):
     '''Creates a new node which is a child of 'parent', with attributes set
     by parameters of the same name.
@@ -277,5 +279,14 @@ class StructureNode(base.Node):
     node.HandleAttribute('encoding', encoding)
     node.EndParsing()
     return node
-  Construct = staticmethod(Construct)
+
+  def SubstituteMessages(self, substituter):
+    '''Propagates substitution to gatherer.
+
+    Args:
+      substituter: a grit.util.Substituter object.
+    '''
+    assert self.gatherer
+    if self.ExpandVariables():
+      self.gatherer.SubstituteMessages(substituter)
 

@@ -20,22 +20,6 @@ from grit.tool import interface
 from grit import shortcuts
 
 
-def ParseDefine(define):
-  '''Parses a define that is either like "NAME" or "NAME=VAL" and
-  returns its components, using True as the default value.  Values of
-  "1" and "0" are transformed to True and False respectively.
-  '''
-  parts = [part.strip() for part in define.split('=')]
-  assert len(parts) >= 1
-  name = parts[0]
-  val = True
-  if len(parts) > 1:
-    val = parts[1]
-  if val == "1": val = True
-  elif val == "0": val = False
-  return (name, val)
-
-
 class RcBuilder(interface.Tool):
   '''A tool that builds RC files and resource header files for compilation.
 
@@ -84,7 +68,7 @@ are exported to translation interchange files (e.g. XMB files), etc.
       if key == '-o':
         self.output_directory = val
       elif key == '-D':
-        name, val = ParseDefine(val)
+        name, val = util.ParseDefine(val)
         self.defines[name] = val
       elif key == '-E':
         (env_name, env_value) = val.split('=')
@@ -98,7 +82,7 @@ are exported to translation interchange files (e.g. XMB files), etc.
         whitelist_filenames.append(val)
 
     if len(args):
-      print "This tool takes no tool-specific arguments."
+      print 'This tool takes no tool-specific arguments.'
       return 2
     self.SetOptions(opts)
     if self.scons_targets:
@@ -123,7 +107,7 @@ are exported to translation interchange files (e.g. XMB files), etc.
     # Set an output context so that conditionals can use defines during the
     # gathering stage; we use a dummy language here since we are not outputting
     # a specific language.
-    self.res.SetOutputContext('no-specific-language', self.defines)
+    self.res.SetOutputContext('en', self.defines)
     self.res.RunGatherers(recursive = True)
     self.Process()
     return 0
@@ -135,10 +119,7 @@ are exported to translation interchange files (e.g. XMB files), etc.
 
     # key/value pairs of C-preprocessor like defines that are used for
     # conditional output of resources
-    if defines:
-      self.defines = defines
-    else:
-      self.defines = {}
+    self.defines = defines or {}
 
     # self.res is a fully-populated resource tree if Run()
     # has been called, otherwise None.
@@ -192,11 +173,11 @@ are exported to translation interchange files (e.g. XMB files), etc.
       formatter = node.ItemFormatter(output_node.GetType())
       if formatter:
         formatted = formatter.Format(node, output_node.GetLanguage(),
-                                     begin_item=True, output_dir=base_dir)
+                                     output_dir=base_dir)
         if should_write:
           outfile.write(formatted)
     except:
-      print u"Error processing node %s" % unicode(node)
+      print u'Error processing node %s' % unicode(node)
       raise
 
     for child in node.children:
@@ -204,12 +185,12 @@ are exported to translation interchange files (e.g. XMB files), etc.
 
     try:
       if formatter:
-        formatted = formatter.Format(node, output_node.GetLanguage(),
-                                     begin_item=False, output_dir=base_dir)
+        formatted = formatter.FormatEnd(node, output_node.GetLanguage(),
+                                        output_dir=base_dir)
         if should_write:
           outfile.write(formatted)
     except:
-      print u"Error processing node %s" % unicode(node)
+      print u'Error processing node %s' % unicode(node)
       raise
   ProcessNode = staticmethod(ProcessNode)
 

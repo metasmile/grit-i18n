@@ -44,7 +44,7 @@ class TemplateFormatter(interface.ItemFormatter):
     # The module that contains the writer class:
     self._writer_module = sys.modules[writer_module_name]
 
-  def Format(self, item, lang='en', begin_item=True, output_dir='.'):
+  def Format(self, item, lang='en', output_dir='.'):
     '''Generates a template corresponding to an <output> node in the grd file.
 
     Args:
@@ -57,9 +57,6 @@ class TemplateFormatter(interface.ItemFormatter):
     Returns:
       The text of the template file.
     '''
-    if not begin_item:
-      return ''
-
     self._lang = lang
     self._config = writer_configuration.GetConfigurationForBuild(item.defines)
     self._policy_data = None

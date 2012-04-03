@@ -84,6 +84,7 @@ how are you?
           </structures>
         </release>
       </grit>'''), path)
+    current_grd.SetOutputContext('en', {})
     current_grd.RunGatherers(recursive=True)
 
     source_rc_path = util.PathFromRoot('grit/testdata/source.rc')
@@ -115,7 +116,7 @@ how are you?
     self.failUnless(('Howdie' in values or 'Hallo sagt man' in values) and not
       ('Howdie' in values and 'Hallo sagt man' in values))
 
-    self.failUnless('XX01XX&SkraXX02XX&HaettaXX03XXThetta er "Klonk" sem eg fylaXX04XXgonkurinnXX05XXKlonk && er "gott"XX06XX&HjalpXX07XX&Um...XX08XX' in values)
+    self.failUnless('XX01XX&SkraXX02XX&HaettaXX03XXThetta er "Klonk" sem eg fylaXX04XXgonkurinnXX05XXKlonk && er [good]XX06XX&HjalpXX07XX&Um...XX08XX' in values)
 
     self.failUnless('I lagi' in values)
 

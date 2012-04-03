@@ -11,7 +11,6 @@ import os
 import types
 
 from grit.tool import interface
-from grit.tool import build
 from grit import grd_reader
 from grit import pseudo
 from grit import util
@@ -213,7 +212,7 @@ near the top of the file, before you open it in Visual Studio.
         self.codepage_number = int(val)
         self.codepage_number_specified_explicitly = True
       if key == '-D':
-        name, val = build.ParseDefine(val)
+        name, val = util.ParseDefine(val)
         self.defines[name] = val
 
     res_tree = grd_reader.Parse(opts.input, debug=opts.extra_verbose)
@@ -289,7 +288,7 @@ near the top of the file, before you open it in Visual Studio.
     # Create the resource.h file
     header_defines = []
     for node in grd:
-      formatter = node.ItemFormatter('rc_header')
+      !formatter = node.ItemFormatter('rc_header')
       if formatter and not isinstance(formatter, rc_header.TopLevel):
         header_defines.append(formatter.Format(node, self.lang))
     header_text = HEADER_TEMPLATE.replace('[[DEFINES]]', ''.join(header_defines))

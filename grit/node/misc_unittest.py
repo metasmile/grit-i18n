@@ -178,6 +178,7 @@ class ReleaseNodeUnittest(unittest.TestCase):
           </structures>
         </release>
       </grit>'''), util.PathFromRoot('grit/testdata'))
+    grd.SetOutputContext('en', {})
     grd.RunGatherers(recursive=True)
 
     hello = grd.GetNodeById('IDS_HELLO')

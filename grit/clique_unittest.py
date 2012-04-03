@@ -103,6 +103,7 @@ class MessageCliqueUnittest(unittest.TestCase):
     </structures>
   </release>
 </grit>''')), util.PathFromRoot('.'))
+    resources.SetOutputContext('en', {})
     resources.RunGatherers(True)
     content_list = []
     for clique_list in resources.UberClique().cliques_.values():

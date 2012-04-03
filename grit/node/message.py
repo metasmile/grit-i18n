@@ -56,9 +56,10 @@ class MessageNode(base.ContentNode):
   def _IsValidAttribute(self, name, value):
     if name not in ['name', 'offset', 'translateable', 'desc', 'meaning',
                     'internal_comment', 'shortcut_groups', 'custom_type',
-                    'validation_expr', 'use_name_for_id']:
+                    'validation_expr', 'use_name_for_id', 'sub_variable']:
       return False
-    if name == 'translateable' and value not in ['true', 'false']:
+    if (name in ('translateable', 'sub_variable') and
+        value not in ['true', 'false']):
       return False
     return True
 
@@ -67,14 +68,15 @@ class MessageNode(base.ContentNode):
 
   def DefaultAttributes(self):
     return {
-      'translateable' : 'true',
-      'desc' : '',
-      'meaning' : '',
-      'internal_comment' : '',
-      'shortcut_groups' : '',
       'custom_type' : '',
-      'validation_expr' : '',
+      'desc' : '',
+      'internal_comment' : '',
+      'meaning' : '',
+      'shortcut_groups' : '',
+      'sub_variable' : 'false',
+      'translateable' : 'true',
       'use_name_for_id' : 'false',
+      'validation_expr' : '',
     }
 
   def GetTextualIds(self):
@@ -158,6 +160,14 @@ class MessageNode(base.ContentNode):
                             description=description_or_id,
                             meaning=self.attrs['meaning'],
                             assigned_id=assigned_id)
+    self.InstallMessage(message)
+
+  def InstallMessage(self, message):
+    '''Sets this node's clique from a tclib.Message instance.
+
+    Args:
+      message: A tclib.Message.
+    '''
     self.clique = self.UberClique().MakeClique(message, self.IsTranslateable())
     for group in self.shortcut_groups_:
       self.clique.AddToShortcutGroup(group)
@@ -167,6 +177,16 @@ class MessageNode(base.ContentNode):
     elif self.attrs['validation_expr'] != '':
       self.clique.SetCustomType(
         clique.OneOffCustomType(self.attrs['validation_expr']))
+
+  def SubstituteMessages(self, substituter):
+    '''Applies substitution to this message.
+
+    Args:
+      substituter: a grit.util.Substituter object.
+    '''
+    message = substituter.SubstituteMessage(self.clique.GetMessage())
+    if message is not self.clique.GetMessage():
+      self.InstallMessage(message)
 
   def GetCliques(self):
     if self.clique:
@@ -189,6 +209,10 @@ class MessageNode(base.ContentNode):
       return self.attrs['name']
     else:
       return self.attrs['offset']
+
+  def ExpandVariables(self):
+    '''We always expand variables on Messages.'''
+    return True
 
   def GetDataPackPair(self, lang, encoding):
     '''Returns a (id, string) pair that represents the string id and the string

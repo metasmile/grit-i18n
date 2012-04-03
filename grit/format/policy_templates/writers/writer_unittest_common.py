@@ -61,6 +61,7 @@ class WriterUnittestCommon(unittest.TestCase):
     grd_string_io = StringIO.StringIO(grd_text)
     # Parse the grit tree and load the policies' JSON with a gatherer.
     grd = grd_reader.Parse(grd_string_io, dir=tmp_dir_name)
+    grd.SetOutputContext('en', {})
     grd.RunGatherers(recursive=True)
     # Remove the policies' JSON.
     os.unlink(json_file_path)

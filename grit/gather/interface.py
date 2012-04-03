@@ -99,6 +99,7 @@ class GathererBase(object):
     '''
     raise NotImplementedError()
 
+  @staticmethod
   def FromFile(rc_file, extkey=None, encoding = 'cp1252'):
     '''Loads the resource from the file 'rc_file'.  Optionally an external key
     (which gets passed to the gatherer's constructor) can be specified.
@@ -115,5 +116,12 @@ class GathererBase(object):
       grit.gather.interface.GathererBase subclass
     '''
     raise NotImplementedError()
-  FromFile = staticmethod(FromFile)
+
+  def SubstituteMessages(self, substituter):
+    '''Applies substitutions to all messages in the gatherer.
+
+    Args:
+      substituter: a grit.util.Substituter object.
+    '''
+    pass
 

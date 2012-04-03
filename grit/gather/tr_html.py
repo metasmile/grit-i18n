@@ -693,7 +693,7 @@ class TrHtml(interface.GathererBase):
           self.skeleton_[ix] = msg.GetRealContent()
 
 
-  # Static method
+  @staticmethod
   def FromFile(html, extkey=None, encoding = 'utf-8'):
     '''Creates a TrHtml object from the contents of 'html' which are decoded
     using 'encoding'.  Returns a new TrHtml object, upon which Parse() has not
@@ -717,5 +717,23 @@ class TrHtml(interface.GathererBase):
       doc = doc[1:]
 
     return TrHtml(doc)
-  FromFile = staticmethod(FromFile)
+
+  def SubstituteMessages(self, substituter):
+    '''Applies substitutions to all messages in the tree.
+
+    Goes through the skeleton and finds all MessageCliques.
+
+    Args:
+      substituter: a grit.util.Substituter object.
+    '''
+    new_skel = []
+    for chunk in self.skeleton_:
+      if isinstance(chunk, clique.MessageClique):
+        old_message = chunk.GetMessage()
+        new_message = substituter.SubstituteMessage(old_message)
+        if new_message is not old_message:
+          new_skel.append(self.uberclique.MakeClique(new_message))
+          continue
+      new_skel.append(chunk)
+    self.skeleton_ = new_skel
 

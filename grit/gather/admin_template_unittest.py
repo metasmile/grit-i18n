@@ -85,6 +85,7 @@ class AdmGathererUnittest(unittest.TestCase):
           <output filename="de_res.rc" type="rc_all" lang="de" />
         </outputs>
       </grit>'''), util.PathFromRoot('grit/testdata'))
+    grd.SetOutputContext('en', {})
     grd.RunGatherers(recursive=True)
     return grd
 

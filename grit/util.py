@@ -408,3 +408,141 @@ def GetCurrentYear():
   '''Returns the current 4-digit year as an integer.'''
   return time.localtime()[0]
 
+def ParseDefine(define):
+  '''Parses a define argument and returns the name and value.
+
+  The format is either "NAME=VAL" or "NAME", using True as the default value.
+  Values of "1" and "0" are transformed to True and False respectively.
+
+  Args:
+    define: a string of the form "NAME=VAL" or "NAME".
+
+  Returns:
+    A (name, value) pair. name is a string, value a string or boolean.
+  '''
+  parts = [part.strip() for part in define.split('=')]
+  assert len(parts) >= 1
+  name = parts[0]
+  val = True
+  if len(parts) > 1:
+    val = parts[1]
+  if val == "1": val = True
+  elif val == "0": val = False
+  return (name, val)
+
+
+class Substituter(object):
+  '''Finds and substitutes variable names in text strings.
+
+  Given a dictionary of variable names and values, prepares to
+  search for patterns of the form [VAR_NAME] in a text.
+  The value will be substituted back efficiently.
+  Also applies to tclib.Message objects.
+  '''
+
+  def __init__(self):
+    '''Create an empty substituter.'''
+    self.substitutions_ = {}
+    self.dirty_ = True
+
+  def AddSubstitutions(self, subs):
+    '''Add new values to the substitutor.
+
+    Args:
+      subs: A dictionary of new substitutions.
+    '''
+    self.substitutions_.update(subs)
+    self.dirty_ = True
+
+  def AddMessages(self, messages, lang):
+    '''Adds substitutions extracted from node.Message objects.
+
+    Args:
+      messages: a list of node.Message objects.
+      lang: The translation language to use in substitutions.
+    '''
+    subs = [(str(msg.attrs['name']), msg.Translate(lang)) for msg in messages]
+    self.AddSubstitutions(dict(subs))
+    self.dirty_ = True
+
+  def GetExp(self):
+    '''Obtain a regular expression that will find substitution keys in text.
+
+    Create and cache if the substituter has been updated. Use the cached value
+    otherwise. Keys will be enclosed in [square brackets] in text.
+
+    Returns:
+      A regular expression object.
+    '''
+    if self.dirty_:
+      components = ['\[%s\]' % (k,) for k in self.substitutions_.keys()]
+      self.exp = re.compile("(%s)" % ('|'.join(components),))
+      self.dirty_ = False
+    return self.exp
+
+  def Substitute(self, text):
+    '''Substitute the variable values in the given text.
+
+    Text of the form [message_name] will be replaced by the message's value.
+
+    Args:
+      text: A string of text.
+
+    Returns:
+      A string of text with substitutions done.
+    '''
+    return ''.join([self._SubFragment(f) for f in self.GetExp().split(text)])
+
+  def _SubFragment(self, fragment):
+    '''Utility function for Substitute.
+
+    Performs a simple substitution if the fragment is exactly of the form
+    [message_name].
+
+    Args:
+      fragment: A simple string.
+
+    Returns:
+      A string with the substitution done.
+    '''
+    if len(fragment) > 2 and fragment[0] == '[' and fragment[-1] == ']':
+      sub = self.substitutions_.get(fragment[1:-1], None)
+      if sub is not None:
+        return sub
+    return fragment
+
+  def SubstituteMessage(self, msg):
+    '''Apply substitutions to a tclib.Message object.
+
+    Text of the form [message_name] will be replaced by a new placeholder,
+    whose presentation will take the form the message_name_{UsageCount}, and
+    whose example will be the message's value. Existing placeholders are
+    not affected.
+
+    Args:
+      msg: A tclib.Message object.
+
+    Returns:
+      A tclib.Message object, with substitutions done.
+    '''
+    from grit import tclib  # avoid circular import
+    counts = {}
+    text = msg.GetPresentableContent()
+    placeholders = []
+    newtext = ''
+    for f in self.GetExp().split(text):
+      sub = self._SubFragment(f)
+      if f != sub:
+        f = str(f)
+        count = counts.get(f, 0) + 1
+        counts[f] = count
+        name = "%s_%d" % (f[1:-1], count)
+        placeholders.append(tclib.Placeholder(name, f, sub))
+        newtext += name
+      else:
+        newtext += f
+    if placeholders:
+      return tclib.Message(newtext, msg.GetPlaceholders() + placeholders,
+                           msg.GetDescription(), msg.GetMeaning())
+    else:
+      return msg

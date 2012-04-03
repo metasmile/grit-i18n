@@ -62,6 +62,7 @@ class FileNodeUnittest(unittest.TestCase):
       </grit>'''
     grd = grd_reader.Parse(StringIO.StringIO(xml),
                            util.PathFromRoot('grit/testdata'))
+    grd.SetOutputContext('en', {})
     grd.RunGatherers(recursive=True)
     self.VerifyCliquesContainEnglishAndFrenchAndNothingElse(grd.GetCliques())
 
@@ -108,6 +109,7 @@ class FileNodeUnittest(unittest.TestCase):
       </grit>'''
     grd = grd_reader.Parse(StringIO.StringIO(xml),
                            util.PathFromRoot('grit/testdata'))
+    grd.SetOutputContext('en', {})
     grd.RunGatherers(recursive=True)
     self.VerifyCliquesContainEnglishAndFrenchAndNothingElse(grd.GetCliques())
 
@@ -132,6 +134,7 @@ class FileNodeUnittest(unittest.TestCase):
       </grit>'''
     grd = grd_reader.Parse(StringIO.StringIO(xml),
                            util.PathFromRoot('grit/test/data'))
+    grd.SetOutputContext('en', {})
     grd.RunGatherers(recursive=True)
     outputs = grd.GetChildrenOfType(io.OutputNode)
     self.failUnless(outputs[0].SatisfiesOutputCondition())

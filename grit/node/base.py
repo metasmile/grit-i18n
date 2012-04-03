@@ -222,11 +222,8 @@ class Node(grit.format.interface.ItemFormatter):
     return header + self.FormatXml()
 
   # Compliance with ItemFormatter interface.
-  def Format(self, item, lang_re = None, begin_item=True):
-    if not begin_item:
-      return ''
-    else:
-      return item.FormatXml()
+  def Format(self, item, lang_re = None):
+    return item.FormatXml()
 
   def FormatXml(self, indent = u'', one_line = False):
     '''Returns this node and all nodes below it as an XML
@@ -322,6 +319,17 @@ class Node(grit.format.interface.ItemFormatter):
       for child in process_last:
         child.RunGatherers(recursive=recursive, debug=debug)
 
+  def SubstituteMessages(self, substituter):
+    '''Applies substitutions to all messages in the tree.
+
+    Called as a final step of RunGatherers.
+
+    Args:
+      substituter: a grit.util.Substituter object.
+    '''
+    for child in self.children:
+      child.SubstituteMessages(substituter)
+
   def ItemFormatter(self, type):
     '''Returns an instance of the item formatter for this object of the
     specified type, or None if not supported.
@@ -338,18 +346,17 @@ class Node(grit.format.interface.ItemFormatter):
       return None
 
   def SatisfiesOutputCondition(self):
-    '''Returns true if this node is either not a child of an <if> element
-    or if it is a child of an <if> element and the conditions for it being
-    output are satisfied.
+    '''Returns true if this node is either not a descendant of an <if> element,
+    or if all conditions on its <if> element ancestors are satisfied.
 
     Used to determine whether to return item formatters for formats that
     obey conditional output of resources (e.g. the RC formatters).
     '''
     from grit.node import misc
-    if not self.parent or not isinstance(self.parent, misc.IfNode):
-      return True
+    if self.parent:
+      return self.parent.SatisfiesOutputCondition()
     else:
-      return self.parent.IsConditionSatisfied()
+      return True
 
   def _IsValidChild(self, child):
     '''Returns true if 'child' is a valid child of this node.
@@ -552,6 +559,10 @@ class Node(grit.format.interface.ItemFormatter):
     '''Sets WhitelistMarkedAsSkip.
     '''
     self._whitelist_marked_as_skip = mark_skipped
+
+  def ExpandVariables(self):
+    '''Whether we need to expand variables on a given node.'''
+    return False
 
 
 class ContentNode(Node):

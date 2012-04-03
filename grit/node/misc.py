@@ -20,6 +20,21 @@ from grit import util
 import grit.format.rc_header
 
 
+# RTL languages
+# TODO(jennyz): remove this fixed set of RTL language array
+# now that generic expand_variable code exists.
+_RTL_LANGS = (
+    'ar',  # Arabic
+    'fa',  # Farsi
+    'iw',  # Hebrew
+    'ks',  # Kashmiri
+    'ku',  # Kurdish
+    'ps',  # Pashto
+    'ur',  # Urdu
+    'yi',  # Yiddish
+)
+
+
 def _ReadFirstIdsFromFile(filename, defines):
   '''Read the starting resource id values from |filename|.  We also
   expand variables of the form <(FOO) based on defines passed in on
@@ -88,6 +103,13 @@ class IfNode(base.Node):
     '''
     return self.EvaluateCondition(self.attrs['expr'])
 
+  def SatisfiesOutputCondition(self):
+    '''Returns true if its condition is satisfied, including on ancestors.'''
+    if not self.IsConditionSatisfied():
+      return False
+    else:
+      return base.Node.SatisfiesOutputCondition(self)
+
 
 class ReleaseNode(base.Node):
   '''The <release> element.'''
@@ -127,6 +149,7 @@ class GritNode(base.Node):
     base.Node.__init__(self)
     self.output_language = ''
     self.defines = {}
+    self.substituter = util.Substituter()
 
   def _IsValidChild(self, child):
     from grit.node import empty
@@ -136,7 +159,7 @@ class GritNode(base.Node):
   def _IsValidAttribute(self, name, value):
     if name not in ['base_dir', 'first_ids_file', 'source_lang_id',
                     'latest_public_release', 'current_release',
-                    'enc_check', 'tc_project']:
+                    'enc_check', 'tc_project', 'grit_version']:
       return False
     if name in ['latest_public_release', 'current_release'] and value.strip(
       '0123456789') != '':
@@ -150,6 +173,7 @@ class GritNode(base.Node):
     return {
       'base_dir' : '.',
       'first_ids_file': '',
+      'grit_version': 1,
       'source_lang_id' : 'en',
       'enc_check' : constants.ENCODING_CHECK,
       'tc_project' : 'NEED_TO_SET_tc_project_ATTRIBUTE',
@@ -291,6 +315,12 @@ class GritNode(base.Node):
         return output_files
     raise exception.MissingElement()
 
+  def GetSubstitutionMessages(self):
+    '''Returns the list of <message sub_variable="true"> nodes.'''
+    msg_nodes = self.GetChildrenOfType(message.MessageNode)
+    return [n for n in msg_nodes if
+            n.attrs['sub_variable'] == 'true' and n.SatisfiesOutputCondition()]
+
   def ItemFormatter(self, t):
     if t == 'rc_header':
       from grit.format import rc_header  # import here to avoid circular dep
@@ -318,8 +348,31 @@ class GritNode(base.Node):
       return super(type(self), self).ItemFormatter(t)
 
   def SetOutputContext(self, output_language, defines):
+    '''Set the output context: language and defines. Prepares substitutions.
+
+    The substitutions are reset every time the OutputContext is changed.
+    They include messages designated as variables, and language codes for html
+    and rc files.
+
+    Args:
+      output_language: a two-letter language code (eg: 'en', 'ar'...)
+      defines: a map of names to values (strings or booleans.)
+    '''
+    output_language = output_language or self.GetSourceLanguage()
     self.output_language = output_language
     self.defines = defines
+    self.substituter.AddMessages(self.GetSubstitutionMessages(),
+                                 output_language)
+    if output_language in _RTL_LANGS:
+      direction = 'dir="RTL"'
+    else:
+      direction = 'dir="LTR"'
+    self.substituter.AddSubstitutions({
+        'GRITLANGCODE': output_language,
+        'GRITDIR': direction,
+    })
+    from grit.format import rc  # avoid circular dep
+    rc.RcSubstitutions(self.substituter, output_language)
 
   def SetDefines(self, defines):
     self.defines = defines
@@ -369,6 +422,22 @@ class GritNode(base.Node):
         except IndexError, e:
           raise Exception('Please update %s and add a first id for %s (%s).'
                           % (first_ids_filename, filename, node.name))
+
+  def RunGatherers(self, recursive=0, debug=False):
+    '''Gathers information for the structure nodes, then apply substitutions.
+
+    The substitutions step requires that the OutputContext has been set.
+    Locally, get the Substitution messages
+    and add them to the substituter. Also add substitutions for language codes
+    in the Rc.
+
+    Args:
+      recursive: will call RunGatherers() recursively on all child nodes first.
+      debug: will print information while running gatherers.
+    '''
+    base.Node.RunGatherers(self, recursive, False)
+    assert self.output_language
+    self.SubstituteMessages(self.substituter)
 
 
 class IdentifierNode(base.Node):
