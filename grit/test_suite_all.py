@@ -42,6 +42,7 @@ class TestSuiteAll(unittest.TestSuite):
     from grit.node import message_unittest
     from grit.node import misc_unittest
     from grit.node.custom import filename_unittest
+    from grit.tool import build_unittest
     from grit.tool import postprocess_unittest
     from grit.tool import preprocess_unittest
     from grit.tool import rc2grd_unittest
@@ -54,6 +55,7 @@ class TestSuiteAll(unittest.TestSuite):
     test_classes = [
       admin_template_unittest.AdmGathererUnittest,
       base_unittest.NodeUnittest,
+      build_unittest.BuildUnittest,
       clique_unittest.MessageCliqueUnittest,
       filename_unittest.WindowsFilenameUnittest,
       grd_reader_unittest.GrdReaderUnittest,

@@ -297,23 +297,15 @@ class Node(grit.format.interface.ItemFormatter):
 
     return u''.join(inside_parts)
 
-  def RunGatherers(self, recursive=0, debug=False):
+  def RunGatherers(self, recursive=0, debug=False, substitute_messages=False):
     '''Runs all gatherers on this object, which may add to the data stored
     by the object.  If 'recursive' is true, will call RunGatherers() recursively
     on all child nodes first.  If 'debug' is True, will print out information
     as it is running each nodes' gatherers.
-
-    Gatherers for <translations> child nodes will always be run after all other
-    child nodes have been gathered.
     '''
     if recursive:
-      process_last = []
       for child in self.children:
-        if child.name == 'translations':
-          process_last.append(child)
-        else:
-          child.RunGatherers(recursive=recursive, debug=debug)
-      for child in process_last:
+        assert child.name != 'translations'  # <grit> node overrides
         child.RunGatherers(recursive=recursive, debug=debug)
 
   def SubstituteMessages(self, substituter):

@@ -189,6 +189,21 @@ class MessageCliqueUnittest(unittest.TestCase):
     c.AddTranslation(translation, 'fr')
     self.failUnless(c.MessageForLanguage('fr').GetRealContent().startswith('jjj'))
 
+  def testWhitespaceMessagesAreNontranslateable(self):
+    factory = clique.UberClique()
+
+    message = tclib.Message(text=' \t')
+    c = factory.MakeClique(message, translateable=True)
+    self.failIf(c.IsTranslateable())
+
+    message = tclib.Message(text='\n \n ')
+    c = factory.MakeClique(message, translateable=True)
+    self.failIf(c.IsTranslateable())
+
+    message = tclib.Message(text='\n hello')
+    c = factory.MakeClique(message, translateable=True)
+    self.failUnless(c.IsTranslateable())
+
 
 class DummyCustomType(clique.CustomType):
   def Validate(self, message):

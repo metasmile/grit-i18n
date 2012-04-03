@@ -433,20 +433,35 @@ class GritNode(base.Node):
                           % (first_ids_filename, filename, node.name))
 
   def RunGatherers(self, recursive=0, debug=False):
-    '''Gathers information for the structure nodes, then apply substitutions.
+    '''Gathers information for the top-level nodes, then apply substitutions,
+    then gather the <translations> node (all substitutions must be done before
+    it is gathered so that they can match up correctly).
 
     The substitutions step requires that the OutputContext has been set.
     Locally, get the Substitution messages
     and add them to the substituter. Also add substitutions for language codes
     in the Rc.
 
+    Gatherers for <translations> child nodes will always be run after all other
+    child nodes have been gathered.
+
     Args:
       recursive: will call RunGatherers() recursively on all child nodes first.
       debug: will print information while running gatherers.
     '''
-    base.Node.RunGatherers(self, recursive, False)
-    assert self.output_language
-    self.SubstituteMessages(self.substituter)
+    if recursive:
+      process_last = []
+      for child in self.children:
+        if child.name == 'translations':
+          process_last.append(child)
+        else:
+          child.RunGatherers(recursive=recursive, debug=debug)
+
+      assert self.output_language
+      self.SubstituteMessages(self.substituter)
+
+      for child in process_last:
+        child.RunGatherers(recursive=recursive, debug=debug)
 
 
 class IdentifierNode(base.Node):

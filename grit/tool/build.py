@@ -290,4 +290,5 @@ are exported to translation interchange files (e.g. XMB files), etc.
     if warnings and self.defines.get('_google_chrome', False):
       print warnings
     if self.res.UberClique().HasMissingTranslations():
+      print self.res.UberClique().missing_translations_
       sys.exit(-1)
