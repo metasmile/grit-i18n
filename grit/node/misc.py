@@ -206,6 +206,8 @@ class GritNode(base.Node):
     for node in self:
       if isinstance(node, message.PhNode):
         continue  # PhNode objects have a 'name' attribute which is not an ID
+      if node.attrs.get('generateid', 'true') == 'false':
+        continue  # Duplication not relevant in that case
 
       node_ids = node.GetTextualIds()
       if node_ids:
@@ -355,24 +357,26 @@ class GritNode(base.Node):
     and rc files.
 
     Args:
-      output_language: a two-letter language code (eg: 'en', 'ar'...)
+      output_language: a two-letter language code (eg: 'en', 'ar'...) or ''
       defines: a map of names to values (strings or booleans.)
     '''
-    output_language = output_language or self.GetSourceLanguage()
-    self.output_language = output_language
+    # We do not specify the output language for .grh files; so we get an empty
+    # string as the default. The value should match
+    # grit.clique.MessageClique.source_language.
+    self.output_language = output_language or self.GetSourceLanguage()
     self.defines = defines
     self.substituter.AddMessages(self.GetSubstitutionMessages(),
-                                 output_language)
-    if output_language in _RTL_LANGS:
+                                 self.output_language)
+    if self.output_language in _RTL_LANGS:
       direction = 'dir="RTL"'
     else:
       direction = 'dir="LTR"'
     self.substituter.AddSubstitutions({
-        'GRITLANGCODE': output_language,
+        'GRITLANGCODE': self.output_language,
         'GRITDIR': direction,
     })
     from grit.format import rc  # avoid circular dep
-    rc.RcSubstitutions(self.substituter, output_language)
+    rc.RcSubstitutions(self.substituter, self.output_language)
 
   def SetDefines(self, defines):
     self.defines = defines
@@ -450,7 +454,7 @@ class IdentifierNode(base.Node):
     return ['name']
 
   def DefaultAttributes(self):
-    return { 'comment' : '', 'id' : '' }
+    return { 'comment' : '', 'id' : '', 'systemid': 'false' }
 
   def ItemFormatter(self, t):
     if t == 'rc_header':
@@ -463,8 +467,14 @@ class IdentifierNode(base.Node):
       return self.attrs['id']
     return None
 
-  # static method
-  def Construct(parent, name, id, comment):
+  def EndParsing(self):
+    '''Handles system identifiers.'''
+    base.Node.EndParsing(self)
+    if self.attrs['systemid'] == 'true':
+      util.SetupSystemIdentifiers((self.attrs['name'],))
+
+  @staticmethod
+  def Construct(parent, name, id, comment, systemid='false'):
     '''Creates a new node which is a child of 'parent', with attributes set
     by parameters of the same name.
     '''
@@ -473,6 +483,6 @@ class IdentifierNode(base.Node):
     node.HandleAttribute('name', name)
     node.HandleAttribute('id', id)
     node.HandleAttribute('comment', comment)
+    node.HandleAttribute('systemid', systemid)
     node.EndParsing()
     return node
-  Construct = staticmethod(Construct)

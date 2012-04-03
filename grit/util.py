@@ -116,22 +116,41 @@ def MakeRelativePath(base_path, path_to_make_relative):
   return base_to_prefix + remaining_other_path
 
 
+KNOWN_SYSTEM_IDENTIFIERS = set()
+
+SYSTEM_IDENTIFIERS = None
+
+def SetupSystemIdentifiers(ids):
+  '''Adds ids to a regexp of known system identifiers.
+
+  Can be called many times, ids will be accumulated.
+
+  Args:
+    ids: an iterable of strings
+  '''
+  KNOWN_SYSTEM_IDENTIFIERS.update(ids)
+  global SYSTEM_IDENTIFIERS
+  SYSTEM_IDENTIFIERS = lazy_re.compile(
+      ' | '.join([r'\b%s\b' % i for i in KNOWN_SYSTEM_IDENTIFIERS]),
+      re.VERBOSE)
+
+
 # Matches all of the resource IDs predefined by Windows.
 # The '\b' before and after each word makes sure these match only whole words and
 # not the beginning of any word.. eg. ID_FILE_NEW will not match ID_FILE_NEW_PROJECT
 # see http://www.amk.ca/python/howto/regex/ (search for "\bclass\b" inside the html page)
-SYSTEM_IDENTIFIERS = lazy_re.compile(
-  r'''\bIDOK\b | \bIDCANCEL\b | \bIDC_STATIC\b | \bIDYES\b | \bIDNO\b |
-      \bID_FILE_NEW\b | \bID_FILE_OPEN\b | \bID_FILE_CLOSE\b | \bID_FILE_SAVE\b |
-      \bID_FILE_SAVE_AS\b | \bID_FILE_PAGE_SETUP\b | \bID_FILE_PRINT_SETUP\b |
-      \bID_FILE_PRINT\b | \bID_FILE_PRINT_DIRECT\b | \bID_FILE_PRINT_PREVIEW\b |
-      \bID_FILE_UPDATE\b | \bID_FILE_SAVE_COPY_AS\b | \bID_FILE_SEND_MAIL\b |
-      \bID_FILE_MRU_FIRST\b | \bID_FILE_MRU_LAST\b |
-      \bID_EDIT_CLEAR\b | \bID_EDIT_CLEAR_ALL\b | \bID_EDIT_COPY\b |
-      \bID_EDIT_CUT\b | \bID_EDIT_FIND\b | \bID_EDIT_PASTE\b | \bID_EDIT_PASTE_LINK\b |
-      \bID_EDIT_PASTE_SPECIAL\b | \bID_EDIT_REPEAT\b | \bID_EDIT_REPLACE\b |
-      \bID_EDIT_SELECT_ALL\b | \bID_EDIT_UNDO\b | \bID_EDIT_REDO\b |
-      \bVS_VERSION_INFO\b | \bIDRETRY''', re.VERBOSE);
+SetupSystemIdentifiers((
+    'IDOK', 'IDCANCEL', 'IDC_STATIC', 'IDYES', 'IDNO',
+    'ID_FILE_NEW', 'ID_FILE_OPEN', 'ID_FILE_CLOSE', 'ID_FILE_SAVE',
+    'ID_FILE_SAVE_AS', 'ID_FILE_PAGE_SETUP', 'ID_FILE_PRINT_SETUP',
+    'ID_FILE_PRINT', 'ID_FILE_PRINT_DIRECT', 'ID_FILE_PRINT_PREVIEW',
+    'ID_FILE_UPDATE', 'ID_FILE_SAVE_COPY_AS', 'ID_FILE_SEND_MAIL',
+    'ID_FILE_MRU_FIRST', 'ID_FILE_MRU_LAST',
+    'ID_EDIT_CLEAR', 'ID_EDIT_CLEAR_ALL', 'ID_EDIT_COPY',
+    'ID_EDIT_CUT', 'ID_EDIT_FIND', 'ID_EDIT_PASTE', 'ID_EDIT_PASTE_LINK',
+    'ID_EDIT_PASTE_SPECIAL', 'ID_EDIT_REPEAT', 'ID_EDIT_REPLACE',
+    'ID_EDIT_SELECT_ALL', 'ID_EDIT_UNDO', 'ID_EDIT_REDO',
+    'VS_VERSION_INFO', 'IDRETRY'))
 
 
 # Matches character entities, whether specified by name, decimal or hex.
