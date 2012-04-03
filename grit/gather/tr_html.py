@@ -201,6 +201,10 @@ _DESCRIPTION_COMMENT = lazy_re.compile(
 _MESSAGE_BREAK_COMMENT = lazy_re.compile(r'<!--\s*message-break\s*-->',
                                          re.DOTALL)
 
+# Matches a comment which is used to prevent block tags from splitting a message
+_MESSAGE_NO_BREAK_COMMENT = re.compile(r'<!--\s*message-no-break\s*-->',
+                                       re.DOTALL)
+
 
 _DEBUG = 0
 def _DebugPrint(text):
@@ -331,10 +335,19 @@ class HtmlChunks(object):
     # The last explicit description we found.
     self.last_description = ''
 
+    # Whether no-break was the last chunk seen
+    self.last_nobreak = False
+
     while self.current < len(self.text_):
       _DebugPrint('REST: %s' % self.text_[self.current:self.current+60])
 
-      # First try to match whitespace
+      m = _MESSAGE_NO_BREAK_COMMENT.match(self.Rest())
+      if m:
+        self.AdvancePast(m)
+        self.last_nobreak = True
+        continue
+
+      # Try to match whitespace
       m = _WHITESPACE.match(self.Rest())
       if m:
         # Whitespace is neutral, it just advances 'current' and does not switch
@@ -367,7 +380,10 @@ class HtmlChunks(object):
         if element_name in _BLOCK_TAGS:
           self.last_element_ = element_name
           if self.InTranslateable():
-            self.EndTranslateable()
+            if self.last_nobreak:
+              self.last_nobreak = False
+            else:
+              self.EndTranslateable()
 
           # Check for "special" elements, i.e. ones that have a translateable
           # attribute, and handle them correctly.  Note that all of the
@@ -461,7 +477,7 @@ def HtmlToMessage(html, include_block_tags=False, description=''):
     Return:
       Closure()
     '''
-    name = base
+    name = base.upper()
     if type != '':
       name = ('%s_%s' % (type, base)).upper()
 
@@ -491,8 +507,15 @@ def HtmlToMessage(html, include_block_tags=False, description=''):
     return MakeFinalName
 
   current = 0
+  last_nobreak = False
 
   while current < len(html):
+    m = _MESSAGE_NO_BREAK_COMMENT.match(html[current:])
+    if m:
+      last_nobreak = True
+      current += m.end()
+      continue
+
     m = _NBSP.match(html[current:])
     if m:
       parts.append((MakeNameClosure('SPACE'), m.group()))
@@ -510,7 +533,10 @@ def HtmlToMessage(html, include_block_tags=False, description=''):
     m = _SPECIAL_ELEMENT.match(html[current:])
     if m:
       if not include_block_tags:
-        raise exception.BlockTagInTranslateableChunk(html)
+        if last_nobreak:
+          last_nobreak = False
+        else:
+          raise exception.BlockTagInTranslateableChunk(html)
       element_name = 'block'  # for simplification
       # Get the appropriate group name
       for group in m.groupdict().keys():
@@ -528,7 +554,10 @@ def HtmlToMessage(html, include_block_tags=False, description=''):
     if m:
       element_name = m.group('element').lower()
       if not include_block_tags and not element_name in _INLINE_TAGS:
-        raise exception.BlockTagInTranslateableChunk(html[current:])
+        if last_nobreak:
+          last_nobreak = False
+        else:
+          raise exception.BlockTagInTranslateableChunk(html[current:])
       if element_name in _HTML_PLACEHOLDER_NAMES:  # use meaningful names
         element_name = _HTML_PLACEHOLDER_NAMES[element_name]
 

@@ -41,6 +41,7 @@ class ParserUnittest(unittest.TestCase):
     self.VerifyChunkingReplaceables(fold_whitespace)
     self.VerifyChunkingLineBreaks(fold_whitespace)
     self.VerifyChunkingMessageBreak(fold_whitespace)
+    self.VerifyChunkingMessageNoBreak(fold_whitespace)
 
   def VerifyChunkingBasic(self, fold_whitespace):
     p = tr_html.HtmlChunks()
@@ -148,6 +149,21 @@ class ParserUnittest(unittest.TestCase):
                                   (True, 'Google', ''),
                                   (False, '</a>', '')])
 
+  def VerifyChunkingMessageNoBreak(self, fold_whitespace):
+    p = tr_html.HtmlChunks()
+    # Make sure that message-no-break comments work properly.
+    chunks = p.Parse('Please <!-- message-no-break --> <br />don\'t break',
+                     fold_whitespace)
+    self.failUnlessEqual(chunks, [(True, 'Please <!-- message-no-break --> '
+                         '<br />don\'t break', '')])
+
+    chunks = p.Parse('Please <br /> break. <!-- message-no-break --> <br /> '
+                     'But not this time.', fold_whitespace)
+    self.failUnlessEqual(chunks, [(True, 'Please', ''),
+                                  (False, ' <br /> ', ''),
+                                  (True, 'break. <!-- message-no-break --> '
+                                         '<br /> But not this time.', '')])
+
   def testTranslateableAttributes(self):
     p = tr_html.HtmlChunks()
 
@@ -238,7 +254,10 @@ and <A HREF='http://desktop.google.com/privacyfaq.html?hl=[LANG_CODE]'>Privacy F
 BEGIN_LINK_1Privacy PolicyEND_LINK_1
 and BEGIN_LINK_2Privacy FAQEND_LINK_2 online.''')
 
-
+    # Check that message-no-break comments are handled correctly.
+    msg = tr_html.HtmlToMessage('''Please <!-- message-no-break --><br /> don't break''')
+    pres = msg.GetPresentableContent()
+    self.failUnlessEqual(pres, '''Please BREAK don't break''')
 
 class TrHtmlUnittest(unittest.TestCase):
   def testSetAttributes(self):
