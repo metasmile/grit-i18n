@@ -89,10 +89,7 @@ class Node(grit.format.interface.ItemFormatter):
     assert isinstance(child, Node)
     if (not self._IsValidChild(child) or
         self._ContentType() == self._CONTENT_TYPE_CDATA):
-      if child.parent:
-        explanation = 'child %s of parent %s' % (child.name, child.parent.name)
-      else:
-        explanation = 'node %s with no parent' % child.name
+      explanation = 'invalid child %s for parent %s' % (str(child), self.name)
       raise exception.UnexpectedChild(explanation)
     self.children.append(child)
     self.mixed_content.append(child)

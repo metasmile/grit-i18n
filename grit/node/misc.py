@@ -75,20 +75,25 @@ class IfNode(base.Node):
 
   def _IsValidChild(self, child):
     from grit.node import empty
-    assert self.parent, '<if> node should never be root.'
-    if isinstance(self.parent, empty.IncludesNode):
+    parent = self.parent
+    while isinstance(parent, IfNode):
+      parent = parent.parent
+    assert parent, '<if> node should never be root.'
+    if isinstance(child, IfNode):
+      return True
+    elif isinstance(parent, empty.IncludesNode):
       from grit.node import include
       return isinstance(child, include.IncludeNode)
-    elif isinstance(self.parent, empty.MessagesNode):
+    elif isinstance(parent, empty.MessagesNode):
       from grit.node import message
       return isinstance(child, message.MessageNode)
-    elif isinstance(self.parent, empty.StructuresNode):
+    elif isinstance(parent, empty.StructuresNode):
       from grit.node import structure
       return isinstance(child, structure.StructureNode)
-    elif isinstance(self.parent, empty.OutputsNode):
+    elif isinstance(parent, empty.OutputsNode):
       from grit.node import io
       return isinstance(child, io.OutputNode)
-    elif isinstance(self.parent, empty.TranslationsNode):
+    elif isinstance(parent, empty.TranslationsNode):
       from grit.node import io
       return isinstance(child, io.FileNode)
     else:

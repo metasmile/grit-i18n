@@ -67,6 +67,7 @@ class TestSuiteAll(unittest.TestSuite):
       lazy_re_unittest.LazyReUnittest,
       message_unittest.MessageUnittest,
       misc_unittest.GritNodeUnittest,
+      misc_unittest.IfNodeChildrenUnittest,
       misc_unittest.IfNodeUnittest,
       misc_unittest.ReleaseNodeUnittest,
       muppet_strings_unittest.MuppetStringsUnittest,
