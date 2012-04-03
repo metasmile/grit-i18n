@@ -52,6 +52,7 @@ class TestSuiteAll(unittest.TestSuite):
     import grit.format.c_format_unittest
     import grit.format.data_pack_unittest
     import grit.format.js_map_format_unittest
+    import grit.format.rc_header_unittest
     import grit.format.rc_unittest
 
     test_classes = [
@@ -65,6 +66,7 @@ class TestSuiteAll(unittest.TestSuite):
         grit.format.c_format_unittest.CFormatUnittest,
         grit.format.data_pack_unittest.FormatDataPackUnittest,
         grit.format.js_map_format_unittest.JsMapFormatUnittest,
+        grit.format.rc_header_unittest.RcHeaderFormatterUnittest,
         grit.format.rc_unittest.FormatRcUnittest,
         grit_runner_unittest.OptionArgsUnittest,
         igoogle_strings_unittest.IgoogleStringsUnittest,

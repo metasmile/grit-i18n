@@ -25,7 +25,8 @@ consisting of the concatenation of the language and character-set identifiers.
 The first 4 digit of the value is the hex value of LCID, the remaining
 4 digits is the hex value of character-set id(code page)of the language.
 
-LCID resource: http://msdn.microsoft.com/en-us/library/ms776260.aspx
+LCID resource: http://msdn.microsoft.com/en-us/library/ms776294.aspx
+Codepage resource: http://www.science.co.il/language/locale-codes.asp
 
 We have defined three GRIT expand_variables to be used in the version resource
 file to set the language info. Here is an example how they should be used in

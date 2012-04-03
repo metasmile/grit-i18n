@@ -166,6 +166,8 @@ class Item(interface.ItemFormatter):
       if tid not in self.ids_.values():
         self.ids_[id] = tid
         self.tids_[tid] = id
-        lines.append('#define %s %d\n' % (tid, id))
+        if (item.GetRoot().ShouldOutputAllResourceDefines() or
+            item.SatisfiesOutputCondition()):
+          lines.append('#define %s %d\n' % (tid, id))
     return ''.join(lines)
 

@@ -6,7 +6,6 @@
 '''The <output> and <file> elements.
 '''
 
-import os
 import re
 import grit.format.rc_header
 
@@ -62,7 +61,7 @@ class FileNode(base.Node):
             'by the \'lang\' attribute.')
 
   def GetFilePath(self):
-    return self.ToRealPath(os.path.expandvars(self.attrs['path']))
+    return self.ToRealPath(self.attrs['path'])
 
 
 class OutputNode(base.Node):

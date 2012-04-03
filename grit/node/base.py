@@ -399,7 +399,7 @@ class Node(grit.format.interface.ItemFormatter):
       'resource'
     '''
     return util.normpath(os.path.join(self.GetRoot().GetBaseDir(),
-                                      path_from_basedir))
+                                      os.path.expandvars(path_from_basedir)))
 
   def FilenameToOpen(self):
     '''Returns a path, either absolute or relative to the current working

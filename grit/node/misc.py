@@ -163,7 +163,8 @@ class GritNode(base.Node):
   def _IsValidAttribute(self, name, value):
     if name not in ['base_dir', 'first_ids_file', 'source_lang_id',
                     'latest_public_release', 'current_release',
-                    'enc_check', 'tc_project', 'grit_version']:
+                    'enc_check', 'tc_project', 'grit_version',
+                    'output_all_resource_defines']:
       return False
     if name in ['latest_public_release', 'current_release'] and value.strip(
       '0123456789') != '':
@@ -181,6 +182,7 @@ class GritNode(base.Node):
       'source_lang_id' : 'en',
       'enc_check' : constants.ENCODING_CHECK,
       'tc_project' : 'NEED_TO_SET_tc_project_ATTRIBUTE',
+      'output_all_resource_defines': 'true'
     }
 
   def EndParsing(self):
@@ -274,6 +276,13 @@ class GritNode(base.Node):
     """Returns the base directory, as set in the .grd file.
     """
     return self.attrs['base_dir']
+
+  def ShouldOutputAllResourceDefines(self):
+    """Returns true if all resource defines should be output, false if
+    defines for resources not emitted to resource files should be
+    skipped.
+    """
+    return self.attrs['output_all_resource_defines'] == 'true'
 
   def GetInputFiles(self):
     """Returns the list of files that are read to produce the output."""

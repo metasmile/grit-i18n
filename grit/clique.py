@@ -207,7 +207,7 @@ class UberClique(object):
               break
           if not found_placeholder:
             raise exception.MismatchingPlaceholders(
-              'Translation for message ID %s had <ph name="%s%/>, no match\n'
+              'Translation for message ID %s had <ph name="%s"/>, no match\n'
               'in original message' % (id, text))
       self.FindCliqueAndAddTranslation(translation, lang)
     return Callback
