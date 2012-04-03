@@ -120,6 +120,10 @@ are exported to translation interchange files (e.g. XMB files), etc.
                                 debug=opts.extra_verbose,
                                 first_ids_file=first_ids_file,
                                 defines=self.defines)
+    # Set an output context so that conditionals can use defines during the
+    # gathering stage; we use a dummy language here since we are not outputting
+    # a specific language.
+    self.res.SetOutputContext('no-specific-language', self.defines)
     self.res.RunGatherers(recursive = True)
     self.Process()
     return 0

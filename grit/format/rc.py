@@ -52,13 +52,16 @@ _LANGUAGE_CHARSET_PAIR = {
   'ko'           : '041203b5',
   'es'           : '040a04e4',
   'bg'           : '040204e3',
+  # No codepage for filipino, use unicode(1200).
+  'fil'          : '046404b0',
   'fr'           : '040c04e4',
   'lv'           : '042604e9',
   'sv'           : '041d04e4',
   'ca'           : '040304e4',
   'de'           : '040704e4',
   'lt'           : '042704e9',
-  # no lcid for tl(Tagalog), use default custom locale
+  # Do not use! This is only around for backwards
+  # compatibility. Use file instead.
   'tl'           : '0c0004b0',
   'zh-CN'        : '080403a8',
   'el'           : '040804e5',
@@ -69,14 +72,15 @@ _LANGUAGE_CHARSET_PAIR = {
   'pl'           : '041504e2',
   'tr'           : '041f04e6',
   'hr'           : '041a04e4',
-  # no codepage for hindi, use unicode(1200)
+  # No codepage for hindi, use unicode(1200).
   'hi'           : '043904b0',
+  'pt-PT'        : '081604e4',
   'pt-BR'        : '041604e4',
   'uk'           : '042204e3',
   'cs'           : '040504e2',
   'hu'           : '040e04e2',
   'ro'           : '041804e2',
-  # no codepage for urdu, use unicode(1200)
+  # No codepage for urdu, use unicode(1200).
   'ur'           : '042004b0',
   'da'           : '040604e4',
   'is'           : '040f04e4',
@@ -101,13 +105,14 @@ _LANGUAGE_DIRECTIVE_PAIR = {
   'ko'           : 'LANG_KOREAN, SUBLANG_KOREAN',
   'es'           : 'LANG_SPANISH, SUBLANG_SPANISH_MODERN',
   'bg'           : 'LANG_BULGARIAN, SUBLANG_DEFAULT',
+  'fil'          : '100, SUBLANG_DEFAULT',  # LANG_FILIPINO is not in winnt.h
   'fr'           : 'LANG_FRENCH, SUBLANG_FRENCH',
   'lv'           : 'LANG_LATVIAN, SUBLANG_DEFAULT',
   'sv'           : 'LANG_SWEDISH, SUBLANG_SWEDISH',
   'ca'           : 'LANG_CATALAN, SUBLANG_DEFAULT',
   'de'           : 'LANG_GERMAN, SUBLANG_GERMAN',
   'lt'           : 'LANG_LITHUANIAN, SUBLANG_LITHUANIAN',
-  'tl'           : 'LANG_NEUTRAL, SUBLANG_DEFAULT',
+  'tl'           : 'LANG_NEUTRAL, SUBLANG_DEFAULT',  # Do not use! See above.
   'zh-CN'        : 'LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED',
   'el'           : 'LANG_GREEK, SUBLANG_DEFAULT',
   'no'           : 'LANG_NORWEGIAN, SUBLANG_DEFAULT',
@@ -119,6 +124,7 @@ _LANGUAGE_DIRECTIVE_PAIR = {
   'hr'           : 'LANG_CROATIAN, SUBLANG_DEFAULT',
   'hi'           : 'LANG_HINDI, SUBLANG_DEFAULT',
   'pt-BR'        : 'LANG_PORTUGUESE, SUBLANG_DEFAULT',
+  'pt-PT'        : 'LANG_PORTUGUESE, SUBLANG_PORTUGUESE',
   'uk'           : 'LANG_UKRAINIAN, SUBLANG_DEFAULT',
   'cs'           : 'LANG_CZECH, SUBLANG_DEFAULT',
   'hu'           : 'LANG_HUNGARIAN, SUBLANG_DEFAULT',

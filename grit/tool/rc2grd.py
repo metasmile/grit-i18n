@@ -265,17 +265,24 @@ C preprocessor on the .rc file or manually edit it before using this tool.
     return root
 
 
+  def IsHtml(self, res_type, fname):
+    '''Check whether both the type and file extension indicate HTML'''
+    fext = fname.split('.')[-1].lower()
+    return res_type == 'HTML' and fext in ('htm', 'html')
+
+
   def AddIncludes(self, rctext, node):
     '''Scans 'rctext' for included resources (e.g. BITMAP, ICON) and
     adds each included resource as an <include> child node of 'node'.'''
     for m in _FILE_REF.finditer(rctext):
       id = m.group('id')
-      type = m.group('type').upper()
+      res_type = m.group('type').upper()
       fname = rc.Section.UnEscape(m.group('file'))
       assert fname.find('\n') == -1
-      if type != 'HTML':
-        self.VerboseOut('Processing %s with ID %s (filename: %s)\n' % (type, id, fname))
-        node.AddChild(include.IncludeNode.Construct(node, id, type, fname))
+      if not self.IsHtml(res_type, fname):
+        self.VerboseOut('Processing %s with ID %s (filename: %s)\n' %
+                        (res_type, id, fname))
+        node.AddChild(include.IncludeNode.Construct(node, id, res_type, fname))
 
 
   def AddStructures(self, rctext, node, rc_filename):
@@ -285,16 +292,16 @@ C preprocessor on the .rc file or manually edit it before using this tool.
     # First add HTML includes
     for m in _FILE_REF.finditer(rctext):
       id = m.group('id')
-      type = m.group('type').upper()
+      res_type = m.group('type').upper()
       fname = rc.Section.UnEscape(m.group('file'))
-      if type == 'HTML':
+      if self.IsHtml(type, fname):
         node.AddChild(structure.StructureNode.Construct(
           node, id, self.html_type, fname, self.html_encoding))
 
     # Then add all RC includes
-    def AddStructure(type, id):
-      self.VerboseOut('Processing %s with ID %s\n' % (type, id))
-      node.AddChild(structure.StructureNode.Construct(node, id, type,
+    def AddStructure(res_type, id):
+      self.VerboseOut('Processing %s with ID %s\n' % (res_type, id))
+      node.AddChild(structure.StructureNode.Construct(node, id, res_type,
                                                       rc_filename,
                                                       encoding=self.input_encoding))
     for m in _MENU.finditer(rctext):
