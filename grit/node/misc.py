@@ -3,21 +3,20 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-'''Miscellaneous node types.
-'''
+"""Miscellaneous node types.
+"""
 
 import os.path
 import re
 import sys
 
-from grit.node import base
-from grit.node import message
-
 from grit import exception
 from grit import constants
 from grit import util
-
 import grit.format.rc_header
+from grit.node import base
+from grit.node import message
+from grit.node import io
 
 
 # RTL languages
@@ -36,13 +35,13 @@ _RTL_LANGS = (
 
 
 def _ReadFirstIdsFromFile(filename, defines):
-  '''Read the starting resource id values from |filename|.  We also
+  """Read the starting resource id values from |filename|.  We also
   expand variables of the form <(FOO) based on defines passed in on
   the command line.
 
   Returns a tuple, the absolute path of SRCDIR followed by the
   first_ids dictionary.
-  '''
+  """
   first_ids_dict = eval(open(filename).read())
   src_root_dir = os.path.abspath(os.path.join(os.path.dirname(filename),
                                               first_ids_dict['SRCDIR']))
@@ -70,8 +69,8 @@ def _ReadFirstIdsFromFile(filename, defines):
 
 
 class IfNode(base.Node):
-  '''A node for conditional inclusion of resources.
-  '''
+  """A node for conditional inclusion of resources.
+  """
 
   def _IsValidChild(self, child):
     from grit.node import empty
@@ -103,13 +102,13 @@ class IfNode(base.Node):
     return ['expr']
 
   def IsConditionSatisfied(self):
-    '''Returns true if and only if the Python expression stored in attribute
+    """Returns true if and only if the Python expression stored in attribute
     'expr' evaluates to true.
-    '''
+    """
     return self.EvaluateCondition(self.attrs['expr'])
 
   def SatisfiesOutputCondition(self):
-    '''Returns true if its condition is satisfied, including on ancestors.'''
+    """Returns true if its condition is satisfied, including on ancestors."""
     if not self.IsConditionSatisfied():
       return False
     else:
@@ -117,7 +116,7 @@ class IfNode(base.Node):
 
 
 class ReleaseNode(base.Node):
-  '''The <release> element.'''
+  """The <release> element."""
 
   def _IsValidChild(self, child):
     from grit.node import empty
@@ -137,7 +136,7 @@ class ReleaseNode(base.Node):
     return { 'allow_pseudo' : 'true' }
 
   def GetReleaseNumber():
-    '''Returns the sequence number of this release.'''
+    """Returns the sequence number of this release."""
     return self.attribs['seq']
 
   def ItemFormatter(self, t):
@@ -148,7 +147,7 @@ class ReleaseNode(base.Node):
       return super(type(self), self).ItemFormatter(t)
 
 class GritNode(base.Node):
-  '''The <grit> root element.'''
+  """The <grit> root element."""
 
   def __init__(self):
     base.Node.__init__(self)
@@ -203,9 +202,9 @@ class GritNode(base.Node):
         'Are you sure your .grd file is in the correct encoding (UTF-8)?')
 
   def ValidateUniqueIds(self):
-    '''Validate that 'name' attribute is unique in all nodes in this tree
+    """Validate that 'name' attribute is unique in all nodes in this tree
     except for nodes that are children of <if> nodes.
-    '''
+    """
     unique_names = {}
     duplicate_names = []
     for node in self:
@@ -232,24 +231,24 @@ class GritNode(base.Node):
 
 
   def GetCurrentRelease(self):
-    '''Returns the current release number.'''
+    """Returns the current release number."""
     return int(self.attrs['current_release'])
 
   def GetLatestPublicRelease(self):
-    '''Returns the latest public release number.'''
+    """Returns the latest public release number."""
     return int(self.attrs['latest_public_release'])
 
   def GetSourceLanguage(self):
-    '''Returns the language code of the source language.'''
+    """Returns the language code of the source language."""
     return self.attrs['source_lang_id']
 
   def GetTcProject(self):
-    '''Returns the name of this project in the TranslationConsole, or
-    'NEED_TO_SET_tc_project_ATTRIBUTE' if it is not defined.'''
+    """Returns the name of this project in the TranslationConsole, or
+    'NEED_TO_SET_tc_project_ATTRIBUTE' if it is not defined."""
     return self.attrs['tc_project']
 
   def SetOwnDir(self, dir):
-    '''Informs the 'grit' element of the directory the file it is in resides.
+    """Informs the 'grit' element of the directory the file it is in resides.
     This allows it to calculate relative paths from the input file, which is
     what we desire (rather than from the current path).
 
@@ -258,33 +257,70 @@ class GritNode(base.Node):
 
     Return:
       None
-    '''
+    """
     assert dir
     self.base_dir = os.path.normpath(os.path.join(dir, self.attrs['base_dir']))
 
   def GetBaseDir(self):
-    '''Returns the base directory, relative to the working directory.  To get
+    """Returns the base directory, relative to the working directory.  To get
     the base directory as set in the .grd file, use GetOriginalBaseDir()
-    '''
+    """
     if hasattr(self, 'base_dir'):
       return self.base_dir
     else:
       return self.GetOriginalBaseDir()
 
   def GetOriginalBaseDir(self):
-    '''Returns the base directory, as set in the .grd file.
-    '''
+    """Returns the base directory, as set in the .grd file.
+    """
     return self.attrs['base_dir']
 
+  def GetInputFiles(self):
+    """Returns the list of files that are read to produce the output."""
+    input_nodes = []
+
+    # Importing this here avoids a circular dependency in the imports.
+    # pylint: disable-msg=C6204
+    from grit.node import include
+    from grit.node import structure
+    from grit.node import variant
+
+    input_nodes.extend(self.GetChildrenOfType(io.FileNode))
+    input_nodes.extend(self.GetChildrenOfType(include.IncludeNode))
+    input_nodes.extend(self.GetChildrenOfType(structure.StructureNode))
+    input_nodes.extend(self.GetChildrenOfType(variant.SkeletonNode))
+
+    # Collect all possible output languages.
+    langs = set()
+    for output in self.GetOutputFiles():
+      if output.attrs['lang']:
+        langs.add(output.attrs['lang'])
+
+    # Check if inputs is required for output in any language.
+    # By default SatisfiesOutputCondition() check only for one language.
+    result = []
+    for node in input_nodes:
+      insert = node.SatisfiesOutputCondition()
+      old_output_language = self.output_language
+      for lang in langs:
+        self.SetOutputContext(lang, self.defines)
+        if node.SatisfiesOutputCondition():
+          insert = True
+          break;
+      self.SetOutputContext(old_output_language, self.defines)
+      if insert:
+        result.append(node)
+    return result
+
   def GetFirstIdsFile(self):
-    '''Returns a usable path to the first_ids file, if set, otherwise
+    """Returns a usable path to the first_ids file, if set, otherwise
     returns None.
 
     The first_ids_file attribute is by default relative to the
     base_dir of the .grd file, but may be prefixed by GRIT_DIR/,
     which makes it relative to the directory of grit.py
     (e.g. GRIT_DIR/../gritsettings/resource_ids).
-    '''
+    """
     if not self.attrs['first_ids_file']:
       return None
 
@@ -296,14 +332,14 @@ class GritNode(base.Node):
       return self.ToRealPath(path)
 
   def _CollectOutputFiles(self, nodes, output_files):
-    '''Recursively filters the list of nodes that may contain other lists
+    """Recursively filters the list of nodes that may contain other lists
     in <if> nodes, and collects all the nodes that are not enclosed by
     unsatisfied <if> conditionals and not <if> nodes themselves.
 
     Args:
       nodes: The list of nodes to filter.
       output_files: The list of satisfying nodes.
-    '''
+    """
     for node in nodes:
       if node.name == 'if':
         if node.IsConditionSatisfied():
@@ -312,9 +348,9 @@ class GritNode(base.Node):
         output_files.append(node)
 
   def GetOutputFiles(self):
-    '''Returns the list of <output> nodes that are descendants of this node's
+    """Returns the list of <output> nodes that are descendants of this node's
     <outputs> child and are not enclosed by unsatisfied <if> conditionals.
-    '''
+    """
     for child in self.children:
       if child.name == 'outputs':
         output_files = []
@@ -323,7 +359,7 @@ class GritNode(base.Node):
     raise exception.MissingElement()
 
   def GetSubstitutionMessages(self):
-    '''Returns the list of <message sub_variable="true"> nodes.'''
+    """Returns the list of <message sub_variable="true"> nodes."""
     msg_nodes = self.GetChildrenOfType(message.MessageNode)
     return [n for n in msg_nodes if
             n.attrs['sub_variable'] == 'true' and n.SatisfiesOutputCondition()]
@@ -355,7 +391,7 @@ class GritNode(base.Node):
       return super(type(self), self).ItemFormatter(t)
 
   def SetOutputContext(self, output_language, defines):
-    '''Set the output context: language and defines. Prepares substitutions.
+    """Set the output context: language and defines. Prepares substitutions.
 
     The substitutions are reset every time the OutputContext is changed.
     They include messages designated as variables, and language codes for html
@@ -364,7 +400,7 @@ class GritNode(base.Node):
     Args:
       output_language: a two-letter language code (eg: 'en', 'ar'...) or ''
       defines: a map of names to values (strings or booleans.)
-    '''
+    """
     # We do not specify the output language for .grh files; so we get an empty
     # string as the default. The value should match
     # grit.clique.MessageClique.source_language.
@@ -387,9 +423,9 @@ class GritNode(base.Node):
     self.defines = defines
 
   def AssignFirstIds(self, filename_or_stream, defines):
-    '''Assign first ids to each grouping node based on values from the
+    """Assign first ids to each grouping node based on values from the
     first_ids file (if specified on the <grit> node).
-    '''
+    """
     # If the input is a stream, then we're probably in a unit test and
     # should skip this step.
     if type(filename_or_stream) not in (str, unicode):
@@ -433,7 +469,7 @@ class GritNode(base.Node):
                           % (first_ids_filename, filename, node.name))
 
   def RunGatherers(self, recursive=0, debug=False):
-    '''Gathers information for the top-level nodes, then apply substitutions,
+    """Gathers information for the top-level nodes, then apply substitutions,
     then gather the <translations> node (all substitutions must be done before
     it is gathered so that they can match up correctly).
 
@@ -448,7 +484,7 @@ class GritNode(base.Node):
     Args:
       recursive: will call RunGatherers() recursively on all child nodes first.
       debug: will print information while running gatherers.
-    '''
+    """
     if recursive:
       process_last = []
       for child in self.children:
@@ -465,10 +501,10 @@ class GritNode(base.Node):
 
 
 class IdentifierNode(base.Node):
-  '''A node for specifying identifiers that should appear in the resource
+  """A node for specifying identifiers that should appear in the resource
   header file, and be unique amongst all other resource identifiers, but don't
   have any other attributes or reference any resources.
-  '''
+  """
 
   def MandatoryAttributes(self):
     return ['name']
@@ -481,23 +517,23 @@ class IdentifierNode(base.Node):
       return grit.format.rc_header.Item()
 
   def GetId(self):
-    '''Returns the id of this identifier if it has one, None otherwise
-    '''
+    """Returns the id of this identifier if it has one, None otherwise
+    """
     if 'id' in self.attrs:
       return self.attrs['id']
     return None
 
   def EndParsing(self):
-    '''Handles system identifiers.'''
+    """Handles system identifiers."""
     base.Node.EndParsing(self)
     if self.attrs['systemid'] == 'true':
       util.SetupSystemIdentifiers((self.attrs['name'],))
 
   @staticmethod
   def Construct(parent, name, id, comment, systemid='false'):
-    '''Creates a new node which is a child of 'parent', with attributes set
+    """Creates a new node which is a child of 'parent', with attributes set
     by parameters of the same name.
-    '''
+    """
     node = IdentifierNode()
     node.StartParsing('identifier', parent)
     node.HandleAttribute('name', name)

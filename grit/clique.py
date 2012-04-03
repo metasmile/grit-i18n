@@ -283,7 +283,7 @@ class MessageClique(object):
   CONSTANT_TRANSLATION = tclib.Translation(text='TTTTTT')
 
   # A pattern to match messages that are empty or whitespace only.
-  WHITESPACE_MESSAGE = lazy_re.compile(u'^( |\t|\n|\r|\xa0)*$')
+  WHITESPACE_MESSAGE = lazy_re.compile(u'^\s*$')
 
   def __init__(self, uber_clique, message, translateable=True, custom_type=None):
     '''Create a new clique initialized with just a message.

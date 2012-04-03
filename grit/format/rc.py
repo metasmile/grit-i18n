@@ -219,9 +219,17 @@ _LANGUAGE_DIRECTIVE_PAIR = {
   'fake-bidi'   : 'LANG_HEBREW, SUBLANG_DEFAULT',
 }
 
+# A note on 'no-specific-language' in the following few functions:
+# Some build systems may wish to call GRIT to scan for dependencies in
+# a language-agnostic way, and can then specify this fake language as
+# the output context.  It should never be used when output is actually
+# being generated.
+
 def GetLangCharsetPair(language):
   if _LANGUAGE_CHARSET_PAIR.has_key(language):
     return _LANGUAGE_CHARSET_PAIR[language]
+  elif language == 'no-specific-language':
+    return ''
   else:
     print 'Warning:GetLangCharsetPair() found undefined language %s' %(language)
     return ''
@@ -230,7 +238,12 @@ def GetLangDirectivePair(language):
   if _LANGUAGE_DIRECTIVE_PAIR.has_key(language):
     return _LANGUAGE_DIRECTIVE_PAIR[language]
   else:
-    print 'Warning:GetLangDirectivePair() found undefined language %s' % (language)
+    # We don't check for 'no-specific-language' here because this
+    # function should only get called when output is being formatted,
+    # and at that point we would not want to get
+    # 'no-specific-language' passed as the language.
+    print ('Warning:GetLangDirectivePair() found undefined language %s' %
+           language)
     return 'unknown language: see tools/grit/format/rc.py'
 
 def GetLangIdHex(language):
@@ -238,6 +251,8 @@ def GetLangIdHex(language):
     langcharset = _LANGUAGE_CHARSET_PAIR[language]
     lang_id = '0x' + langcharset[0:4]
     return lang_id
+  elif language == 'no-specific-language':
+    return ''
   else:
     print 'Warning:GetLangIdHex() found undefined language %s' %(language)
     return ''
@@ -248,6 +263,8 @@ def GetCharsetIdDecimal(language):
     langcharset = _LANGUAGE_CHARSET_PAIR[language]
     charset_decimal = int(langcharset[4:], 16)
     return str(charset_decimal)
+  elif language == 'no-specific-language':
+    return ''
   else:
     print 'Warning:GetCharsetIdDecimal() found undefined language %s' %(language)
     return ''

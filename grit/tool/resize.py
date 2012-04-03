@@ -288,7 +288,7 @@ near the top of the file, before you open it in Visual Studio.
     # Create the resource.h file
     header_defines = []
     for node in grd:
-      !formatter = node.ItemFormatter('rc_header')
+      formatter = node.ItemFormatter('rc_header')
       if formatter and not isinstance(formatter, rc_header.TopLevel):
         header_defines.append(formatter.Format(node, self.lang))
     header_text = HEADER_TEMPLATE.replace('[[DEFINES]]', ''.join(header_defines))

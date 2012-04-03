@@ -22,6 +22,7 @@ class TestSuiteAll(unittest.TestSuite):
   def __init__(self):
     super(type(self), self).__init__()
     # Imports placed here to prevent circular imports.
+    # pylint: disable-msg=C6204
     from grit import clique_unittest
     from grit import grd_reader_unittest
     from grit import grit_runner_unittest
@@ -43,6 +44,7 @@ class TestSuiteAll(unittest.TestSuite):
     from grit.node import misc_unittest
     from grit.node.custom import filename_unittest
     from grit.tool import build_unittest
+    from grit.tool import buildinfo_unittest
     from grit.tool import postprocess_unittest
     from grit.tool import preprocess_unittest
     from grit.tool import rc2grd_unittest
@@ -53,40 +55,41 @@ class TestSuiteAll(unittest.TestSuite):
     import grit.format.rc_unittest
 
     test_classes = [
-      admin_template_unittest.AdmGathererUnittest,
-      base_unittest.NodeUnittest,
-      build_unittest.BuildUnittest,
-      clique_unittest.MessageCliqueUnittest,
-      filename_unittest.WindowsFilenameUnittest,
-      grd_reader_unittest.GrdReaderUnittest,
-      grit.format.c_format_unittest.CFormatUnittest,
-      grit.format.data_pack_unittest.FormatDataPackUnittest,
-      grit.format.js_map_format_unittest.JsMapFormatUnittest,
-      grit.format.rc_unittest.FormatRcUnittest,
-      grit_runner_unittest.OptionArgsUnittest,
-      igoogle_strings_unittest.IgoogleStringsUnittest,
-      io_unittest.FileNodeUnittest,
-      lazy_re_unittest.LazyReUnittest,
-      message_unittest.MessageUnittest,
-      misc_unittest.GritNodeUnittest,
-      misc_unittest.IfNodeChildrenUnittest,
-      misc_unittest.IfNodeUnittest,
-      misc_unittest.ReleaseNodeUnittest,
-      muppet_strings_unittest.MuppetStringsUnittest,
-      policy_json_unittest.PolicyJsonUnittest,
-      postprocess_unittest.PostProcessingUnittest,
-      preprocess_unittest.PreProcessingUnittest,
-      rc2grd_unittest.Rc2GrdUnittest,
-      rc_unittest.RcUnittest,
-      shortcuts_unittests.ShortcutsUnittest,
-      tclib_unittest.TclibUnittest,
-      tr_html_unittest.ParserUnittest,
-      tr_html_unittest.TrHtmlUnittest,
-      transl2tc_unittest.TranslationToTcUnittest,
-      txt_unittest.TxtUnittest,
-      util_unittest.UtilUnittest,
-      xtb_reader_unittest.XtbReaderUnittest,
-      # add test classes here...
+        admin_template_unittest.AdmGathererUnittest,
+        base_unittest.NodeUnittest,
+        build_unittest.BuildUnittest,
+        buildinfo_unittest.BuildInfoUnittest,
+        clique_unittest.MessageCliqueUnittest,
+        filename_unittest.WindowsFilenameUnittest,
+        grd_reader_unittest.GrdReaderUnittest,
+        grit.format.c_format_unittest.CFormatUnittest,
+        grit.format.data_pack_unittest.FormatDataPackUnittest,
+        grit.format.js_map_format_unittest.JsMapFormatUnittest,
+        grit.format.rc_unittest.FormatRcUnittest,
+        grit_runner_unittest.OptionArgsUnittest,
+        igoogle_strings_unittest.IgoogleStringsUnittest,
+        io_unittest.FileNodeUnittest,
+        lazy_re_unittest.LazyReUnittest,
+        message_unittest.MessageUnittest,
+        misc_unittest.GritNodeUnittest,
+        misc_unittest.IfNodeChildrenUnittest,
+        misc_unittest.IfNodeUnittest,
+        misc_unittest.ReleaseNodeUnittest,
+        muppet_strings_unittest.MuppetStringsUnittest,
+        policy_json_unittest.PolicyJsonUnittest,
+        postprocess_unittest.PostProcessingUnittest,
+        preprocess_unittest.PreProcessingUnittest,
+        rc2grd_unittest.Rc2GrdUnittest,
+        rc_unittest.RcUnittest,
+        shortcuts_unittests.ShortcutsUnittest,
+        tclib_unittest.TclibUnittest,
+        tr_html_unittest.ParserUnittest,
+        tr_html_unittest.TrHtmlUnittest,
+        transl2tc_unittest.TranslationToTcUnittest,
+        txt_unittest.TxtUnittest,
+        util_unittest.UtilUnittest,
+        xtb_reader_unittest.XtbReaderUnittest,
+        # add test classes here...
     ]
 
     for test_class in test_classes:
