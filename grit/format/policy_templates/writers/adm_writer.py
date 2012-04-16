@@ -77,7 +77,9 @@ class AdmWriter(template_writer.TemplateWriter):
     # Escape newlines in the value.
     value = value.replace('\n', '\\n')
     if name in self.strings_seen:
-      assert value == self.strings_seen[name]
+      err = ('%s was added as "%s" and now added again as "%s"' %
+             (name, self.strings_seen[name], value))
+      assert value == self.strings_seen[name], err
     else:
       self.strings_seen[name] = value
       line = '%s="%s"' % (name, value)
