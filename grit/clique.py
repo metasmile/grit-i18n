@@ -7,6 +7,7 @@
 collections of cliques (uber-cliques).
 '''
 
+import re
 import types
 
 from grit import constants
@@ -56,7 +57,11 @@ class UberClique(object):
     '''
     def ReportTranslation(clique, langs):
       text = clique.GetMessage().GetPresentableContent()
-      extract = text[0:40]
+      # The text 'error' (usually 'Error:' but we are conservative)
+      # can trigger some build environments (Visual Studio, we're
+      # looking at you) to consider invocation of grit to have failed,
+      # so we make sure never to output that word.
+      extract = re.sub('(?i)error', 'REDACTED', text[0:40])[0:40]
       ellipsis = ''
       if len(text) > 40:
         ellipsis = '...'
