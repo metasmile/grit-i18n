@@ -164,5 +164,16 @@ class TclibUnittest(unittest.TestCase):
     except exception.InvalidPlaceholderName:
       pass  # Expect exception to be thrown because presentation contained space
 
+  def testTagsWithCommonSubstring(self):
+    word = 'ABCDEFGHIJ'
+    text = ' '.join([word[:i] for i in range(1, 11)])
+    phs = [tclib.Placeholder(word[:i], str(i), str(i)) for i in range(1, 11)]
+    try:
+      msg = tclib.Message(text=text, placeholders=phs)
+      self.failUnless(msg.GetRealContent() == '1 2 3 4 5 6 7 8 9 10')
+    except:
+      self.fail('tclib.Message() should handle placeholders that are '
+                'substrings of each other')
+
 if __name__ == '__main__':
   unittest.main()

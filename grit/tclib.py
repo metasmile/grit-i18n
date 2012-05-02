@@ -44,8 +44,15 @@ class BaseMessage(object):
         tag_map = {}
         for placeholder in placeholders:
           tag_map[placeholder.GetPresentation()] = [placeholder, 0]
-        tag_re = '(' + '|'.join(tag_map.keys()) + ')'
-        # This creates a regexp like '(TAG1|TAG2|TAG3)'
+        # This creates a regexp like '(TAG1|TAG2|TAG3)'.
+        # The tags have to be sorted in order of decreasing length, so that
+        # longer tags are substituted before shorter tags that happen to be
+        # substrings of the longer tag.
+        # E.g. "EXAMPLE_FOO_NAME" must be matched before "EXAMPLE_FOO",
+        # otherwise "EXAMPLE_FOO" splits "EXAMPLE_FOO_NAME" too.
+        tags = tag_map.keys()
+        tags.sort(cmp=lambda x,y: len(x) - len(y) or cmp(x, y), reverse=True)
+        tag_re = '(' + '|'.join(tags) + ')'
         chunked_text = re.split(tag_re, text)
         for chunk in chunked_text:
           if chunk: # ignore empty chunk
