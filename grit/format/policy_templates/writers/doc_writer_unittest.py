@@ -478,6 +478,85 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
         '</div>'
       '</root>')
 
+  def testAddDictionaryExample(self):
+    policy = {
+      'name': 'PolicyName',
+      'caption': 'PolicyCaption',
+      'desc': 'PolicyDesc',
+      'type': 'dict',
+      'supported_on': [{
+        'product': 'chrome',
+        'platforms': ['win'],
+        'since_version': '7',
+        'until_version': '',
+      }],
+      'features': {'dynamic_refresh': False},
+      'example_value': {
+        "ProxyMode": "direct",
+        "List": ["1", "2", "3"],
+        "True": True,
+        "False": False,
+        "Integer": 123,
+        "DictList": [ {
+            "A": 1,
+            "B": 2,
+          }, {
+            "C": 3,
+            "D": 4,
+          },
+        ],
+      },
+    }
+    self.writer._AddDictionaryExample(self.doc_root, policy)
+    value = str(policy['example_value'])
+    self.assertEquals(
+      self.doc_root.toxml(),
+      '<root>'
+        '<dl style="style_dd dl;">'
+          '<dt>Windows:</dt>'
+          '<dd style="style_.monospace;style_.pre;">MockKey\PolicyName = '
+              '&quot;' + value + '&quot;'
+          '</dd>'
+          '<dt>Linux:</dt>'
+          '<dd style="style_.monospace;">PolicyName: ' + value + '</dd>'
+          '<dt>Mac:</dt>'
+          '<dd style="style_.monospace;style_.pre;">'
+            '&lt;key&gt;PolicyName&lt;/key&gt;\n'
+            '&lt;dict&gt;\n'
+            '  &lt;key&gt;DictList&lt;/key&gt;\n'
+            '  &lt;array&gt;\n'
+            '    &lt;dict&gt;\n'
+            '      &lt;key&gt;A&lt;/key&gt;\n'
+            '      &lt;integer&gt;1&lt;/integer&gt;\n'
+            '      &lt;key&gt;B&lt;/key&gt;\n'
+            '      &lt;integer&gt;2&lt;/integer&gt;\n'
+            '    &lt;/dict&gt;\n'
+            '    &lt;dict&gt;\n'
+            '      &lt;key&gt;C&lt;/key&gt;\n'
+            '      &lt;integer&gt;3&lt;/integer&gt;\n'
+            '      &lt;key&gt;D&lt;/key&gt;\n'
+            '      &lt;integer&gt;4&lt;/integer&gt;\n'
+            '    &lt;/dict&gt;\n'
+            '  &lt;/array&gt;\n'
+            '  &lt;key&gt;False&lt;/key&gt;\n'
+            '  &lt;false/&gt;\n'
+            '  &lt;key&gt;Integer&lt;/key&gt;\n'
+            '  &lt;integer&gt;123&lt;/integer&gt;\n'
+            '  &lt;key&gt;List&lt;/key&gt;\n'
+            '  &lt;array&gt;\n'
+            '    &lt;string&gt;1&lt;/string&gt;\n'
+            '    &lt;string&gt;2&lt;/string&gt;\n'
+            '    &lt;string&gt;3&lt;/string&gt;\n'
+            '  &lt;/array&gt;\n'
+            '  &lt;key&gt;ProxyMode&lt;/key&gt;\n'
+            '  &lt;string&gt;direct&lt;/string&gt;\n'
+            '  &lt;key&gt;True&lt;/key&gt;\n'
+            '  &lt;true/&gt;\n'
+            '&lt;/dict&gt;'
+          '</dd>'
+        '</dl>'
+      '</root>')
+
 
 if __name__ == '__main__':
   unittest.main()

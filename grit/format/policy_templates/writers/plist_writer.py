@@ -30,6 +30,7 @@ class PListWriter(xml_formatted_writer.XMLFormattedWriter):
     'string-enum': 'string',
     'main': 'boolean',
     'list': 'array',
+    'dict': 'dictionary',
   }
 
   def _AddKeyValuePair(self, parent, key_string, value_tag):

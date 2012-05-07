@@ -70,7 +70,8 @@ class AdmWriter(template_writer.TemplateWriter):
     'int': 'NUMERIC',
     'string-enum': 'DROPDOWNLIST',
     'int-enum': 'DROPDOWNLIST',
-    'list': 'LISTBOX'
+    'list': 'LISTBOX',
+    'dict': 'EDITTEXT'
   }
 
   def _AddGuiString(self, name, value):

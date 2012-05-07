@@ -272,7 +272,8 @@ class ADMXWriter(xml_formatted_writer.XMLFormattedWriter):
     if policy_type == 'main':
       self.AddAttribute(policy_elem, 'valueName', policy_name)
       self._AddMainPolicy(policy_elem)
-    elif policy_type == 'string':
+    elif policy_type in ('string', 'dict'):
+      # 'dict' policies are configured as JSON-encoded strings on Windows.
       parent = self._GetElements(policy_elem)
       self._AddStringPolicy(parent, policy_name)
     elif policy_type == 'int':

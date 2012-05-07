@@ -323,6 +323,38 @@ class AdmlWriterTest(xml_writer_base_unittest.XmlWriterBaseTest):
         '</presentation>')
     self.AssertXMLEquals(output, expected_output)
 
+  def testDictionaryPolicy(self):
+    dict_policy = {
+      'name': 'DictionaryPolicyStub',
+      'type': 'dict',
+      'caption': 'Dictionary policy caption',
+      'label': 'Dictionary policy label',
+      'desc': 'This is a test description.',
+    }
+    self. _InitWriterForAddingPolicies(self.writer, dict_policy)
+    self.writer.WritePolicy(dict_policy)
+    # Assert generated string elements.
+    output = self.GetXMLOfChildren(self.writer._string_table_elem)
+    expected_output = (
+        '<string id="DictionaryPolicyStub">\n'
+        '  Dictionary policy caption\n'
+        '</string>\n'
+        '<string id="DictionaryPolicyStub_Explain">\n'
+        '  This is a test description.\n'
+        '</string>')
+    self.AssertXMLEquals(output, expected_output)
+    # Assert generated presentation elements.
+    output = self.GetXMLOfChildren(self.writer._presentation_table_elem)
+    expected_output = (
+        '<presentation id="DictionaryPolicyStub">\n'
+        '  <textBox refId="DictionaryPolicyStub">\n'
+        '    <label>\n'
+        '      Dictionary policy label\n'
+        '    </label>\n'
+        '  </textBox>\n'
+        '</presentation>')
+    self.AssertXMLEquals(output, expected_output)
+
   def testPlatform(self):
     # Test that the writer correctly chooses policies of platform Windows.
     self.assertTrue(self.writer.IsPolicySupported({

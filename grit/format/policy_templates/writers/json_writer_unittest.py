@@ -231,6 +231,46 @@ class JsonWriterUnittest(writer_unittest_common.WriterUnittestCommon):
         '}')
     self.CompareOutputs(output, expected_output)
 
+  def testDictionaryPolicy(self):
+    # Tests a policy group with a single policy of type 'dict'.
+    example = {
+      'bool': True,
+      'int': 10,
+      'string': 'abc',
+      'list': [1, 2, 3],
+      'dict': {
+        'a': 1,
+        'b': 2,
+      }
+    }
+    # Encode |value| here, to make sure the string encoded within the reg_writer
+    # and the expected value are the same.
+    value = str(example)
+    grd = self.PrepareTest(
+        '{'
+        '  "policy_definitions": ['
+        '    {'
+        '      "name": "DictionaryPolicy",'
+        '      "type": "dict",'
+        '      "caption": "Example Dictionary Policy",'
+        '      "desc": "Example Dictionary Policy",'
+        '      "supported_on": ["chrome.linux:8-"],'
+        '      "example_value": ' + value +
+        '    },'
+        '  ],'
+        '  "placeholders": [],'
+        '  "messages": {},'
+        '}')
+    output = self.GetOutput(grd, 'fr', {'_chromium' : '1'}, 'json', 'en')
+    expected_output = (
+        TEMPLATE_HEADER +
+        '  // Example Dictionary Policy\n' +
+        HEADER_DELIMETER +
+        '  // Example Dictionary Policy\n\n'
+        '  //"DictionaryPolicy": ' + str(eval(value)) + '\n\n'
+        '}')
+    self.CompareOutputs(output, expected_output)
+
   def testNonSupportedPolicy(self):
     # Tests a policy that is not supported on Linux, so it shouldn't
     # be included in the JSON file.

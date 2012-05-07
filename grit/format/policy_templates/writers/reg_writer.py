@@ -62,8 +62,8 @@ class RegWriter(template_writer.TemplateWriter):
         i = i + 1
     else:
       self._StartBlock(key, None, list)
-      if policy['type'] == 'string':
-        escaped_str = self._EscapeRegString(example_value)
+      if policy['type'] in ('string', 'dict'):
+        escaped_str = self._EscapeRegString(str(example_value))
         example_value_str = '"' + escaped_str + '"'
       elif policy['type'] == 'main':
         if example_value == True:
