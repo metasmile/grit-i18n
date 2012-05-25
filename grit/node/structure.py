@@ -16,6 +16,7 @@ from grit import exception
 from grit import util
 
 import grit.gather.admin_template
+import grit.gather.chrome_html
 import grit.gather.igoogle_strings
 import grit.gather.muppet_strings
 import grit.gather.policy_json
@@ -30,6 +31,7 @@ import grit.format.rc_header
 _GATHERERS = {
   'accelerators' : grit.gather.rc.Accelerators,
   'admin_template' : grit.gather.admin_template.AdmGatherer,
+  'chrome_html' : grit.gather.chrome_html.ChromeHtml,
   'dialog'  : grit.gather.rc.Dialog,
   'igoogle' : grit.gather.igoogle_strings.IgoogleStrings,
   'menu'    : grit.gather.rc.Menu,
@@ -47,6 +49,7 @@ _GATHERERS = {
 _RC_FORMATTERS = {
   'accelerators' : grit.format.rc.RcSection(),
   'admin_template' : grit.format.rc.RcInclude('ADM'),
+  'chrome_html' : grit.format.rc.RcInclude('HTML'),
   'dialog'  : grit.format.rc.RcSection(),
   'igoogle' : grit.format.rc.RcInclude('XML'),
   'menu'    : grit.format.rc.RcSection(),
@@ -118,8 +121,22 @@ class StructureNode(base.Node):
     else:
       return []
 
+  def GetDataPackPair(self, lang, encoding):
+    """Returns a (id, string|None) pair that represents the resource id and raw
+    bytes of the data (or None if no resource is generated).  This is used to
+    generate the data pack data file.
+    """
+    from grit.format import rc_header
+    id_map = rc_header.Item.tids_
+    id = id_map[self.GetTextualIds()[0]]
+    data = ''
+    if self.gatherer:
+      data = self.gatherer.GetData(lang, encoding)
+    return id, data
+
   def GetTextualIds(self):
-    if self.gatherer and self.attrs['type'] not in ['tr_html', 'admin_template', 'txt']:
+    if self.gatherer and self.attrs['type'] not in [
+        'chrome_html', 'tr_html', 'admin_template', 'txt']:
       return self.gatherer.GetTextualIds()
     else:
       return [self.attrs['name']]
@@ -146,6 +163,8 @@ class StructureNode(base.Node):
                                         self.attrs['name'],
                                         self.attrs['encoding'])
     self.gatherer.SetUberClique(self.UberClique())
+    if hasattr(self.GetRoot(), 'defines'):
+      self.gatherer.SetDefines(self.GetRoot().defines)
     self.gatherer.SetAttributes(self.attrs)
     self.gatherer.Parse()
 

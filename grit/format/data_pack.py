@@ -16,6 +16,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 from grit.format import interface
 from grit.node import include
 from grit.node import message
+from grit.node import structure
 from grit.node import misc
 
 
@@ -41,7 +42,8 @@ class DataPack(interface.ItemFormatter):
     data = {}
     for node in nodes:
       id, value = node.GetDataPackPair(lang, UTF8)
-      data[id] = value
+      if value is not None:
+        data[id] = value
     return DataPack.WriteDataPackToString(data, UTF8)
 
   @staticmethod
@@ -51,7 +53,8 @@ class DataPack(interface.ItemFormatter):
     if (isinstance(item, misc.IfNode) and not item.IsConditionSatisfied()):
       return nodes
     if (isinstance(item, include.IncludeNode) or
-        isinstance(item, message.MessageNode)):
+        isinstance(item, message.MessageNode) or
+        isinstance(item, structure.StructureNode)):
       # Include this node if it wasn't marked as skipped by a whitelist.
       if not item.WhitelistMarkedAsSkip():
         return [item]

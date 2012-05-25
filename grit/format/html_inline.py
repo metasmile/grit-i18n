@@ -95,7 +95,8 @@ class InlinedData:
     self.inlined_files = inlined_files
 
 def DoInline(
-    input_filename, grd_node, allow_external_script=False, names_only=False):
+    input_filename, grd_node, allow_external_script=False, names_only=False,
+    rewrite_function=None):
   """Helper function that inlines the resources in a specified file.
 
   Reads input_filename, finds all the src attributes and attempts to
@@ -106,6 +107,8 @@ def DoInline(
     input_filename: name of file to read in
     grd_node: html node from the grd file for this include tag
     names_only: |nil| will be returned for the inlined contents (faster).
+    rewrite_function: function(filepath, text, distribution) which will be
+        called to rewrite html content before inlining images.
   Returns:
     a tuple of the inlined data as a string and the set of filenames
     of all the inlined files
@@ -208,6 +211,9 @@ def DoInline(
   def InlineCSSText(text, css_filepath):
     """Helper function that inlines external resources in CSS text"""
     filepath = os.path.dirname(css_filepath)
+    # Allow custom modifications before inlining images.
+    if rewrite_function:
+      text = rewrite_function(filepath, text, distribution)
     return InlineCSSImages(text, filepath)
 
   def InlineCSSFile(src_match, inlined_files=inlined_files):
@@ -234,10 +240,22 @@ def DoInline(
     """Helper function that inlines external images in CSS backgrounds."""
     # Replace contents of url() for css attributes: content, background,
     # or *-image.
-    return re.sub('(?:content|background|[\w-]*-image):[ ]*' +
-                  'url\((?:\'|\")(?P<filename>[^"\'\)\(]*)(?:\'|\")',
-                  lambda m: SrcReplace(m, filepath),
+    return re.sub('(?:content|background|[\w-]*-image):[^;]*' +
+                  '(?:url\((?:\'|\")([^"\'\)\(]*)(?:\'|\")\)|' +
+                      'image-set\(' +
+                          '([ ]*url\((?:\'|\")([^"\'\)\(]*)(?:\'|\")\)' +
+                              '[ ]*[0-9.]*x[ ]*(,[ ]*)?)*\))',
+                  lambda m: InlineCSSUrls(m, filepath),
                   text)
+
+  def InlineCSSUrls(src_match, filepath=input_filepath):
+    """Helper function that inlines each url on a CSS image rule match."""
+    # Replace contents of url() references in matches.
+    return re.sub('url\((?:\'|\")(?P<filename>[^"\'\)\(]*)(?:\'|\")',
+                  lambda m: SrcReplace(m, filepath),
+                  src_match.group(0))
+
+
 
   flat_text = ReadFile(input_filename)
 
@@ -266,6 +284,10 @@ def DoInline(
                      SrcReplace,
                      flat_text)
 
+  # Allow custom modifications before inlining images.
+  if rewrite_function:
+    flat_text = rewrite_function(input_filepath, flat_text, distribution)
+
   # TODO(arv): Only do this inside <style> tags.
   flat_text = InlineCSSImages(flat_text)
 
@@ -278,7 +300,8 @@ def DoInline(
   return InlinedData(flat_text, inlined_files)
 
 
-def InlineToString(input_filename, grd_node, allow_external_script=False):
+def InlineToString(input_filename, grd_node, allow_external_script=False,
+                   rewrite_function=None):
   """Inlines the resources in a specified file and returns it as a string.
 
   Args:
@@ -290,7 +313,8 @@ def InlineToString(input_filename, grd_node, allow_external_script=False):
   try:
     return DoInline(input_filename,
                     grd_node,
-                    allow_external_script=allow_external_script).inlined_data
+                    allow_external_script=allow_external_script,
+                    rewrite_function=rewrite_function).inlined_data
   except IOError, e:
     raise Exception("Failed to open %s while trying to flatten %s. (%s)" %
                     (e.filename, input_filename, e.strerror))

@@ -33,6 +33,17 @@ class GathererBase(object):
     '''
     pass
 
+  def SetDefines(self, defines):
+    '''Sets global defines used by the gatherer.
+
+    By default, this does nothing.  If special handling is desired, it should be
+    overridden by the child gatherer.
+
+    Args:
+      defines: The mapping of define values.
+    '''
+    pass
+
   def SetUberClique(self, uberclique):
     '''Overrides the default uberclique so that cliques created by this object
     become part of the uberclique supplied by the user.
@@ -48,6 +59,12 @@ class GathererBase(object):
   def Parse(self):
     '''Parses the contents of what is being gathered.'''
     raise NotImplementedError()
+
+  def GetData(self, lang, encoding):
+    '''Returns the data to be added to the DataPack for this node or None if
+    this node does not add a DataPack entry.
+    '''
+    return None
 
   def GetText(self):
     '''Returns the text of what is being gathered.'''
