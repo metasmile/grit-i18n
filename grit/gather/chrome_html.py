@@ -4,13 +4,15 @@
 # found in the LICENSE file.
 
 """Prepares a Chrome HTML file by inlining resources and adding references to
-high DPI resources.
+high DPI resources and removing references to unsupported scale factors.
 
 This is a small gatherer that takes a HTML file, looks for src attributes
 and inlines the specified file, producing one HTML file with no external
 dependencies. It recursively inlines the included files. When inlining CSS
 image files this script also checks for the existence of high DPI versions
-of the inlined file including those on relevant platforms.
+of the inlined file including those on relevant platforms. Unsupported scale
+factors are also removed from existing image sets to support explicitly
+referencing all available images.
 """
 
 import os
@@ -32,6 +34,16 @@ _THEME_SOURCE = lazy_re.compile('chrome://theme/IDR_[A-Z0-9_]*')
 _CSS_IMAGE_URLS = lazy_re.compile(
     '(?P<attribute>content|background|[\w-]*-image):[ ]*' +
     'url\((?:\'|\")(?P<filename>[^"\'\)\(]*)(?:\'|\")')
+# Matches CSS image sets.
+_CSS_IMAGE_SETS = lazy_re.compile(
+    '(?P<attribute>content|background|[\w-]*-image):[ ]*' +
+        '-webkit-image-set\((?P<images>' +
+        '([,\n ]*url\((\'|\")[^"\'\)\(]*(\'|\")\)[ ]*[0-9.]*x)*)\)',
+    re.MULTILINE)
+# Matches a single image in a CSS image set with the capture group scale.
+_CSS_IMAGE_SET_IMAGE = lazy_re.compile(
+    '[,\n ]*url\((\'|\")[^"\'\)\(]*(\'|\")\)[ ]*(?P<scale>[0-9.]*x)',
+    re.MULTILINE)
 
 
 def InsertImageSet(
@@ -86,10 +98,12 @@ def InsertImageSet(
       images.append("url(\"%s\") %s" % (scale_image_name, sc))
   return "%s: -webkit-image-set(%s" % (attr, ', '.join(images))
 
+
 def InsertImageSets(
     filepath, text, scale_factors, distribution):
   """Helper function that adds references to external images available in any of
-  scale_factors in CSS backgrounds."""
+  scale_factors in CSS backgrounds.
+  """
   # Add high DPI urls for css attributes: content, background,
   # or *-image.
   return _CSS_IMAGE_URLS.sub(
@@ -97,12 +111,56 @@ def InsertImageSets(
       text).decode('utf-8').encode('ascii', 'ignore')
 
 
+def RemoveImagesNotIn(scale_factors, src_match):
+  """Regex replace function which removes images for scale factors not in
+  scale_factors.
+
+  Takes a regex match for _CSS_IMAGE_SETS. For each image in the group images,
+  checks if this scale factor is in scale_factors and if not, removes it.
+
+  Args:
+    scale_factors: a list of the supported scale factors (i.e. ['1x', '2x'])
+    src_match: regex match object from _CSS_IMAGE_SETS
+
+  Returns:
+    string
+  """
+  attr = src_match.group('attribute')
+  images = _CSS_IMAGE_SET_IMAGE.sub(
+      lambda m: m.group('scale') in scale_factors and m.group(0) or '',
+    src_match.group('images'))
+  return "%s: -webkit-image-set(%s)" % (attr, images)
+
+
+def RemoveImageSetImages(text, scale_factors):
+  """Helper function which removes images in image sets not in the list of
+  supported scale_factors.
+  """
+  return _CSS_IMAGE_SETS.sub(
+      lambda m: RemoveImagesNotIn(scale_factors, m), text)
+
+
+def ProcessImageSets(
+    filepath, text, scale_factors, distribution):
+  """Helper function that adds references to external images available in other
+  scale_factors and removes images from image-sets in unsupported scale_factors.
+  """
+  # Explicitly add 1x to supported scale factors so that it is not removed.
+  supported_scale_factors = ['1x']
+  supported_scale_factors.extend(scale_factors)
+  return InsertImageSets(filepath,
+                         RemoveImageSetImages(text, supported_scale_factors),
+                         scale_factors,
+                         distribution)
+
+
 class ChromeHtml(interface.GathererBase):
   """Represents an HTML document processed for Chrome WebUI.
 
   HTML documents used in Chrome WebUI have local resources inlined and
   automatically insert references to high DPI assets used in CSS properties
-  with the use of the -webkit-image-set value. This does not generate any
+  with the use of the -webkit-image-set value. References to unsupported scale
+  factors in image sets are also removed. This does not generate any
   translateable messages and instead generates a single DataPack resource.
   """
 
@@ -138,7 +196,7 @@ class ChromeHtml(interface.GathererBase):
   def Parse(self):
     """Parses and inlines the represented file."""
     self.inlined_text_ = html_inline.InlineToString(self.filename_, None,
-        rewrite_function=lambda fp, t, d: InsertImageSets(
+        rewrite_function=lambda fp, t, d: ProcessImageSets(
             fp, t, self.scale_factors_, d))
 
   @staticmethod

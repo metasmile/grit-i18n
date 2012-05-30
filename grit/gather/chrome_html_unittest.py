@@ -198,6 +198,58 @@ class ChromeHtmlUnittest(unittest.TestCase):
       '''))
     tmp_dir.CleanUp()
 
+  def testRemoveUnsupportedScale(self):
+    '''Tests removing an unsupported scale factor from an explicit image-set.'''
+
+    tmp_dir = TempDir({
+      'index.html': '''
+      <!DOCTYPE HTML>
+      <html>
+        <head>
+          <link rel="stylesheet" href="test.css">
+        </head>
+        <body>
+          <!-- Don't need a body. -->
+        </body>
+      </html>
+      ''',
+
+      'test.css': '''
+      .image {
+        background: -webkit-image-set(url('test.png') 1x,
+                                      url('test1.4.png') 1.4x,
+                                      url('test1.8.png') 1.8x);
+      }
+      ''',
+
+      'test.png': 'PNG DATA',
+
+      'test1.4.png': '1.4x PNG DATA',
+
+      'test1.8.png': '1.8x PNG DATA',
+    })
+
+    html = chrome_html.ChromeHtml(tmp_dir.GetPath('index.html'))
+    html.SetDefines({'scale_factors': '1.8x'})
+    html.Parse()
+    self.failUnlessEqual(StandardizeHtml(html.GetData('en', 'utf-8')),
+                         StandardizeHtml('''
+      <!DOCTYPE HTML>
+      <html>
+        <head>
+          <style>
+      .image {
+        background: -webkit-image-set(url("data:image/png;base64,UE5HIERBVEE=") 1x,
+                                      url("data:image/png;base64,MS44eCBQTkcgREFUQQ==") 1.8x);
+      }
+      </style>
+        </head>
+        <body>
+          <!-- Don't need a body. -->
+        </body>
+      </html>
+      '''))
+    tmp_dir.CleanUp()
 
 if __name__ == '__main__':
   unittest.main()
