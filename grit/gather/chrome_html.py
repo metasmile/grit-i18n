@@ -195,7 +195,9 @@ class ChromeHtml(interface.GathererBase):
 
   def Parse(self):
     """Parses and inlines the represented file."""
-    self.inlined_text_ = html_inline.InlineToString(self.filename_, None,
+    self.inlined_text_ = html_inline.InlineToString(
+        self.filename_,
+        self.grd_node,
         rewrite_function=lambda fp, t, d: ProcessImageSets(
             fp, t, self.scale_factors_, d))
 

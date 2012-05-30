@@ -162,6 +162,7 @@ class StructureNode(base.Node):
     self.gatherer = gathertype.FromFile(self.FilenameToOpen(),
                                         self.attrs['name'],
                                         self.attrs['encoding'])
+    self.gatherer.SetGrdNode(self)
     self.gatherer.SetUberClique(self.UberClique())
     if hasattr(self.GetRoot(), 'defines'):
       self.gatherer.SetDefines(self.GetRoot().defines)
