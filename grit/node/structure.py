@@ -147,6 +147,12 @@ class StructureNode(base.Node):
     elif (t in ['rc_all', 'rc_translateable', 'rc_nontranslateable'] and
           self.SatisfiesOutputCondition()):
       return _RC_FORMATTERS[self.attrs['type']]
+    elif t == 'resource_map_source':
+      from grit.format import resource_map
+      return resource_map.SourceInclude()
+    elif t == 'resource_file_map_source':
+      from grit.format import resource_map
+      return resource_map.SourceFileInclude()
     else:
       return super(type(self), self).ItemFormatter(t)
 
