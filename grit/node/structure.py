@@ -90,6 +90,8 @@ class StructureNode(base.Node):
              'output_filename' : '',
              'fold_whitespace': 'false',
              'run_command' : '',
+             'allowexternalscript': 'false',
+             'flattenhtml': 'false',
              # TODO(joi) this is a hack - should output all generated files
              # as SCons dependencies; however, for now there is a bug I can't
              # find where GRIT doesn't build the matching fileset, therefore
@@ -168,7 +170,6 @@ class StructureNode(base.Node):
     self.gatherer = gathertype.FromFile(self.FilenameToOpen(),
                                         self.attrs['name'],
                                         self.attrs['encoding'])
-    self.gatherer.SetGrdNode(self)
     self.gatherer.SetUberClique(self.UberClique())
     if hasattr(self.GetRoot(), 'defines'):
       self.gatherer.SetDefines(self.GetRoot().defines)

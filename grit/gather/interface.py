@@ -21,9 +21,6 @@ class GathererBase(object):
     # Indicates whether this gatherer is a skeleton gatherer, in which case
     # we should not do some types of processing on the translateable bits.
     self.is_skeleton = False
-    # Stores the grd node on which this gatherer is running. This allows
-    # evaluating expressions.
-    self.grd_node = None
 
   def SetAttributes(self, attrs):
     '''Sets node attributes used by the gatherer.
@@ -46,11 +43,6 @@ class GathererBase(object):
       defines: The mapping of define values.
     '''
     pass
-
-  def SetGrdNode(self, node):
-    '''Sets the grd node on which this gatherer is running.
-    '''
-    self.grd_node = node
 
   def SetUberClique(self, uberclique):
     '''Overrides the default uberclique so that cliques created by this object

@@ -89,6 +89,7 @@ class ChromeHtmlUnittest(unittest.TestCase):
 
     html = chrome_html.ChromeHtml(tmp_dir.GetPath('index.html'))
     html.SetDefines({'scale_factors': '1.4x,1.8x'})
+    html.SetAttributes({'flattenhtml': 'true'})
     html.Parse()
     self.failUnlessEqual(StandardizeHtml(html.GetData('en', 'utf-8')),
                          StandardizeHtml('''
@@ -105,6 +106,35 @@ class ChromeHtmlUnittest(unittest.TestCase):
           <!-- Don't need a body. -->
         </body>
       </html>
+      '''))
+    tmp_dir.CleanUp()
+
+  def testFileResourcesNoFlatten(self):
+    '''Tests non-inlined image file resources with available high DPI assets.'''
+
+    tmp_dir = TempDir({
+      'test.css': '''
+      .image {
+        background: url('test.png');
+      }
+      ''',
+
+      'test.png': 'PNG DATA',
+
+      '1.4x/test.png': '1.4x PNG DATA',
+
+      '1.8x/test.png': '1.8x PNG DATA',
+    })
+
+    html = chrome_html.ChromeHtml(tmp_dir.GetPath('test.css'))
+    html.SetDefines({'scale_factors': '1.4x,1.8x'})
+    html.SetAttributes({'flattenhtml': 'false'})
+    html.Parse()
+    self.failUnlessEqual(StandardizeHtml(html.GetData('en', 'utf-8')),
+                         StandardizeHtml('''
+      .image {
+        background: -webkit-image-set(url("test.png") 1x, url("1.4x/test.png") 1.4x, url("1.8x/test.png") 1.8x);
+      }
       '''))
     tmp_dir.CleanUp()
 
@@ -135,6 +165,7 @@ class ChromeHtmlUnittest(unittest.TestCase):
 
     html = chrome_html.ChromeHtml(tmp_dir.GetPath('index.html'))
     html.SetDefines({'scale_factors': '2x'})
+    html.SetAttributes({'flattenhtml': 'true'})
     html.Parse()
     self.failUnlessEqual(StandardizeHtml(html.GetData('en', 'utf-8')),
                          StandardizeHtml('''
@@ -179,6 +210,7 @@ class ChromeHtmlUnittest(unittest.TestCase):
 
     html = chrome_html.ChromeHtml(tmp_dir.GetPath('index.html'))
     html.SetDefines({'scale_factors': '2x'})
+    html.SetAttributes({'flattenhtml': 'true'})
     html.Parse()
     self.failUnlessEqual(StandardizeHtml(html.GetData('en', 'utf-8')),
                          StandardizeHtml('''
@@ -231,6 +263,7 @@ class ChromeHtmlUnittest(unittest.TestCase):
 
     html = chrome_html.ChromeHtml(tmp_dir.GetPath('index.html'))
     html.SetDefines({'scale_factors': '1.8x'})
+    html.SetAttributes({'flattenhtml': 'true'})
     html.Parse()
     self.failUnlessEqual(StandardizeHtml(html.GetData('en', 'utf-8')),
                          StandardizeHtml('''

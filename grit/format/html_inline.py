@@ -30,6 +30,21 @@ _BEGIN_IF_BLOCK = lazy_re.compile(
 # Matches ending of an "if" block with preceding spaces.
 _END_IF_BLOCK = lazy_re.compile('\s*</if>')
 
+
+def GetDistribution():
+  """Helper function that gets the distribution we are building.
+
+  Returns:
+    string
+  """
+  distribution = DIST_DEFAULT
+  if DIST_ENV_VAR in os.environ.keys():
+    distribution = os.environ[DIST_ENV_VAR]
+    if len(distribution) > 1 and distribution[0] == '_':
+      distribution = distribution[1:].lower()
+  return distribution
+
+
 def ReadFile(input_filename):
   """Helper function that returns input_filename as a string.
 
@@ -70,7 +85,7 @@ def SrcInlineAsDataURL(
     # filename is probably a URL, which we don't want to bother inlining
     return src_match.group(0)
 
-  filename = filename.replace('%DISTRIBUTION%', distribution)
+  filename = filename.replace(DIST_SUBSTR , distribution)
   filepath = os.path.join(base_path, filename)
   inlined_files.add(filepath)
 
@@ -114,12 +129,7 @@ def DoInline(
     of all the inlined files
   """
   input_filepath = os.path.dirname(input_filename)
-
-  distribution = DIST_DEFAULT
-  if DIST_ENV_VAR in os.environ.keys():
-    distribution = os.environ[DIST_ENV_VAR]
-    if len(distribution) > 1 and distribution[0] == '_':
-      distribution = distribution[1:].lower()
+  distribution = GetDistribution()
 
   # Keep track of all the files we inline.
   inlined_files = set()

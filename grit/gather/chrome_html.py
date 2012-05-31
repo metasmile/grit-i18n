@@ -28,6 +28,10 @@ from grit import lazy_re
 from grit import util
 
 
+# Distribution string to replace with distribution.
+DIST_SUBSTR = '%DISTRIBUTION%'
+
+
 # Matches a chrome theme source URL.
 _THEME_SOURCE = lazy_re.compile('chrome://theme/IDR_[A-Z0-9_]*')
 # Matches CSS image urls with the capture group 'filename'.
@@ -82,7 +86,7 @@ def InsertImageSet(
     # filename is probably a URL, which we don't want to bother inlining
     return src_match.group(0)
 
-  filename = filename.replace('%DISTRIBUTION%', distribution)
+  filename = filename.replace(DIST_SUBSTR, distribution)
   filepath = os.path.join(base_path, filename)
   images = ["url(\"%s\") %s" % (filename, '1x')]
 
@@ -172,9 +176,17 @@ class ChromeHtml(interface.GathererBase):
     super(type(self), self).__init__()
     self.filename_ = html
     self.inlined_text_ = None
+    self.allow_external_script_ = False
+    self.flatten_html_ = False
     # 1x resources are implicitly already in the source and do not need to be
     # added.
     self.scale_factors_ = []
+
+  def SetAttributes(self, attrs):
+    self.allow_external_script_ = ('allowexternalscript' in attrs and
+                                   attrs['allowexternalscript'] == 'true')
+    self.flatten_html_ = ('flattenhtml' in attrs and
+                          attrs['flattenhtml'] == 'true')
 
   def SetDefines(self, defines):
     if 'scale_factors' in defines:
@@ -195,11 +207,18 @@ class ChromeHtml(interface.GathererBase):
 
   def Parse(self):
     """Parses and inlines the represented file."""
-    self.inlined_text_ = html_inline.InlineToString(
-        self.filename_,
-        self.grd_node,
-        rewrite_function=lambda fp, t, d: ProcessImageSets(
-            fp, t, self.scale_factors_, d))
+    if self.flatten_html_:
+      self.inlined_text_ = html_inline.InlineToString(self.filename_, None,
+          allow_external_script = self.allow_external_script_,
+          rewrite_function=lambda fp, t, d: ProcessImageSets(
+              fp, t, self.scale_factors_, d))
+    else:
+      distribution = html_inline.GetDistribution()
+      html = util.WrapInputStream(file(self.filename_, 'r'), 'utf-8')
+      self.inlined_text_ = ProcessImageSets(os.path.dirname(self.filename_),
+                                            html.read(),
+                                            self.scale_factors_,
+                                            distribution)
 
   @staticmethod
   def FromFile(html, extkey=None, encoding = 'utf-8'):
