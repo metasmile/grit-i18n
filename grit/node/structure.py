@@ -136,6 +136,12 @@ class StructureNode(base.Node):
       data = self.gatherer.GetData(lang, encoding)
     return id, data
 
+  def GetHtmlResourceFilenames(self):
+    """Returns a set of all filenames inlined by this node."""
+    if self.gatherer:
+      return self.gatherer.GetHtmlResourceFilenames()
+    return []
+
   def GetTextualIds(self):
     if self.gatherer and self.attrs['type'] not in [
         'chrome_html', 'tr_html', 'admin_template', 'txt']:

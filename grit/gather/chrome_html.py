@@ -200,6 +200,16 @@ class ChromeHtml(interface.GathererBase):
     """Returns inlined text of the HTML document."""
     return self.inlined_text_
 
+  def GetHtmlResourceFilenames(self):
+    """Returns a set of all filenames inlined by this file."""
+    if self.flatten_html_:
+      return html_inline.GetResourceFilenames(
+          self.filename_,
+          allow_external_script=self.allow_external_script_,
+          rewrite_function=lambda fp, t, d: ProcessImageSets(
+              fp, t, self.scale_factors_, d))
+    return []
+
   def Translate(self, lang, pseudo_if_not_available=True,
                 skeleton_gatherer=None, fallback_to_english=False):
     """Returns this document translated."""

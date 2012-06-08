@@ -10,6 +10,7 @@ import optparse
 import os
 import posixpath
 import types
+import string
 import sys
 
 from grit import grd_reader
@@ -84,6 +85,10 @@ def Inputs(filename, defines):
         (node.name == 'file' and node.parent and
          node.parent.name == 'translations')):
       files.append(node.GetFilePath())
+      # If it's a flattened node, grab inlined resources too.
+      if node.name == 'structure' and node.attrs['flattenhtml'] == 'true':
+        node.RunGatherers(recursive = True)
+        files.extend(node.GetHtmlResourceFilenames())
     elif node.name == 'grit':
       first_ids_file = node.GetFirstIdsFile()
       if first_ids_file:
@@ -119,7 +124,8 @@ def DoMain(argv):
 
   defines = {}
   for define in options.defines:
-    defines[define] = 1
+    name, val = util.ParseDefine(define)
+    defines[name] = val
 
   if options.inputs:
     if len(args) > 1:

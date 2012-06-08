@@ -87,6 +87,10 @@ class GathererBase(object):
     '''Returns the MessageClique objects for all translateable portions.'''
     return []
 
+  def GetHtmlResourceFilenames(self):
+    """Returns a set of all filenames inlined by this gatherer."""
+    return []
+
   def Translate(self, lang, pseudo_if_not_available=True,
                 skeleton_gatherer=None, fallback_to_english=False):
     '''Returns the resource being gathered, with translateable portions filled

@@ -350,11 +350,16 @@ def InlineToFile(input_filename, output_filename, grd_node):
   out_file.close()
 
 
-def GetResourceFilenames(filename, allow_external_script=False):
+def GetResourceFilenames(filename,
+                         allow_external_script=False,
+                         rewrite_function=None):
   """For a grd file, returns a set of all the files that would be inline."""
   try:
-    return DoInline(filename, None, names_only=True,
-                    allow_external_script=allow_external_script).inlined_files
+    return DoInline(filename,
+                    None,
+                    names_only=True,
+                    allow_external_script=allow_external_script,
+                    rewrite_function=rewrite_function).inlined_files
   except IOError, e:
     raise Exception("Failed to open %s while trying to flatten %s. (%s)" %
                     (e.filename, filename, e.strerror))
