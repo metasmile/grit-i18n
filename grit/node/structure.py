@@ -269,7 +269,7 @@ class StructureNode(base.Node):
         # Note that we reapply substitution a second time here.
         # This is because a) we need to look inside placeholders
         # b) the substitution values are language-dependent
-        file_contents = self.GetRoot().substituter.Substitute(file_contents)
+        file_contents = self.GetRoot().GetSubstituter().Substitute(file_contents)
       if self._ShouldAddBom():
         file_object.write(constants.BOM)
       file_object.write(file_contents)

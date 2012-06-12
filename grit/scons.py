@@ -213,7 +213,8 @@ def _Emitter(target, source, env):
   grd = grd_reader.Parse(_SourceToFile(source), debug=_IsDebugEnabled())
   # TODO(jperkins): This is a hack to get an output context set for the reader.
   # This should really be smarter about the language.
-  grd.SetOutputContext('en', defines)
+  grd.SetOutputLanguage('en')
+  grd.SetDefines(defines)
 
   base_dir = util.dirname(str(target[0]))
   (rc_headers, rc_alls, lang_folders) = _GetOutputFiles(grd, base_dir)

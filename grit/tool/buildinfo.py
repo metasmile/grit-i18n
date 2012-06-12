@@ -46,7 +46,7 @@ class DetermineBuildInfo(interface.Tool):
 
     for lang, dirname in langs.iteritems():
       old_output_language = res_tree.output_language
-      res_tree.SetOutputContext(lang, res_tree.defines)
+      res_tree.SetOutputLanguage(lang)
       for node in res_tree.GetChildrenOfType(structure.StructureNode):
         if node.HasFileForLanguage() and node.SatisfiesOutputCondition():
           path = node.FileForLanguage(lang, dirname, create_file=False,
@@ -55,7 +55,7 @@ class DetermineBuildInfo(interface.Tool):
             path = os.path.join(self.output_directory, path)
             path = os.path.normpath(path)
             print '%s|%s' % ('rc_all', path)
-      res_tree.SetOutputContext(old_output_language, res_tree.defines)
+      res_tree.SetOutputLanguage(old_output_language)
 
     for output in res_tree.GetOutputFiles():
       path = os.path.join(self.output_directory, output.GetFilename())

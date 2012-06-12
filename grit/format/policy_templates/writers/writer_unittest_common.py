@@ -61,7 +61,7 @@ class WriterUnittestCommon(unittest.TestCase):
     grd_string_io = StringIO.StringIO(grd_text)
     # Parse the grit tree and load the policies' JSON with a gatherer.
     grd = grd_reader.Parse(grd_string_io, dir=tmp_dir_name)
-    grd.SetOutputContext('en', {})
+    grd.SetOutputLanguage('en')
     grd.RunGatherers(recursive=True)
     # Remove the policies' JSON.
     os.unlink(json_file_path)
@@ -81,7 +81,8 @@ class WriterUnittestCommon(unittest.TestCase):
     Returns:
       The string of the tamplete created by the writer.
     '''
-    grd.SetOutputContext(env_lang, env_defs)
+    grd.SetOutputLanguage(env_lang)
+    grd.SetDefines(env_defs)
     buf = StringIO.StringIO()
     build.RcBuilder.ProcessNode(grd, DummyOutput(out_type, out_lang), buf)
     return buf.getvalue()

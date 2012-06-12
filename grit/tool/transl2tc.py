@@ -115,12 +115,12 @@ Bulk Translation Upload tool.
     '''
     source_grd = self.rc2grd.Process(source_rc, source_path)
     self.VerboseOut('Read %s into GRIT format, running gatherers.\n' % source_path)
-    source_grd.SetOutputContext(current_grd.output_language,
-                                current_grd.defines)
+    source_grd.SetOutputLanguage(current_grd.output_language)
+    source_grd.SetDefines(current_grd.defines)
     source_grd.RunGatherers(recursive=True, debug=self.o.extra_verbose)
     transl_grd = self.rc2grd.Process(transl_rc, transl_path)
-    transl_grd.SetOutputContext(current_grd.output_language,
-                                current_grd.defines)
+    transl_grd.SetOutputLanguage(current_grd.output_language)
+    transl_grd.SetDefines(current_grd.defines)
     self.VerboseOut('Read %s into GRIT format, running gatherers.\n' % transl_path)
     transl_grd.RunGatherers(recursive=True, debug=self.o.extra_verbose)
     self.VerboseOut('Done running gatherers for %s.\n' % transl_path)

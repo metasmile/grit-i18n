@@ -238,7 +238,8 @@ near the top of the file, before you open it in Visual Studio.
       grd: grd = grd_reader.Parse(...); grd.RunGatherers()
       dialog_ids: ['IDD_MYDIALOG', 'IDD_OTHERDIALOG']
     '''
-    grd.SetOutputContext(self.lang, self.defines)
+    grd.SetOutputLanguage(self.lang)
+    grd.SetDefines(self.defines)
 
     project_name = dialog_ids[0]
 

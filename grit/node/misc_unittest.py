@@ -79,17 +79,20 @@ class IfNodeUnittest(unittest.TestCase):
     self.assertTrue(hello_message.name == 'message')
     self.assertTrue(french_message.name == 'message')
 
-    grd.SetOutputContext('fr', {'hello' : '1'})
+    grd.SetOutputLanguage('fr')
+    grd.SetDefines({'hello': '1'})
     self.failUnless(not bingo_message.SatisfiesOutputCondition())
     self.failUnless(hello_message.SatisfiesOutputCondition())
     self.failUnless(french_message.SatisfiesOutputCondition())
 
-    grd.SetOutputContext('en', {'bingo' : 1})
+    grd.SetOutputLanguage('en')
+    grd.SetDefines({'bingo': 1})
     self.failUnless(bingo_message.SatisfiesOutputCondition())
     self.failUnless(not hello_message.SatisfiesOutputCondition())
     self.failUnless(not french_message.SatisfiesOutputCondition())
 
-    grd.SetOutputContext('en', {'FORCE_FRENCH' : '1', 'bingo' : '1'})
+    grd.SetOutputLanguage('en')
+    grd.SetDefines({'FORCE_FRENCH': '1', 'bingo': '1'})
     self.failUnless(bingo_message.SatisfiesOutputCondition())
     self.failUnless(not hello_message.SatisfiesOutputCondition())
     self.failUnless(french_message.SatisfiesOutputCondition())
@@ -125,31 +128,36 @@ class IfNodeUnittest(unittest.TestCase):
     self.assertTrue(doc_output.name == 'output')
     self.assertTrue(uncond2_output.name == 'output')
 
-    grd.SetOutputContext('ru', {'hello' : '1'})
+    grd.SetOutputLanguage('ru')
+    grd.SetDefines({'hello': '1'})
     outputs = [output.GetFilename() for output in grd.GetOutputFiles()]
     self.assertEquals(
         outputs,
         ['uncond1.rc', 'only_fr.adm', 'only_fr.plist', 'doc.html',
          'uncond2.adm', 'iftest.h'])
 
-    grd.SetOutputContext('ru', {'bingo': '2'})
+    grd.SetOutputLanguage('ru')
+    grd.SetDefines({'bingo': '2'})
     outputs = [output.GetFilename() for output in grd.GetOutputFiles()]
     self.assertEquals(
         outputs,
         ['uncond1.rc', 'doc.html', 'uncond2.adm', 'iftest.h'])
 
-    grd.SetOutputContext('fr', {'hello': '1'})
+    grd.SetOutputLanguage('fr')
+    grd.SetDefines({'hello': '1'})
     outputs = [output.GetFilename() for output in grd.GetOutputFiles()]
     self.assertEquals(
         outputs,
         ['uncond1.rc', 'only_fr.adm', 'only_fr.plist', 'uncond2.adm',
          'iftest.h'])
 
-    grd.SetOutputContext('en', {'bingo': '1'})
+    grd.SetOutputLanguage('en')
+    grd.SetDefines({'bingo': '1'})
     outputs = [output.GetFilename() for output in grd.GetOutputFiles()]
     self.assertEquals(outputs, ['uncond1.rc', 'uncond2.adm', 'iftest.h'])
 
-    grd.SetOutputContext('fr', {'bingo': '1'})
+    grd.SetOutputLanguage('fr')
+    grd.SetDefines({'bingo': '1'})
     outputs = [output.GetFilename() for output in grd.GetOutputFiles()]
     self.assertNotEquals(outputs, ['uncond1.rc', 'uncond2.adm', 'iftest.h'])
 
@@ -327,7 +335,7 @@ class ReleaseNodeUnittest(unittest.TestCase):
           </structures>
         </release>
       </grit>'''), util.PathFromRoot('grit/testdata'))
-    grd.SetOutputContext('en', {})
+    grd.SetOutputLanguage('en')
     grd.RunGatherers(recursive=True)
 
     hello = grd.GetNodeById('IDS_HELLO')

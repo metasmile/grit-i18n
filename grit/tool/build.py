@@ -107,7 +107,7 @@ are exported to translation interchange files (e.g. XMB files), etc.
     # Set an output context so that conditionals can use defines during the
     # gathering stage; we use a dummy language here since we are not outputting
     # a specific language.
-    self.res.SetOutputContext('en', self.defines)
+    self.res.SetOutputLanguage('en')
     self.res.RunGatherers(recursive = True)
     self.Process()
     return 0
@@ -244,7 +244,8 @@ are exported to translation interchange files (e.g. XMB files), etc.
         outfile = util.WrapOutputStream(outfile, encoding)
 
       # Set the context, for conditional inclusion of resources
-      self.res.SetOutputContext(output.GetLanguage(), self.defines)
+      self.res.SetOutputLanguage(output.GetLanguage())
+      self.res.SetDefines(self.defines)
 
       # TODO(joi) Handle this more gracefully
       import grit.format.rc_header

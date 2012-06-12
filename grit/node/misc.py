@@ -153,7 +153,7 @@ class GritNode(base.Node):
     base.Node.__init__(self)
     self.output_language = ''
     self.defines = {}
-    self.substituter = util.Substituter()
+    self.substituter = None
 
   def _IsValidChild(self, child):
     from grit.node import empty
@@ -305,18 +305,18 @@ class GritNode(base.Node):
       if output.attrs['lang']:
         langs.add(output.attrs['lang'])
 
-    # Check if inputs is required for output in any language.
-    # By default SatisfiesOutputCondition() check only for one language.
+    # Check if the input is required for output in any language.
+    # SatisfiesOutputCondition() checks only one language at a time.
     result = []
     for node in input_nodes:
       insert = node.SatisfiesOutputCondition()
       old_output_language = self.output_language
       for lang in langs:
-        self.SetOutputContext(lang, self.defines)
+        self.SetOutputLanguage(lang)
         if node.SatisfiesOutputCondition():
           insert = True
-          break;
-      self.SetOutputContext(old_output_language, self.defines)
+          break
+      self.SetOutputLanguage(old_output_language)
       if insert:
         result.append(node)
     return result
@@ -399,8 +399,8 @@ class GritNode(base.Node):
     else:
       return super(type(self), self).ItemFormatter(t)
 
-  def SetOutputContext(self, output_language, defines):
-    """Set the output context: language and defines. Prepares substitutions.
+  def SetOutputLanguage(self, output_language):
+    """Set the output language.
 
     The substitutions are reset every time the OutputContext is changed.
     They include messages designated as variables, and language codes for html
@@ -410,26 +410,35 @@ class GritNode(base.Node):
       output_language: a two-letter language code (eg: 'en', 'ar'...) or ''
       defines: a map of names to values (strings or booleans.)
     """
-    # We do not specify the output language for .grh files; so we get an empty
-    # string as the default. The value should match
-    # grit.clique.MessageClique.source_language.
-    self.output_language = output_language or self.GetSourceLanguage()
-    self.defines = defines
-    self.substituter.AddMessages(self.GetSubstitutionMessages(),
-                                 self.output_language)
-    if self.output_language in _RTL_LANGS:
-      direction = 'dir="RTL"'
-    else:
-      direction = 'dir="LTR"'
-    self.substituter.AddSubstitutions({
-        'GRITLANGCODE': self.output_language,
-        'GRITDIR': direction,
-    })
-    from grit.format import rc  # avoid circular dep
-    rc.RcSubstitutions(self.substituter, self.output_language)
+    if not output_language:
+      # We do not specify the output language for .grh files,
+      # so we get an empty string as the default.
+      # The value should match grit.clique.MessageClique.source_language.
+      output_language = self.GetSourceLanguage()
+    if output_language != self.output_language:
+      self.output_language = output_language
+      self.substituter = None  # force recalculate
 
   def SetDefines(self, defines):
     self.defines = defines
+    self.substituter = None  # force recalculate
+
+  def GetSubstituter(self):
+    if self.substituter is None:
+      self.substituter = util.Substituter()
+      self.substituter.AddMessages(self.GetSubstitutionMessages(),
+                                   self.output_language)
+      if self.output_language in _RTL_LANGS:
+        direction = 'dir="RTL"'
+      else:
+        direction = 'dir="LTR"'
+      self.substituter.AddSubstitutions({
+          'GRITLANGCODE': self.output_language,
+          'GRITDIR': direction,
+      })
+      from grit.format import rc  # avoid circular dep
+      rc.RcSubstitutions(self.substituter, self.output_language)
+    return self.substituter
 
   def AssignFirstIds(self, filename_or_stream, defines):
     """Assign first ids to each grouping node based on values from the
@@ -503,7 +512,7 @@ class GritNode(base.Node):
           child.RunGatherers(recursive=recursive, debug=debug)
 
       assert self.output_language
-      self.SubstituteMessages(self.substituter)
+      self.SubstituteMessages(self.GetSubstituter())
 
       for child in process_last:
         child.RunGatherers(recursive=recursive, debug=debug)

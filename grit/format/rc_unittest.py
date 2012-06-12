@@ -258,7 +258,7 @@ END'''.strip()
       </grit>
       ''' % input_file), util.PathFromRoot('.'))
     util.FixRootForUnittest(root, '.')
-    root.SetOutputContext('ar', {})
+    root.SetOutputLanguage('ar')
     # We must run the gatherers since we'll be wanting the translation of the
     # file.  The file exists in the location pointed to.
     root.RunGatherers(recursive=True)
@@ -287,7 +287,7 @@ END'''.strip()
         </release>
       </grit>'''), util.PathFromRoot('.'))
     util.FixRootForUnittest(root)
-    root.SetOutputContext('en', {})
+    root.SetOutputLanguage('en')
     root.RunGatherers(recursive = True)
 
     node = root.GetNodeById("IDD_ABOUTBOX")
@@ -331,7 +331,7 @@ END''')
     </grit>
     '''), util.PathFromRoot('.'))
     util.FixRootForUnittest(root)
-    root.SetOutputContext('en', {})
+    root.SetOutputLanguage('en')
     root.RunGatherers(recursive=True)
 
     buf = StringIO.StringIO()

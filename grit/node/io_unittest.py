@@ -62,7 +62,7 @@ class FileNodeUnittest(unittest.TestCase):
       </grit>'''
     grd = grd_reader.Parse(StringIO.StringIO(xml),
                            util.PathFromRoot('grit/testdata'))
-    grd.SetOutputContext('en', {})
+    grd.SetOutputLanguage('en')
     grd.RunGatherers(recursive=True)
     self.VerifyCliquesContainEnglishAndFrenchAndNothingElse(grd.GetCliques())
 
@@ -81,10 +81,10 @@ class FileNodeUnittest(unittest.TestCase):
           </messages>
         </release>
       </grit>'''), util.PathFromRoot('grit/testdata'))
-    grd.SetOutputContext('en', {})
+    grd.SetOutputLanguage('en')
     grd.RunGatherers(recursive=True)
 
-    grd.SetOutputContext('fr', {})
+    grd.SetOutputLanguage('fr')
     grd.RunGatherers(recursive=True)
 
   def testConditionalLoadTranslations(self):
@@ -109,7 +109,7 @@ class FileNodeUnittest(unittest.TestCase):
       </grit>'''
     grd = grd_reader.Parse(StringIO.StringIO(xml),
                            util.PathFromRoot('grit/testdata'))
-    grd.SetOutputContext('en', {})
+    grd.SetOutputLanguage('en')
     grd.RunGatherers(recursive=True)
     self.VerifyCliquesContainEnglishAndFrenchAndNothingElse(grd.GetCliques())
 
@@ -133,8 +133,9 @@ class FileNodeUnittest(unittest.TestCase):
         </release>
       </grit>'''
     grd = grd_reader.Parse(StringIO.StringIO(xml),
-                           util.PathFromRoot('grit/test/data'))
-    grd.SetOutputContext('en', {})
+                           util.PathFromRoot('grit/test/data'),
+                           defines={})
+    grd.SetOutputLanguage('en')
     grd.RunGatherers(recursive=True)
     outputs = grd.GetChildrenOfType(io.OutputNode)
     self.failUnless(outputs[0].SatisfiesOutputCondition())
