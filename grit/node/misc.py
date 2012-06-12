@@ -302,23 +302,19 @@ class GritNode(base.Node):
     # Collect all possible output languages.
     langs = set()
     for output in self.GetOutputFiles():
-      if output.attrs['lang']:
-        langs.add(output.attrs['lang'])
+      langs.add(output.attrs['lang'] or self.GetSourceLanguage())
 
     # Check if the input is required for output in any language.
     # SatisfiesOutputCondition() checks only one language at a time.
     result = []
+    old_output_language = self.output_language
     for node in input_nodes:
-      insert = node.SatisfiesOutputCondition()
-      old_output_language = self.output_language
       for lang in langs:
         self.SetOutputLanguage(lang)
         if node.SatisfiesOutputCondition():
-          insert = True
+          result.append(node)
           break
-      self.SetOutputLanguage(old_output_language)
-      if insert:
-        result.append(node)
+    self.SetOutputLanguage(old_output_language)
     return result
 
   def GetFirstIdsFile(self):
