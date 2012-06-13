@@ -50,6 +50,7 @@ class TestSuiteAll(unittest.TestSuite):
     from grit.tool import preprocess_unittest
     from grit.tool import rc2grd_unittest
     from grit.tool import transl2tc_unittest
+    from grit.tool import xmb_unittest
     import grit.format.c_format_unittest
     import grit.format.data_pack_unittest
     import grit.format.js_map_format_unittest
@@ -92,8 +93,9 @@ class TestSuiteAll(unittest.TestSuite):
         transl2tc_unittest.TranslationToTcUnittest,
         txt_unittest.TxtUnittest,
         util_unittest.UtilUnittest,
+        xmb_unittest.XmbUnittest,
         xtb_reader_unittest.XtbReaderUnittest,
-        # add test classes here...
+        # add test classes here, in alphabetical order...
     ]
 
     for test_class in test_classes:
