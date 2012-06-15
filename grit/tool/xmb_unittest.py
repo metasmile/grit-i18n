@@ -13,9 +13,9 @@ if __name__ == '__main__':
 import unittest
 import StringIO
 
-from grit.tool import xmb
 from grit import grd_reader
 from grit import util
+from grit.tool import xmb
 
 
 class XmbUnittest(unittest.TestCase):
@@ -39,7 +39,7 @@ class XmbUnittest(unittest.TestCase):
             </message>
           </messages>
           <structures>
-            <structure type="version" name="VS_VERSION_INFO" encoding="utf-16" file="grit/testdata/klonk.rc" />
+            <structure type="dialog" name="IDD_SPACYBOX" encoding="utf-16" file="grit/testdata/klonk.rc" />
           </structures>
         </release>
       </grit>''')), '.')
@@ -86,6 +86,17 @@ class XmbUnittest(unittest.TestCase):
     output = self.xmb_file.getvalue()
     self.failUnless(output.count(
         '<ph name="GOOD_1"><ex>excellent</ex>[GOOD]</ph>'))
+
+  def testLeadingTrailingWhitespace(self):
+    # Regression test for problems outputting messages with leading or
+    # trailing whitespace (these come in via structures only, as
+    # message nodes already strip and store whitespace).
+    self.res_tree.SetOutputLanguage('en')
+    os.chdir(util.PathFromRoot('.'))  # so it can find klonk.rc
+    self.res_tree.RunGatherers(True)
+    xmb.OutputXmb().Process(self.res_tree, self.xmb_file)
+    output = self.xmb_file.getvalue()
+    self.failUnless(output.count('OK ? </msg>'))
 
 
 if __name__ == '__main__':

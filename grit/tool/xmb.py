@@ -58,9 +58,11 @@ def _WriteAttribute(file, name, value):
 
 def _WriteMessage(file, message):
   presentable_content = message.GetPresentableContent()
-  assert type(presentable_content) == unicode
+  assert (type(presentable_content) == unicode or
+          (len(message.parts) == 1 and
+           type(message.parts[0] == tclib.Placeholder)))
   preserve_space = presentable_content != _WHITESPACES_REGEX.sub(
-      u' ', presentable_content)
+      u' ', presentable_content.strip())
 
   file.write('<msg')
   _WriteAttribute(file, 'desc', message.GetDescription())
