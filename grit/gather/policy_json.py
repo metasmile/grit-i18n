@@ -27,12 +27,6 @@ class PolicyJson(skeleton_gatherer.SkeletonGatherer):
      format that is used in .grd files.
   '''
 
-  def __init__(self, text):
-    if util.IsExtraVerbose():
-      print text
-    skeleton_gatherer.SkeletonGatherer.__init__(self)
-    self.text_ = text
-
   def _ParsePlaceholder(self, placeholder, msg):
     '''Extracts a placeholder from a DOM node and adds it to a tclib Message.
 
@@ -235,9 +229,13 @@ class PolicyJson(skeleton_gatherer.SkeletonGatherer):
   # _RegExpParse method of that class to implement Parse().  Instead, we
   # parse using a DOM parser.
   def Parse(self):
-    if (self.have_parsed_):
+    if self.have_parsed_:
       return
     self.have_parsed_ = True
+
+    self.text_ = self._LoadInputFile('r')
+    if util.IsExtraVerbose():
+      print self.text_
 
     self.data = eval(self.text_)
 
@@ -253,13 +251,3 @@ class PolicyJson(skeleton_gatherer.SkeletonGatherer):
     # ' -> \'
     # " -> \"
     return text.replace('\\', '\\\\').replace('"', '\\"').replace("'", "\\'")
-
-  def FromFile(filename_or_stream, extkey=None, encoding='cp1252'):
-    if isinstance(filename_or_stream, types.StringTypes):
-      if util.IsVerbose():
-        print "PolicyJson reading file %s, encoding %s" % (
-          filename_or_stream, encoding)
-      filename_or_stream = \
-          util.WrapInputStream(file(filename_or_stream, 'r'), encoding)
-    return PolicyJson(filename_or_stream.read())
-  FromFile = staticmethod(FromFile)

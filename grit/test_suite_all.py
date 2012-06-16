@@ -33,6 +33,7 @@ class TestSuiteAll(unittest.TestSuite):
     from grit import xtb_reader_unittest
     from grit.gather import admin_template_unittest
     from grit.gather import chrome_html_unittest
+    from grit.gather import chrome_scaled_image_unittest
     from grit.gather import igoogle_strings_unittest
     from grit.gather import muppet_strings_unittest
     from grit.gather import policy_json_unittest
@@ -63,6 +64,7 @@ class TestSuiteAll(unittest.TestSuite):
         build_unittest.BuildUnittest,
         buildinfo_unittest.BuildInfoUnittest,
         chrome_html_unittest.ChromeHtmlUnittest,
+        chrome_scaled_image_unittest.ChromeScaledImageUnittest,
         clique_unittest.MessageCliqueUnittest,
         filename_unittest.WindowsFilenameUnittest,
         grd_reader_unittest.GrdReaderUnittest,

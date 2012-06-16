@@ -99,8 +99,9 @@ class DiffStructures(interface.Tool):
     Return:
       'c:\\temp\\werlkjsdf334.tmp'
     """
-    original = structure._GATHERERS[self.structure_type].FromFile(
-      original_filename, extkey=self.section, encoding=encoding)
+    original = structure._GATHERERS[self.structure_type](original_filename,
+                                                         extkey=self.section,
+                                                         encoding=encoding)
     original.Parse()
     translated = original.Translate(constants.CONSTANT_LANGUAGE, False)
 

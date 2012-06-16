@@ -168,14 +168,8 @@ class ChromeHtml(interface.GathererBase):
   translateable messages and instead generates a single DataPack resource.
   """
 
-  def __init__(self, html):
-    """Creates a new object that represents the file 'html'.
-    Args:
-      html: 'filename.html'
-    """
-    super(type(self), self).__init__()
-    self.filename_ = html
-    self.inlined_text_ = None
+  def __init__(self, *args, **kwargs):
+    super(ChromeHtml, self).__init__(*args, **kwargs)
     self.allow_external_script_ = False
     self.flatten_html_ = False
     # 1x resources are implicitly already in the source and do not need to be
@@ -196,6 +190,9 @@ class ChromeHtml(interface.GathererBase):
     """Returns inlined text of the HTML document."""
     return self.inlined_text_
 
+  def GetTextualIds(self):
+    return [self.extkey]
+
   def GetData(self, lang, encoding):
     """Returns inlined text of the HTML document."""
     return self.inlined_text_
@@ -204,7 +201,7 @@ class ChromeHtml(interface.GathererBase):
     """Returns a set of all filenames inlined by this file."""
     if self.flatten_html_:
       return html_inline.GetResourceFilenames(
-          self.filename_,
+          self.grd_node.ToRealPath(self.GetInputPath()),
           allow_external_script=self.allow_external_script_,
           rewrite_function=lambda fp, t, d: ProcessImageSets(
               fp, t, self.scale_factors_, d))
@@ -217,35 +214,22 @@ class ChromeHtml(interface.GathererBase):
 
   def Parse(self):
     """Parses and inlines the represented file."""
+
+    filename = self.GetInputPath()
+    # Hack: some unit tests supply an absolute path and no root node.
+    if not os.path.isabs(filename):
+      filename = self.grd_node.ToRealPath(filename)
     if self.flatten_html_:
       self.inlined_text_ = html_inline.InlineToString(
-          self.filename_,
+          filename,
           self.grd_node,
           allow_external_script = self.allow_external_script_,
           rewrite_function=lambda fp, t, d: ProcessImageSets(
               fp, t, self.scale_factors_, d))
     else:
       distribution = html_inline.GetDistribution()
-      html = util.WrapInputStream(file(self.filename_, 'r'), 'utf-8')
-      self.inlined_text_ = ProcessImageSets(os.path.dirname(self.filename_),
+      html = util.WrapInputStream(open(filename, 'r'), 'utf-8')
+      self.inlined_text_ = ProcessImageSets(os.path.dirname(filename),
                                             html.read(),
                                             self.scale_factors_,
                                             distribution)
-
-  @staticmethod
-  def FromFile(html, extkey=None, encoding = 'utf-8'):
-    """Creates a ChromeHtml object for the contents of 'html'.  Returns a new
-    ChromeHtml object.
-
-    Args:
-      html: file('') | 'filename.html'
-      extkey: ignored
-      encoding: 'utf-8' (encoding is ignored)
-
-    Return:
-      ChromeHtml(text_of_file)
-    """
-    if not isinstance(html, types.StringTypes):
-      html = html.name
-
-    return ChromeHtml(html)

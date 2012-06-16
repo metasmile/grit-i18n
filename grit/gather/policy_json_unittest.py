@@ -12,6 +12,7 @@ if __name__ == '__main__':
   sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '../..'))
 
 import unittest
+import StringIO
 
 from grit.gather import muppet_strings
 from grit.gather import policy_json
@@ -26,7 +27,7 @@ class PolicyJsonUnittest(unittest.TestCase):
 
   def testEmpty(self):
     original = "{'policy_definitions': [], 'messages': {}}"
-    gatherer = policy_json.PolicyJson(original)
+    gatherer = policy_json.PolicyJson(StringIO.StringIO(original))
     gatherer.Parse()
     self.failUnless(len(gatherer.GetCliques()) == 0)
     self.failUnless(eval(original) == eval(gatherer.Translate('en')))
@@ -53,7 +54,7 @@ class PolicyJsonUnittest(unittest.TestCase):
         "    }"
         "  }"
         "}")
-    gatherer = policy_json.PolicyJson(original)
+    gatherer = policy_json.PolicyJson(StringIO.StringIO(original))
     gatherer.Parse()
     self.failUnless(len(gatherer.GetCliques()) == 4)
     expected = self.GetExpectedOutput(original)
@@ -75,7 +76,7 @@ class PolicyJsonUnittest(unittest.TestCase):
         "  ],"
         "  'messages': {}"
         "}")
-    gatherer = policy_json.PolicyJson(original)
+    gatherer = policy_json.PolicyJson(StringIO.StringIO(original))
     gatherer.Parse()
     self.failUnless(len(gatherer.GetCliques()) == 1)
     expected = self.GetExpectedOutput(original)
@@ -96,7 +97,7 @@ class PolicyJsonUnittest(unittest.TestCase):
         "  ],"
         "  'messages': {}"
         "}")
-    gatherer = policy_json.PolicyJson(original)
+    gatherer = policy_json.PolicyJson(StringIO.StringIO(original))
     gatherer.Parse()
     self.failUnless(len(gatherer.GetCliques()) == 1)
     expected = self.GetExpectedOutput(original)
@@ -139,7 +140,7 @@ with a newline?''',
           }
         }
 }"""
-    gatherer = policy_json.PolicyJson(original)
+    gatherer = policy_json.PolicyJson(StringIO.StringIO(original))
     gatherer.Parse()
     self.failUnless(len(gatherer.GetCliques()) == 6)
     expected = self.GetExpectedOutput(original)
@@ -156,7 +157,7 @@ with a newline?''',
         ],
         'messages': {}
 }"""
-    gatherer = policy_json.PolicyJson(original)
+    gatherer = policy_json.PolicyJson(StringIO.StringIO(original))
     gatherer.Parse()
     self.failUnless(len(gatherer.GetCliques()) == 1)
     expected = eval(re.sub('<ph.*ph>', '$1', original))

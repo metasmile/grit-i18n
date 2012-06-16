@@ -29,7 +29,7 @@ class AdmGathererUnittest(unittest.TestCase):
       '[strings] \n'
       'whatcha="bingo bongo"\n'
       'gotcha = "bingolabongola "the wise" fingulafongula" \n')
-    gatherer = admin_template.AdmGatherer.FromFile(pseudofile)
+    gatherer = admin_template.AdmGatherer(pseudofile)
     gatherer.Parse()
     self.failUnless(len(gatherer.GetCliques()) == 2)
     self.failUnless(gatherer.GetCliques()[1].GetMessage().GetRealContent() ==
@@ -44,7 +44,7 @@ class AdmGathererUnittest(unittest.TestCase):
       'ding dong\n'
       'whatcha="bingo bongo"\n'
       'gotcha = "bingolabongola "the wise" fingulafongula" \n')
-    gatherer = admin_template.AdmGatherer.FromFile(pseudofile)
+    gatherer = admin_template.AdmGatherer(pseudofile)
     self.assertRaises(admin_template.MalformedAdminTemplateException,
                       gatherer.Parse)
 
@@ -65,7 +65,7 @@ class AdmGathererUnittest(unittest.TestCase):
 
   def testFromFile(self):
     fname = util.PathFromRoot('grit/testdata/GoogleDesktop.adm')
-    gatherer = admin_template.AdmGatherer.FromFile(fname)
+    gatherer = admin_template.AdmGatherer(fname)
     gatherer.Parse()
     cliques = gatherer.GetCliques()
     self.VerifyCliquesFromAdmFile(cliques)

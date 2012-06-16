@@ -87,6 +87,13 @@ class GotPathExpectedFilenameOnly(Parsing):
     Parsing.__init__(self, msg)
 
 
+class FileNotFound(Parsing):
+  '''The resource file was not found.
+  '''
+  def __init__(self, msg=''):
+    Parsing.__init__(self, msg)
+
+
 class InvalidMessage(Base):
   '''The specified message failed validation.'''
   def __init__(self, msg=''):

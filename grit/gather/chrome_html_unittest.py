@@ -12,10 +12,10 @@ import sys
 if __name__ == '__main__':
   sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '../..'))
 
-import tempfile
 import unittest
 
 from grit import lazy_re
+from grit import util
 from grit.gather import chrome_html
 
 
@@ -28,40 +28,13 @@ def StandardizeHtml(text):
                                            'data:image/png;')
 
 
-class TempDir(object):
-  def __init__(self, file_data):
-    self.files = []
-    self.dirs = []
-    self.tmp_dir_name = tempfile.gettempdir()
-    for name in file_data:
-      file_path = self.tmp_dir_name + '/' + name
-      dir_path = os.path.split(file_path)[0]
-      if not os.path.exists(dir_path):
-        self.dirs.append(dir_path)
-        os.makedirs(dir_path)
-      self.files.append(file_path)
-      f = open(file_path, 'w')
-      f.write(file_data[name])
-      f.close()
-
-  def CleanUp(self):
-    self.dirs.reverse()
-    for name in self.files:
-      os.unlink(name)
-    for name in self.dirs:
-      os.removedirs(name)
-
-  def GetPath(self, name):
-    return self.tmp_dir_name + '/' + name
-
-
 class ChromeHtmlUnittest(unittest.TestCase):
   '''Unit tests for ChromeHtml.'''
 
   def testFileResources(self):
     '''Tests inlined image file resources with available high DPI assets.'''
 
-    tmp_dir = TempDir({
+    tmp_dir = util.TempDir({
       'index.html': '''
       <!DOCTYPE HTML>
       <html>
@@ -112,7 +85,7 @@ class ChromeHtmlUnittest(unittest.TestCase):
   def testFileResourcesNoFlatten(self):
     '''Tests non-inlined image file resources with available high DPI assets.'''
 
-    tmp_dir = TempDir({
+    tmp_dir = util.TempDir({
       'test.css': '''
       .image {
         background: url('test.png');
@@ -141,7 +114,7 @@ class ChromeHtmlUnittest(unittest.TestCase):
   def testFileResourcesNoFile(self):
     '''Tests inlined image file resources without available high DPI assets.'''
 
-    tmp_dir = TempDir({
+    tmp_dir = util.TempDir({
       'index.html': '''
       <!DOCTYPE HTML>
       <html>
@@ -188,7 +161,7 @@ class ChromeHtmlUnittest(unittest.TestCase):
   def testThemeResources(self):
     '''Tests inserting high DPI chrome://theme references.'''
 
-    tmp_dir = TempDir({
+    tmp_dir = util.TempDir({
       'index.html': '''
       <!DOCTYPE HTML>
       <html>
@@ -233,7 +206,7 @@ class ChromeHtmlUnittest(unittest.TestCase):
   def testRemoveUnsupportedScale(self):
     '''Tests removing an unsupported scale factor from an explicit image-set.'''
 
-    tmp_dir = TempDir({
+    tmp_dir = util.TempDir({
       'index.html': '''
       <!DOCTYPE HTML>
       <html>

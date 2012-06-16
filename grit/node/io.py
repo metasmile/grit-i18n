@@ -44,14 +44,14 @@ class FileNode(base.Node):
     if hasattr(root, 'defines'):
       defs = root.defines
 
-    xtb_file = file(self.GetFilePath())
+    xtb_file = open(self.ToRealPath(self.GetInputPath()))
     try:
       lang = xtb_reader.Parse(xtb_file,
                               self.UberClique().GenerateXtbParserCallback(
                                 self.attrs['lang'], debug=debug),
                               defs=defs)
     except:
-      print "Exception during parsing of %s" % self.GetFilePath()
+      print "Exception during parsing of %s" % self.GetInputPath()
       raise
     # We special case 'he' and 'iw' because the translation console uses 'iw'
     # and we use 'he'.
@@ -60,8 +60,8 @@ class FileNode(base.Node):
             'reference must contain messages in the language specified\n'
             'by the \'lang\' attribute.')
 
-  def GetFilePath(self):
-    return self.ToRealPath(self.attrs['path'])
+  def GetInputPath(self):
+    return self.attrs['path']
 
 
 class OutputNode(base.Node):
@@ -71,9 +71,11 @@ class OutputNode(base.Node):
     return ['filename', 'type']
 
   def DefaultAttributes(self):
-    return { 'lang' : '', # empty lang indicates all languages
-             'language_section' : 'neutral' # defines a language neutral section
-             }
+    return {
+      'lang' : '', # empty lang indicates all languages
+      'language_section' : 'neutral', # defines a language neutral section
+      'context' : '',
+    }
 
   def GetType(self):
     if self.SatisfiesOutputCondition():
@@ -84,6 +86,9 @@ class OutputNode(base.Node):
   def GetLanguage(self):
     '''Returns the language ID, default 'en'.'''
     return self.attrs['lang']
+
+  def GetContext(self):
+    return self.attrs['context']
 
   def GetFilename(self):
     return self.attrs['filename']

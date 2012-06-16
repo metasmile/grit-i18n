@@ -63,5 +63,4 @@ class DetermineBuildInfo(interface.Tool):
       print '%s|%s' % (output.GetType(), path)
 
     for infile in res_tree.GetInputFiles():
-      path = os.path.normpath(infile.GetFilePath())
-      print 'input|%s' % (path)
+      print 'input|%s' % os.path.normpath(infile)

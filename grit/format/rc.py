@@ -422,8 +422,8 @@ class RcInclude(interface.ItemFormatter):
     from grit.node import structure
     from grit.node import include
     assert isinstance(item, (structure.StructureNode, include.IncludeNode))
-    assert (isinstance(item, include.IncludeNode) or
-            item.attrs['type'] in ['tr_html', 'admin_template', 'txt', 'muppet'])
+    assert (isinstance(item, include.IncludeNode) or item.attrs['type'] in
+        ['tr_html', 'admin_template', 'txt', 'muppet', 'chrome_scaled_image'])
 
     # By default, we use relative pathnames to included resources so that
     # sharing the resulting .rc files is possible.

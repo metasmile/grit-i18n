@@ -21,7 +21,7 @@ from grit.gather import txt
 class TxtUnittest(unittest.TestCase):
   def testGather(self):
     input = StringIO.StringIO('Hello there\nHow are you?')
-    gatherer = txt.TxtFile.FromFile(input)
+    gatherer = txt.TxtFile(input)
     gatherer.Parse()
     self.failUnless(gatherer.GetText() == input.getvalue())
     self.failUnless(len(gatherer.GetCliques()) == 1)

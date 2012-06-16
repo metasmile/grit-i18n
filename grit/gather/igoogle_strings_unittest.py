@@ -11,13 +11,14 @@ if __name__ == '__main__':
   sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '../..'))
 
 import unittest
+import StringIO
 
 from grit.gather import igoogle_strings
 
 class IgoogleStringsUnittest(unittest.TestCase):
   def testParsing(self):
     original = '''<messagebundle><msg test="hello_world">Hello World</msg></messagebundle>'''
-    gatherer = igoogle_strings.IgoogleStrings(original)
+    gatherer = igoogle_strings.IgoogleStrings(StringIO.StringIO(original))
     gatherer.Parse()
     print len(gatherer.GetCliques())
     print gatherer.GetCliques()[0].GetMessage().GetRealContent()

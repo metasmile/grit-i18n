@@ -245,6 +245,7 @@ are exported to translation interchange files (e.g. XMB files), etc.
 
       # Set the context, for conditional inclusion of resources
       self.res.SetOutputLanguage(output.GetLanguage())
+      self.res.SetOutputContext(output.GetContext())
       self.res.SetDefines(self.defines)
 
       # TODO(joi) Handle this more gracefully

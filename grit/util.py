@@ -6,11 +6,13 @@
 '''Utilities used by GRIT.
 '''
 
-import sys
-import os.path
 import codecs
 import htmlentitydefs
+import os
 import re
+import shutil
+import sys
+import tempfile
 import time
 from xml.sax import saxutils
 
@@ -573,3 +575,45 @@ class Substituter(object):
                            msg.GetDescription(), msg.GetMeaning())
     else:
       return msg
+
+
+class TempDir(object):
+  '''Creates files with the specified contents in a temporary directory,
+  for unit testing.
+  '''
+  def __init__(self, file_data):
+    self._tmp_dir_name = tempfile.mkdtemp()
+    assert not os.listdir(self.GetPath())
+    for name, contents in file_data.items():
+      file_path = self.GetPath(name)
+      dir_path = os.path.split(file_path)[0]
+      if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+      with open(file_path, 'w') as f:
+        f.write(file_data[name])
+
+  def __enter__(self):
+    return self
+
+  def __exit__(self, *exc_info):
+    self.CleanUp()
+
+  def CleanUp(self):
+    shutil.rmtree(self.GetPath())
+
+  def GetPath(self, name=''):
+    name = os.path.join(self._tmp_dir_name, name)
+    assert name.startswith(self._tmp_dir_name)
+    return name
+
+  def AsCurrentDir(self):
+    return self._AsCurrentDirClass(self.GetPath())
+
+  class _AsCurrentDirClass(object):
+    def __init__(self, path):
+      self.path = path
+    def __enter__(self):
+      self.oldpath = os.getcwd()
+      os.chdir(self.path)
+    def __exit__(self, *exc_info):
+      os.chdir(self.oldpath)

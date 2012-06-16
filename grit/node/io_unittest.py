@@ -37,7 +37,7 @@ class FileNodeUnittest(unittest.TestCase):
     translations.AddChild(file_node)
     root.EndParsing()
 
-    self.failUnless(file_node.GetFilePath() ==
+    self.failUnless(root.ToRealPath(file_node.GetInputPath()) ==
                     util.normpath(
                       os.path.join(ur'../resource', ur'flugel/kugel.pdf')))
 

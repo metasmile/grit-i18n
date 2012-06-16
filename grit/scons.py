@@ -136,8 +136,9 @@ def _ProcessNodes(grd, base_dir, lang_folders):
   # as build targets, based on the sconsdep flag.
   for node in grd:
     if node.SatisfiesOutputCondition():
+      file = node.ToRealPath(node.GetInputPath())
       if node.name == 'structure':
-        translated_files.append(os.path.abspath(node.GetFilePath()))
+        translated_files.append(os.path.abspath(file))
         # TODO(joi) Should remove the "if sconsdep is true" thing as it is a
         # hack - see grit/node/structure.py
         if node.HasFileForLanguage() and node.attrs['sconsdep'] == 'true':
@@ -152,9 +153,8 @@ def _ProcessNodes(grd, base_dir, lang_folders):
       elif (node.name == 'skeleton' or
             (node.name == 'file' and node.parent and
              node.parent.name == 'translations')):
-        translated_files.append(os.path.abspath(node.GetFilePath()))
+        translated_files.append(os.path.abspath(file))
       elif node.name == 'include':
-        file = node.FilenameToOpen()
         # If it's added by file name and the file isn't easy to find, don't make
         # it a dependency.  This could add some build flakiness, but it doesn't
         # work otherwise.

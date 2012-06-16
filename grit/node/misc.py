@@ -299,23 +299,24 @@ class GritNode(base.Node):
     input_nodes.extend(self.GetChildrenOfType(structure.StructureNode))
     input_nodes.extend(self.GetChildrenOfType(variant.SkeletonNode))
 
-    # Collect all possible output languages.
-    langs = set()
+    # Collect all output languages and contexts.
+    configs = set()
     for output in self.GetOutputFiles():
-      langs.add(output.attrs['lang'] or self.GetSourceLanguage())
+      configs.add((output.GetLanguage() or self.GetSourceLanguage(),
+                   output.GetContext()))
 
-    # Check if the input is required for output in any language.
-    # SatisfiesOutputCondition() checks only one language at a time.
-    result = []
+    # Check if the input is required for any output configuration.
+    # SatisfiesOutputCondition() checks only one configuration at a time.
+    input_files = set()
     old_output_language = self.output_language
-    for node in input_nodes:
-      for lang in langs:
-        self.SetOutputLanguage(lang)
+    for lang, ctx in configs:
+      self.SetOutputLanguage(lang)
+      self.SetOutputContext(ctx)
+      for node in input_nodes:
         if node.SatisfiesOutputCondition():
-          result.append(node)
-          break
+          input_files.add(node.GetInputPath())
     self.SetOutputLanguage(old_output_language)
-    return result
+    return map(self.ToRealPath, sorted(input_files))
 
   def GetFirstIdsFile(self):
     """Returns a usable path to the first_ids file, if set, otherwise
@@ -396,15 +397,14 @@ class GritNode(base.Node):
       return super(type(self), self).ItemFormatter(t)
 
   def SetOutputLanguage(self, output_language):
-    """Set the output language.
+    """Set the output language. Prepares substitutions.
 
-    The substitutions are reset every time the OutputContext is changed.
+    The substitutions are reset every time the language is changed.
     They include messages designated as variables, and language codes for html
     and rc files.
 
     Args:
       output_language: a two-letter language code (eg: 'en', 'ar'...) or ''
-      defines: a map of names to values (strings or booleans.)
     """
     if not output_language:
       # We do not specify the output language for .grh files,
@@ -414,6 +414,10 @@ class GritNode(base.Node):
     if output_language != self.output_language:
       self.output_language = output_language
       self.substituter = None  # force recalculate
+
+  def SetOutputContext(self, output_context):
+    self.output_context = output_context
+    self.substituter = None  # force recalculate
 
   def SetDefines(self, defines):
     self.defines = defines

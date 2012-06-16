@@ -79,30 +79,35 @@ def Inputs(filename, defines):
   grd = grd_reader.Parse(
       filename, debug=False, defines=defines, tags_to_ignore=set(['messages']),
       first_ids_file='GRIT_DIR/../gritsettings/resource_ids')
-  files = []
+  files = set()
+  contexts = set(output.GetContext() for output in grd.GetOutputFiles())
   for node in grd:
     if (node.name == 'structure' or node.name == 'skeleton' or
         (node.name == 'file' and node.parent and
          node.parent.name == 'translations')):
-      files.append(node.GetFilePath())
+      # TODO(benrg): This is an awful hack. Do dependencies right.
+      for context in contexts:
+        grd.SetOutputContext(context)
+        if node.SatisfiesOutputCondition():
+          files.add(grd.ToRealPath(node.GetInputPath()))
       # If it's a flattened node, grab inlined resources too.
       if node.name == 'structure' and node.attrs['flattenhtml'] == 'true':
         node.RunGatherers(recursive = True)
-        files.extend(node.GetHtmlResourceFilenames())
+        files.update(node.GetHtmlResourceFilenames())
     elif node.name == 'grit':
       first_ids_file = node.GetFirstIdsFile()
       if first_ids_file:
-        files.append(first_ids_file)
+        files.add(first_ids_file)
     elif node.name == 'include':
       # Only include files that we actually plan on using.
       if node.SatisfiesOutputCondition():
-        files.append(node.FilenameToOpen())
+        files.add(grd.ToRealPath(node.GetInputPath()))
         # If it's a flattened node, grab inlined resources too.
         if node.attrs['flattenhtml'] == 'true':
-          files.extend(node.GetHtmlResourceFilenames())
+          files.update(node.GetHtmlResourceFilenames())
 
   cwd = os.getcwd()
-  return [os.path.relpath(f, cwd) for f in files]
+  return [os.path.relpath(f, cwd) for f in sorted(files)]
 
 
 def PrintUsage():
