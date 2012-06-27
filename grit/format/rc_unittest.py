@@ -246,6 +246,36 @@ END'''.strip()
     self.failUnless(contents.find('Hello!') == -1)  # should be translated
 
 
+  def testChromeHtmlNodeOutputfile(self):
+    input_file = util.PathFromRoot('grit/testdata/chrome_html.html')
+    output_file = '%s/HTML_FILE1_chrome_html.html' % tempfile.gettempdir()
+    root = grd_reader.Parse(StringIO.StringIO(
+      '<structure type="chrome_html" name="HTML_FILE1" file="%s" flattenhtml="true" />' %
+      input_file), flexible_root = True)
+    util.FixRootForUnittest(root, '.')
+    # We must run the gatherers since we'll be wanting the chrome_html output.
+    # The file exists in the location pointed to.
+    root.RunGatherers(recursive=True)
+
+    buf = StringIO.StringIO()
+    build.RcBuilder.ProcessNode(root, DummyOutput('rc_all', 'en', output_file),
+                                buf)
+    output = buf.getvalue()
+    expected = u'HTML_FILE1         HTML               "HTML_FILE1_chrome_html.html"'
+    # hackety hack to work on win32&lin
+    output = re.sub('"[c-zC-Z]:', '"', output)
+    self.failUnless(output.strip() == expected)
+
+    fo = file(output_file)
+    file_contents = fo.read()
+    fo.close()
+
+    # Check for the content added by the <include> tag.
+    self.failUnless(file_contents.find('Hello Include!') != -1)
+    # Check for inserted -webkit-image-set.
+    self.failUnless(file_contents.find('content: -webkit-image-set') != -1)
+
+
   def testSubstitutionHtml(self):
     input_file = util.PathFromRoot('grit/testdata/toolbar_about.html')
     root = grd_reader.Parse(StringIO.StringIO('''<?xml version="1.0" encoding="UTF-8"?>

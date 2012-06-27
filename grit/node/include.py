@@ -95,7 +95,7 @@ class IncludeNode(base.Node):
     # data.
     return id, data
 
-  def Flatten(self, output_dir):
+  def Process(self, output_dir):
     """Rewrite file references to be base64 encoded data URLs.  The new file
     will be written to output_dir and the name of the new file is returned."""
     filename = self.ToRealPath(self.GetInputPath())
@@ -111,7 +111,6 @@ class IncludeNode(base.Node):
 
     self._last_flat_filename = flat_filename
     return os.path.basename(flat_filename)
-
 
   def GetHtmlResourceFilenames(self):
     """Returns a set of all filenames inlined by this file."""

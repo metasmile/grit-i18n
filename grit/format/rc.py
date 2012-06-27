@@ -403,8 +403,8 @@ class RcSection(interface.ItemFormatter):
 class RcInclude(interface.ItemFormatter):
   '''Writes out an item that is included in an .rc file (e.g. an ICON)'''
 
-  def __init__(self, type, filenameWithoutPath = 0, relative_path = 0,
-               flatten_html = 0):
+  def __init__(self, type, filenameWithoutPath=False, relative_path=False,
+               process_html=False):
     '''Indicates to the instance what the type of the resource include is,
     e.g. 'ICON' or 'HTML'.  Case must be correct, i.e. if the type is all-caps
     the parameter should be all-caps.
@@ -415,7 +415,7 @@ class RcInclude(interface.ItemFormatter):
     self.type_ = type
     self.filenameWithoutPath = filenameWithoutPath
     self.relative_path_ = relative_path
-    self.flatten_html = flatten_html
+    self.process_html = process_html
 
   def Format(self, item, lang='en', output_dir='.'):
     assert isinstance(lang, types.StringTypes)
@@ -423,7 +423,8 @@ class RcInclude(interface.ItemFormatter):
     from grit.node import include
     assert isinstance(item, (structure.StructureNode, include.IncludeNode))
     assert (isinstance(item, include.IncludeNode) or item.attrs['type'] in
-        ['tr_html', 'admin_template', 'txt', 'muppet', 'chrome_scaled_image'])
+        ['tr_html', 'admin_template', 'txt', 'muppet', 'chrome_scaled_image',
+         'chrome_html'])
 
     # By default, we use relative pathnames to included resources so that
     # sharing the resulting .rc files is possible.
@@ -431,8 +432,8 @@ class RcInclude(interface.ItemFormatter):
     # The FileForLanguage() Function has the side effect of generating the file
     # if needed (e.g. if it is an HTML file include).
     filename = os.path.abspath(item.FileForLanguage(lang, output_dir))
-    if self.flatten_html:
-      filename = item.Flatten(output_dir)
+    if self.process_html:
+      filename = item.Process(output_dir)
     elif self.filenameWithoutPath:
       filename = os.path.basename(filename)
     elif self.relative_path_:

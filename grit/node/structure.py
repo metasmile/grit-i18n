@@ -51,7 +51,7 @@ _GATHERERS = {
 _RC_FORMATTERS = {
   'accelerators'        : grit.format.rc.RcSection(),
   'admin_template'      : grit.format.rc.RcInclude('ADM'),
-  'chrome_html'         : grit.format.rc.RcInclude('HTML'),
+  'chrome_html'         : grit.format.rc.RcInclude('HTML', process_html=True),
   'chrome_scaled_image' : grit.format.rc.RcInclude('BINDATA'),
   'dialog'              : grit.format.rc.RcSection(),
   'igoogle'             : grit.format.rc.RcInclude('XML'),
@@ -74,6 +74,10 @@ class StructureNode(base.Node):
 
   def __init__(self):
     base.Node.__init__(self)
+
+    # Keep track of the last filename we flattened to, so we can
+    # avoid doing it more than once.
+    self._last_flat_filename = None
 
   def _IsValidChild(self, child):
     return isinstance(child, variant.SkeletonNode)
@@ -130,6 +134,25 @@ class StructureNode(base.Node):
 
   def IsExcludedFromRc(self):
     return self.attrs['exclude_from_rc'] == 'true'
+
+  def Process(self, output_dir):
+    """Writes the processed data to output_dir.  In the case of a chrome_html
+    structure this will add references to other scale factors.  If flattening
+    this will also write file references to be base64 encoded data URLs.  The
+    name of the new file is returned."""
+    filename = self.ToRealPath(self.GetInputPath())
+    flat_filename = os.path.join(output_dir,
+        self.attrs['name'] + '_' + os.path.basename(filename))
+
+    if self._last_flat_filename == flat_filename:
+      return
+
+    outfile = open(flat_filename, 'wb')
+    outfile.write(self.gatherer.GetData('', 'utf-8'))
+    outfile.close()
+
+    self._last_flat_filename = flat_filename
+    return os.path.basename(flat_filename)
 
   def GetLineEnd(self):
     '''Returns the end-of-line character or characters for files output because
@@ -211,7 +234,8 @@ class StructureNode(base.Node):
 
   def HasFileForLanguage(self):
     return self.attrs['type'] in ['tr_html', 'admin_template', 'txt',
-                                  'muppet', 'igoogle', 'chrome_scaled_image']
+                                  'muppet', 'igoogle', 'chrome_scaled_image',
+                                  'chrome_html']
 
   def ExpandVariables(self):
     '''Variable expansion on structures is controlled by an XML attribute.
