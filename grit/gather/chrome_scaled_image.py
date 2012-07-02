@@ -59,7 +59,9 @@ class ChromeScaledImage(interface.GathererBase):
         path = os.path.join(dir, self.rc_file)
         if os.path.exists(self.grd_node.ToRealPath(path)):
           return path, scale, req_scale
-    dir = "%s_%s_percent" % (_MakeBraceGlob(layouts), _MakeBraceGlob(scales))
+    # If we get here then the file is missing, so fail.
+    dir = "%s_%s_percent" % (_MakeBraceGlob(layouts),
+                             _MakeBraceGlob(map(str, scales)))
     raise exception.FileNotFound(
         'Tried ' + self.grd_node.ToRealPath(os.path.join(dir, self.rc_file)))
 

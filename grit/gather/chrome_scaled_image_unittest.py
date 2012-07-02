@@ -121,7 +121,7 @@ class ChromeScaledImageUnittest(unittest.TestCase):
             ['default_100_percent/a.png',
              'tactile_100_percent/a.png',
             ],
-            [('tactile_123_percent', None),
+            [('tactile_123_percent', ['should fail before using this']),
             ])
 
   def testLowresFallback(self):
@@ -142,3 +142,13 @@ class ChromeScaledImageUnittest(unittest.TestCase):
         else:
           # shouldn't fall back
           self.assertRaises(exception.FileNotFound, _RunBuildTest, *args)
+
+    # Test fallback failure with fallback_to_low_resolution=True
+    self.assertRaises(exception.FileNotFound,
+        _RunBuildTest, self,
+            _Structures(True,
+                _Structure('IDR_A', 'a.png'),
+            ),
+            [],  # no files
+            [('tactile_123_percent', ['should fail before using this']),
+            ])
