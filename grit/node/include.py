@@ -18,7 +18,7 @@ from grit import util
 class IncludeNode(base.Node):
   """An <include> element."""
   def __init__(self):
-    base.Node.__init__(self)
+    super(IncludeNode, self).__init__()
 
     # Cache flattened data so that we don't flatten the same file
     # multiple times.
@@ -67,7 +67,7 @@ class IncludeNode(base.Node):
       from grit.format import resource_map
       return resource_map.SourceFileInclude()
     else:
-      return super(type(self), self).ItemFormatter(t)
+      return super(IncludeNode, self).ItemFormatter(t)
 
   def FileForLanguage(self, lang, output_dir):
     """Returns the file for the specified language.  This allows us to return
@@ -87,9 +87,7 @@ class IncludeNode(base.Node):
       data = self._GetFlattenedData(allow_external_script=allow_external_script)
     else:
       filename = self.ToRealPath(self.GetInputPath())
-      infile = open(filename, 'rb')
-      data = infile.read()
-      infile.close()
+      data = util.ReadFile(filename, util.BINARY)
 
     # Include does not care about the encoding, because it only returns binary
     # data.
@@ -105,9 +103,8 @@ class IncludeNode(base.Node):
     if self._last_flat_filename == flat_filename:
       return
 
-    outfile = open(flat_filename, 'wb')
-    outfile.write(self._GetFlattenedData())
-    outfile.close()
+    with open(flat_filename, 'wb') as outfile:
+      outfile.write(self._GetFlattenedData())
 
     self._last_flat_filename = flat_filename
     return os.path.basename(flat_filename)

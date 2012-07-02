@@ -4,7 +4,6 @@
 # found in the LICENSE file.
 
 from textwrap import TextWrapper
-from xml.dom import minidom
 from grit.format.policy_templates.writers import template_writer
 
 

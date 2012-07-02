@@ -4,16 +4,13 @@
 # found in the LICENSE file.
 
 
-import os
 import sys
-import types
 
 from grit.format import interface
 from grit.format.policy_templates import policy_template_generator
 from grit.format.policy_templates import writer_configuration
-from grit.node import structure
-from grit.node import message
 from grit.node import misc
+from grit.node import structure
 
 
 class TemplateFormatter(interface.ItemFormatter):
@@ -37,7 +34,7 @@ class TemplateFormatter(interface.ItemFormatter):
         for generating the output. If writer name is 'adm', then the class
         from module 'writers.adm_writer' will be used.
     '''
-    super(type(self), self).__init__()
+    super(TemplateFormatter, self).__init__()
     writer_module_name = \
         'grit.format.policy_templates.writers.' + writer_name + '_writer'
     __import__(writer_module_name)

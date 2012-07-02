@@ -14,10 +14,9 @@ import re
 import StringIO
 import unittest
 
+from grit import grd_reader
 from grit.node import base
 from grit.tool import rc2grd
-from grit.gather import rc
-from grit import grd_reader
 
 
 class Rc2GrdUnittest(unittest.TestCase):

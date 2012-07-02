@@ -59,9 +59,9 @@ class AdmGathererUnittest(unittest.TestCase):
 
   def VerifyCliquesFromAdmFile(self, cliques):
     self.failUnless(len(cliques) > 20)
-    for ix in range(len(self._TRANSLATABLES_FROM_FILE)):
-      text = cliques[ix].GetMessage().GetRealContent()
-      self.failUnless(text == self._TRANSLATABLES_FROM_FILE[ix])
+    for clique, expected in zip(cliques, self._TRANSLATABLES_FROM_FILE):
+      text = clique.GetMessage().GetRealContent()
+      self.failUnless(text == expected)
 
   def testFromFile(self):
     fname = util.PathFromRoot('grit/testdata/GoogleDesktop.adm')

@@ -65,7 +65,6 @@ where in the file.'''
       print 'This tool requires exactly one argument, the name of the output file.'
       return 2
     filename = my_arguments[0]
-    out = util.WrapOutputStream(file(filename, 'w'), 'utf-8')
-    out.write(_FILE_CONTENTS)
-    out.close()
+    with util.WrapOutputStream(open(filename, 'w'), 'utf-8') as out:
+      out.write(_FILE_CONTENTS)
     print "Wrote file %s" % filename

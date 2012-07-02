@@ -9,8 +9,6 @@ Also adds some identifiers nodes to declare specific ids to be included
 in the generated grh file.
 '''
 
-import sys
-import re
 import postprocess_interface
 from grit import lazy_re
 import grit.node.empty

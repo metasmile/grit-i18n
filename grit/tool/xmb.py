@@ -8,15 +8,14 @@
 
 import getopt
 import os
-import types
 
 from xml.sax import saxutils
 
-from grit.tool import interface
 from grit import grd_reader
 from grit import lazy_re
 from grit import tclib
 from grit import util
+from grit.tool import interface
 
 
 # Used to collapse presentable content to determine if
@@ -153,7 +152,7 @@ use with the 'grit transl2tc' tool's -l option.
   FORMAT_IDS_ONLY = 1
 
   def __init__(self, defines=None):
-    super(type(self), self).__init__()
+    super(OutputXmb, self).__init__()
     self.format = self.FORMAT_XMB
     self.defines = defines or {}
 
@@ -169,7 +168,7 @@ use with the 'grit transl2tc' tool's -l option.
     own_opts, args = getopt.getopt(args, 'l:D:ih')
     for key, val in own_opts:
       if key == '-l':
-        limit_file = file(val, 'r')
+        limit_file = open(val, 'r')
         limit_file_dir = util.dirname(val)
         if not len(limit_file_dir):
           limit_file_dir = '.'
@@ -191,10 +190,9 @@ use with the 'grit transl2tc' tool's -l option.
     res_tree.OnlyTheseTranslations([])
     res_tree.RunGatherers(True)
 
-    output_file = file(xmb_path, 'wb')
-    self.Process(
-      res_tree, output_file, limit_file, limit_is_grd, limit_file_dir)
-    output_file.close()
+    with open(xmb_path, 'wb') as output_file:
+      self.Process(
+        res_tree, output_file, limit_file, limit_is_grd, limit_file_dir)
     if limit_file:
       limit_file.close()
     print "Wrote %s" % xmb_path

@@ -20,7 +20,7 @@ import unittest
 
 class TestSuiteAll(unittest.TestSuite):
   def __init__(self):
-    super(type(self), self).__init__()
+    super(TestSuiteAll, self).__init__()
     # Imports placed here to prevent circular imports.
     # pylint: disable-msg=C6204
     from grit import clique_unittest

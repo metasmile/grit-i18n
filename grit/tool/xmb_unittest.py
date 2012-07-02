@@ -20,8 +20,8 @@ from grit.tool import xmb
 
 class XmbUnittest(unittest.TestCase):
   def setUp(self):
-    self.res_tree = grd_reader.Parse(util.WrapInputStream(
-        StringIO.StringIO('''<?xml version="1.0" encoding="UTF-8"?>
+    self.res_tree = grd_reader.Parse(
+        StringIO.StringIO(u'''<?xml version="1.0" encoding="UTF-8"?>
       <grit latest_public_release="2" source_lang_id="en-US" current_release="3" base_dir=".">
         <release seq="3">
           <includes>
@@ -42,7 +42,7 @@ class XmbUnittest(unittest.TestCase):
             <structure type="dialog" name="IDD_SPACYBOX" encoding="utf-16" file="grit/testdata/klonk.rc" />
           </structures>
         </release>
-      </grit>''')), '.')
+      </grit>'''), '.')
     self.xmb_file = StringIO.StringIO()
 
   def testNormalOutput(self):

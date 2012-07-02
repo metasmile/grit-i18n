@@ -12,7 +12,6 @@ import types
 
 from grit import util
 from grit.format import interface
-from grit.node import io
 
 
 class TopLevel(interface.ItemFormatter):

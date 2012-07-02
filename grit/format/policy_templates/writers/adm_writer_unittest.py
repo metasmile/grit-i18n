@@ -11,14 +11,9 @@ import sys
 if __name__ == '__main__':
   sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '../../../..'))
 
-import tempfile
 import unittest
-import StringIO
 
 from grit.format.policy_templates.writers import writer_unittest_common
-from grit import grd_reader
-from grit import util
-from grit.tool import build
 
 
 class AdmWriterUnittest(writer_unittest_common.WriterUnittestCommon):

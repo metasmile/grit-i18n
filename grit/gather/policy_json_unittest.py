@@ -14,7 +14,6 @@ if __name__ == '__main__':
 import unittest
 import StringIO
 
-from grit.gather import muppet_strings
 from grit.gather import policy_json
 
 class PolicyJsonUnittest(unittest.TestCase):

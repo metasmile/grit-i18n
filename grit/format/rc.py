@@ -10,7 +10,6 @@ import os
 import types
 import re
 
-from grit import lazy_re
 from grit import util
 from grit.format import interface
 from grit.node import misc

@@ -16,7 +16,6 @@ if __name__ == '__main__':
 
 from grit.format.policy_templates.writers import adml_writer
 from grit.format.policy_templates.writers import xml_writer_base_unittest
-from xml.dom import minidom
 
 
 class AdmlWriterTest(xml_writer_base_unittest.XmlWriterBaseTest):

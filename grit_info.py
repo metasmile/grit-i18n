@@ -9,8 +9,6 @@
 import optparse
 import os
 import posixpath
-import types
-import string
 import sys
 
 from grit import grd_reader

@@ -153,19 +153,15 @@ class GathererBase(object):
     pass
 
   # TODO(benrg): Move this elsewhere, since it isn't part of the interface.
-  def _LoadInputFile(self, mode='r'):
+  def _LoadInputFile(self):
     '''A convenience function for subclasses that loads the contents of the
     input file.
-
-    Args:
-      mode: the mode for open().
     '''
     if isinstance(self.rc_file, types.StringTypes):
       path = self.GetInputPath()
       # Hack: some unit tests supply an absolute path and no root node.
       if not os.path.isabs(path):
         path = self.grd_node.ToRealPath(path)
-      with util.WrapInputStream(open(path, mode), self.encoding) as f:
-        return f.read()
+      return util.ReadFile(path, self.encoding)
     else:
       return self.rc_file.read()

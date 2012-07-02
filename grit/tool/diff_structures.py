@@ -106,10 +106,9 @@ class DiffStructures(interface.Tool):
     translated = original.Translate(constants.CONSTANT_LANGUAGE, False)
 
     fname = tempfile.mktemp()
-    fhandle = file(fname, 'w')
-    writer = util.WrapOutputStream(fhandle)
-    writer.write("Original filename: %s\n=============\n\n" % original_filename)
-    writer.write(translated)  # write in UTF-8
-    fhandle.close()
+    with util.WrapOutputStream(open(fname, 'w')) as writer:
+      writer.write("Original filename: %s\n=============\n\n"
+                       % original_filename)
+      writer.write(translated)  # write in UTF-8
 
     return fname

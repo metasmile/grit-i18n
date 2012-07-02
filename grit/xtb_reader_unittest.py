@@ -14,11 +14,9 @@ if __name__ == '__main__':
 import StringIO
 import unittest
 
-from grit import xtb_reader
-from grit import clique
 from grit import grd_reader
-from grit import tclib
 from grit import util
+from grit import xtb_reader
 
 
 class XtbReaderUnittest(unittest.TestCase):
@@ -74,9 +72,8 @@ and another after a blank line.</translation>
   def testParseLargeFile(self):
     def Callback(id, structure):
       pass
-    xtb = file(util.PathFromRoot('grit/testdata/generated_resources_fr.xtb'))
-    xtb_reader.Parse(xtb, Callback)
-    xtb.close()
+    with open(util.PathFromRoot('grit/testdata/generated_resources_fr.xtb')) as xtb:
+      xtb_reader.Parse(xtb, Callback)
 
 
 if __name__ == '__main__':

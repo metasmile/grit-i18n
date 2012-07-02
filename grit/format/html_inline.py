@@ -16,8 +16,8 @@ import sys
 import base64
 import mimetypes
 
-from grit.node import base
 from grit import lazy_re
+from grit import util
 
 DIST_DEFAULT = 'chromium'
 DIST_ENV_VAR = 'CHROMIUM_BUILD'
@@ -44,20 +44,6 @@ def GetDistribution():
       distribution = distribution[1:].lower()
   return distribution
 
-
-def ReadFile(input_filename):
-  """Helper function that returns input_filename as a string.
-
-  Args:
-    input_filename: name of file to be read
-
-  Returns:
-    string
-  """
-  f = open(input_filename, 'rb')
-  file_contents = f.read()
-  f.close()
-  return file_contents
 
 def SrcInlineAsDataURL(
     src_match, base_path, distribution, inlined_files, names_only=False):
@@ -93,7 +79,7 @@ def SrcInlineAsDataURL(
     return ""
 
   mimetype = mimetypes.guess_type(filename)[0] or 'text/plain'
-  inline_data = base64.standard_b64encode(ReadFile(filepath))
+  inline_data = base64.standard_b64encode(util.ReadFile(filepath, util.BINARY))
 
   prefix = src_match.string[src_match.start():src_match.start('filename')-1]
   return "%s\"data:%s;base64,%s\"" % (prefix, mimetype, inline_data)
@@ -244,7 +230,8 @@ def DoInline(
     inlined_files.add(filepath)
     # When resolving CSS files we need to pass in the path so that relative URLs
     # can be resolved.
-    return '<style>%s</style>' % InlineCSSText(ReadFile(filepath), filepath)
+    return '<style>%s</style>' % InlineCSSText(
+        util.ReadFile(filepath, util.BINARY), filepath)
 
   def InlineCSSImages(text, filepath=input_filepath):
     """Helper function that inlines external images in CSS backgrounds."""
@@ -267,7 +254,7 @@ def DoInline(
 
 
 
-  flat_text = ReadFile(input_filename)
+  flat_text = util.ReadFile(input_filename, util.BINARY)
 
   if not allow_external_script:
     # We need to inline css and js before we inline images so that image
@@ -345,9 +332,8 @@ def InlineToFile(input_filename, output_filename, grd_node):
     a set of filenames of all the inlined files
   """
   inlined_data = InlineToString(input_filename, grd_node)
-  out_file = open(output_filename, 'wb')
-  out_file.writelines(inlined_data)
-  out_file.close()
+  with open(output_filename, 'wb') as out_file:
+    out_file.writelines(inlined_data)
 
 
 def GetResourceFilenames(filename,

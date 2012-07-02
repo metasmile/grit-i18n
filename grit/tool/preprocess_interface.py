@@ -6,7 +6,6 @@
 ''' Base class for preprocessing of RC files.
 '''
 
-import sys
 
 class PreProcessor(object):
   ''' Base class for preprocessing of the RC file data before being

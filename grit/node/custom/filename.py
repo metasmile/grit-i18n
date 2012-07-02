@@ -5,8 +5,6 @@
 
 '''A CustomType for filenames.'''
 
-import re
-
 from grit import clique
 from grit import lazy_re
 

@@ -4,7 +4,6 @@
 # found in the LICENSE file.
 
 
-from xml.dom import minidom
 from grit.format.policy_templates.writers import template_writer
 
 
@@ -73,8 +72,7 @@ class XMLFormattedWriter(template_writer.TemplateWriter):
     indent = ''
     res = ''
     # Determine indent for each line.
-    for i in range(len(lines)):
-      line = lines[i]
+    for i, line in enumerate(lines):
       if line[0] == '/':
         # If the current line starts with a closing tag, decrease indent before
         # printing.

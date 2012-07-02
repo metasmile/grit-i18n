@@ -9,8 +9,6 @@
 import re
 
 from grit.gather import skeleton_gatherer
-from grit import clique
-from grit import tclib
 
 
 class RegexpGatherer(skeleton_gatherer.SkeletonGatherer):

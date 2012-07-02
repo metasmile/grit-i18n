@@ -8,15 +8,14 @@
 
 import os.path
 import re
-import sys
 
-from grit import exception
 from grit import constants
+from grit import exception
 from grit import util
 import grit.format.rc_header
 from grit.node import base
-from grit.node import message
 from grit.node import io
+from grit.node import message
 
 
 # RTL languages
@@ -42,7 +41,7 @@ def _ReadFirstIdsFromFile(filename, defines):
   Returns a tuple, the absolute path of SRCDIR followed by the
   first_ids dictionary.
   """
-  first_ids_dict = eval(open(filename).read())
+  first_ids_dict = eval(util.ReadFile(filename, util.RAW_TEXT))
   src_root_dir = os.path.abspath(os.path.join(os.path.dirname(filename),
                                               first_ids_dict['SRCDIR']))
 
@@ -112,7 +111,7 @@ class IfNode(base.Node):
     if not self.IsConditionSatisfied():
       return False
     else:
-      return base.Node.SatisfiesOutputCondition(self)
+      return super(IfNode, self).SatisfiesOutputCondition()
 
 
 class ReleaseNode(base.Node):
@@ -144,13 +143,13 @@ class ReleaseNode(base.Node):
       from grit.format import data_pack
       return data_pack.DataPack()
     else:
-      return super(type(self), self).ItemFormatter(t)
+      return super(ReleaseNode, self).ItemFormatter(t)
 
 class GritNode(base.Node):
   """The <grit> root element."""
 
   def __init__(self):
-    base.Node.__init__(self)
+    super(GritNode, self).__init__()
     self.output_language = ''
     self.defines = {}
     self.substituter = None
@@ -186,7 +185,7 @@ class GritNode(base.Node):
     }
 
   def EndParsing(self):
-    base.Node.EndParsing(self)
+    super(GritNode, self).EndParsing()
     if (int(self.attrs['latest_public_release'])
         > int(self.attrs['current_release'])):
       raise exception.Parsing('latest_public_release cannot have a greater '
@@ -394,7 +393,7 @@ class GritNode(base.Node):
       from grit.format.policy_templates import template_formatter
       return template_formatter.TemplateFormatter(t)
     else:
-      return super(type(self), self).ItemFormatter(t)
+      return super(GritNode, self).ItemFormatter(t)
 
   def SetOutputLanguage(self, output_language):
     """Set the output language. Prepares substitutions.
@@ -543,7 +542,7 @@ class IdentifierNode(base.Node):
 
   def EndParsing(self):
     """Handles system identifiers."""
-    base.Node.EndParsing(self)
+    super(IdentifierNode, self).EndParsing()
     if self.attrs['systemid'] == 'true':
       util.SetupSystemIdentifiers((self.attrs['name'],))
 

@@ -17,15 +17,11 @@ referencing all available images.
 
 import os
 import re
-import sys
-import types
-import base64
-import mimetypes
 
-from grit.gather import interface
-from grit.format import html_inline
 from grit import lazy_re
 from grit import util
+from grit.format import html_inline
+from grit.gather import interface
 
 
 # Distribution string to replace with distribution.
@@ -131,8 +127,8 @@ def RemoveImagesNotIn(scale_factors, src_match):
   """
   attr = src_match.group('attribute')
   images = _CSS_IMAGE_SET_IMAGE.sub(
-      lambda m: m.group('scale') in scale_factors and m.group(0) or '',
-    src_match.group('images'))
+      lambda m: m.group(0) if m.group('scale') in scale_factors else '',
+      src_match.group('images'))
   return "%s: -webkit-image-set(%s)" % (attr, images)
 
 
@@ -228,8 +224,8 @@ class ChromeHtml(interface.GathererBase):
               fp, t, self.scale_factors_, d))
     else:
       distribution = html_inline.GetDistribution()
-      html = util.WrapInputStream(open(filename, 'r'), 'utf-8')
-      self.inlined_text_ = ProcessImageSets(os.path.dirname(filename),
-                                            html.read(),
-                                            self.scale_factors_,
-                                            distribution)
+      self.inlined_text_ = ProcessImageSets(
+          os.path.dirname(filename),
+          util.ReadFile(filename, 'utf-8'),
+          self.scale_factors_,
+          distribution)

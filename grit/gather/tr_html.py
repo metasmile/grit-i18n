@@ -678,7 +678,7 @@ class TrHtml(interface.GathererBase):
       return
     self.have_parsed_ = True
 
-    text = self._LoadInputFile('r')
+    text = self._LoadInputFile()
 
     # Ignore the BOM character if the document starts with one.
     if text.startswith(u'\ufeff'):

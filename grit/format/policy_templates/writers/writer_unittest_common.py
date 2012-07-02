@@ -46,9 +46,8 @@ class WriterUnittestCommon(unittest.TestCase):
     tmp_file_name = 'test.json'
     tmp_dir_name = tempfile.gettempdir()
     json_file_path = tmp_dir_name + '/' + tmp_file_name
-    f = open(json_file_path, 'w')
-    f.write(policy_json.strip())
-    f.close()
+    with open(json_file_path, 'w') as f:
+      f.write(policy_json.strip())
     # Then assemble the grit tree.
     grd_text = '''
     <grit base_dir="." latest_public_release="0" current_release="1" source_lang_id="en">

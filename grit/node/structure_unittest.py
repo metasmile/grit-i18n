@@ -14,7 +14,6 @@ if __name__ == '__main__':
 import unittest
 import StringIO
 
-from grit.node import structure
 from grit import grd_reader
 from grit import util
 
@@ -42,20 +41,6 @@ class StructureUnittest(unittest.TestCase):
 
     self.failUnless(transl.count('040704') and transl.count('110978'))
     self.failUnless(transl.count('2005",IDC_STATIC'))
-
-  def testOutputEncoding(self):
-    grd = grd_reader.Parse(StringIO.StringIO(
-      '''<?xml version="1.0" encoding="UTF-8"?>
-      <grit latest_public_release="2" source_lang_id="en-US" current_release="3" base_dir=".">
-        <release seq="3">
-          <structures>
-            <structure type="dialog" name="IDD_ABOUTBOX" file="klonk.rc" encoding="utf-16-le" output_encoding="utf-8-sig" />
-          </structures>
-        </release>
-      </grit>'''), dir=util.PathFromRoot('grit\\test\\data'))
-    node = grd.GetNodeById('IDD_ABOUTBOX')
-    self.failUnless(node._GetOutputEncoding() == 'utf-8')
-    self.failUnless(node._ShouldAddBom())
 
 if __name__ == '__main__':
   unittest.main()

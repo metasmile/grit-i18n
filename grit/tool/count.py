@@ -5,15 +5,8 @@
 
 '''Count number of occurrences of a given message ID.'''
 
-import getopt
-import os
-import types
-
-from grit.tool import interface
 from grit import grd_reader
-from grit import util
-
-from grit.extern import tclib
+from grit.tool import interface
 
 
 class CountMessage(interface.Tool):

@@ -8,9 +8,7 @@
 
 
 import re
-import StringIO
 
-from grit import clique
 from grit import exception
 from grit import lazy_re
 from grit import tclib
@@ -45,28 +43,26 @@ _UNESCAPE_CHARS = dict([[value, key] for key, value in _ESCAPE_CHARS.items()])
 class Section(regexp.RegexpGatherer):
   '''A section from a resource file.'''
 
-  # static method
+  @staticmethod
   def Escape(text):
     '''Returns a version of 'text' with characters escaped that need to be
     for inclusion in a resource section.'''
     def Replace(match):
       return _ESCAPE_CHARS[match.group()]
     return _NEED_ESCAPE.sub(Replace, text)
-  Escape = staticmethod(Escape)
 
-  # static method
+  @staticmethod
   def UnEscape(text):
     '''Returns a version of 'text' with escaped characters unescaped.'''
     def Replace(match):
       return _UNESCAPE_CHARS[match.group()]
     return _NEED_UNESCAPE.sub(Replace, text)
-  UnEscape = staticmethod(UnEscape)
 
   def _RegExpParse(self, rexp, text_to_parse):
     '''Overrides _RegExpParse to add shortcut group handling.  Otherwise
     the same.
     '''
-    regexp.RegexpGatherer._RegExpParse(self, rexp, text_to_parse)
+    super(Section, self)._RegExpParse(rexp, text_to_parse)
 
     if not self.is_skeleton and len(self.GetTextualIds()) > 0:
       group_name = self.GetTextualIds()[0]
@@ -74,7 +70,7 @@ class Section(regexp.RegexpGatherer):
         c.AddToShortcutGroup(group_name)
 
   def ReadSection(self):
-    rc_text = self._LoadInputFile('r')
+    rc_text = self._LoadInputFile()
 
     out = ''
     begin_count = 0
@@ -288,7 +284,7 @@ class RCData(Section):
   def Parse(self):
     '''Implementation for resource types w/braces (not BEGIN/END)
     '''
-    rc_text = self._LoadInputFile('r')
+    rc_text = self._LoadInputFile()
 
     out = ''
     begin_count = 0

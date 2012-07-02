@@ -16,7 +16,6 @@ import getopt
 
 from grit import util
 
-import grit.exception
 import grit.extern.FP
 
 # Copyright notice

@@ -7,12 +7,7 @@
 """Unittests for grit.format.policy_templates.writers.admx_writer."""
 
 
-import os
-import sys
 import unittest
-
-
-from xml.dom import minidom
 
 
 class XmlWriterBaseTest(unittest.TestCase):

@@ -8,7 +8,6 @@
 
 from grit.gather import interface
 from grit import tclib
-from grit import util
 
 
 class TxtFile(interface.GathererBase):

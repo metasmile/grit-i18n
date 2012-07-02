@@ -4,9 +4,6 @@
 # found in the LICENSE file.
 
 
-import itertools
-
-
 class TemplateWriter(object):
   '''Abstract base class for writing policy templates in various formats.
   The methods of this class will be called by PolicyTemplateGenerator.

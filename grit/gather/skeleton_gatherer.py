@@ -7,7 +7,6 @@
 list.
 '''
 
-import re
 import types
 
 from grit.gather import interface

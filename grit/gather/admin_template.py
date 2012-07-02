@@ -11,13 +11,11 @@ import re
 from grit.gather import regexp
 from grit import exception
 from grit import lazy_re
-from grit import tclib
 
 
 class MalformedAdminTemplateException(exception.Base):
   '''This file doesn't look like a .adm file to me.'''
-  def __init__(self, msg=''):
-    exception.Base.__init__(self, msg)
+  pass
 
 
 class AdmGatherer(regexp.RegexpGatherer):
@@ -50,7 +48,7 @@ class AdmGatherer(regexp.RegexpGatherer):
       return
     self.have_parsed_ = True
 
-    self.text_ = self._LoadInputFile('r').strip()
+    self.text_ = self._LoadInputFile().strip()
     m = self._STRINGS_SECTION.match(self.text_)
     if not m:
       raise MalformedAdminTemplateException()

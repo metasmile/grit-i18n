@@ -10,10 +10,6 @@ expansion of $lf; placeholders into the correct linefeed character.
 
 import preprocess_interface
 
-import re
-import sys
-import codecs
-
 from grit import lazy_re
 
 class ToolbarPreProcessor(preprocess_interface.PreProcessor):

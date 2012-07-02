@@ -7,8 +7,6 @@
 generator as a source for generating ADM,ADMX,etc files.'''
 
 import types
-import pprint
-import re
 import sys
 
 from grit.gather import skeleton_gatherer
@@ -233,7 +231,7 @@ class PolicyJson(skeleton_gatherer.SkeletonGatherer):
       return
     self.have_parsed_ = True
 
-    self.text_ = self._LoadInputFile('r')
+    self.text_ = self._LoadInputFile()
     if util.IsExtraVerbose():
       print self.text_
 

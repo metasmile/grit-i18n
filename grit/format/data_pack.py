@@ -13,6 +13,7 @@ import struct
 import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+from grit import util
 from grit.format import interface
 from grit.node import include
 from grit.node import message
@@ -66,7 +67,7 @@ class DataPack(interface.ItemFormatter):
   @staticmethod
   def ReadDataPack(input_file):
     """Reads a data pack file and returns a dictionary."""
-    data = open(input_file, "rb").read()
+    data = util.ReadFile(input_file, util.BINARY)
     original_data = data
 
     # Read the header.
@@ -122,9 +123,9 @@ class DataPack(interface.ItemFormatter):
   @staticmethod
   def WriteDataPack(resources, output_file, encoding):
     """Write a map of id=>data into output_file as a data pack."""
-    file = open(output_file, "wb")
     content = DataPack.WriteDataPackToString(resources, encoding)
-    file.write(content)
+    with open(output_file, "wb") as file:
+      file.write(content)
 
   @staticmethod
   def RePack(output_file, input_files):

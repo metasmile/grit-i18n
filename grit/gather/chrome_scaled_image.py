@@ -7,17 +7,11 @@
 '''
 
 import os
-import re
-import sys
-import types
-import base64
-import mimetypes
 
-from grit.gather import interface
-from grit.format import html_inline
 from grit import exception
 from grit import lazy_re
 from grit import util
+from grit.gather import interface
 
 
 def _RescaleImage(data, from_scale, to_scale):
@@ -81,8 +75,7 @@ class ChromeScaledImage(interface.GathererBase):
 
   def GetData(self, *args):
     path, scale, req_scale = self._FindInputFile()
-    with open(self.grd_node.ToRealPath(path), 'rb') as f:
-      data = f.read()
+    data = util.ReadFile(self.grd_node.ToRealPath(path), util.BINARY)
     return _RescaleImage(data, scale, req_scale)
 
   def Translate(self, *args, **kwargs):

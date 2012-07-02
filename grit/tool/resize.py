@@ -6,20 +6,16 @@
 '''The 'grit resize' tool.
 '''
 
+import codecs
 import getopt
 import os
-import types
 
-from grit.tool import interface
 from grit import grd_reader
 from grit import pseudo
 from grit import util
-
-from grit.node import include
-from grit.node import structure
-from grit.node import message
-
 from grit.format import rc_header
+from grit.node import include
+from grit.tool import interface
 
 
 # Template for the .vcproj file, with a couple of [[REPLACEABLE]] parts.
@@ -298,6 +294,5 @@ near the top of the file, before you open it in Visual Studio.
     print "Wrote %s" % fname
 
   def WriteFile(self, filename, contents, encoding='cp1252'):
-    f = util.WrapOutputStream(file(filename, 'wb'), encoding)
-    f.write(contents)
-    f.close()
+    with codecs.open(filename, 'wb', encoding) as f:
+      f.write(contents)

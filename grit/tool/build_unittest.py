@@ -7,7 +7,6 @@
 '''
 
 import os
-import re
 import sys
 import tempfile
 if __name__ == '__main__':

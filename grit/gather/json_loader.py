@@ -14,7 +14,7 @@ class JsonLoader(interface.GathererBase):
     '''Reads and parses the text of self._json_text into the data structure in
     self._data.
     '''
-    self._json_text = self._LoadInputFile('rU')
+    self._json_text = self._LoadInputFile()
     self._data = None
 
     globs = {}

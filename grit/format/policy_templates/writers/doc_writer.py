@@ -4,8 +4,6 @@
 # found in the LICENSE file.
 
 
-import re
-
 from xml.dom import minidom
 from grit import lazy_re
 from grit.format.policy_templates.writers import xml_formatted_writer
@@ -244,7 +242,7 @@ class DocWriter(xml_formatted_writer.XMLFormattedWriter):
       result.append('%s<key>%s</key>' % (indent, k))
       value_type = type(v)
       if value_type == bool:
-        result.append('%s<%s/>' % (indent, v and 'true' or 'false'))
+        result.append('%s<%s/>' % (indent, 'true' if v else 'false'))
       elif value_type == int:
         result.append('%s<integer>%s</integer>' % (indent, v))
       elif value_type == str:

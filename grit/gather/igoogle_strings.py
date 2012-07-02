@@ -112,7 +112,7 @@ class IgoogleStrings(regexp.RegexpGatherer):
       return
     self.have_parsed_ = True
 
-    self.text_ = self._LoadInputFile('r').strip()
+    self.text_ = self._LoadInputFile().strip()
     self._AddNontranslateableChunk(u'<messagebundle>\n')
     stream = StringIO.StringIO(self.text_)
     handler = IgoogleStringsContentHandler(self)

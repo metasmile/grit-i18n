@@ -6,20 +6,17 @@
 '''The <output> and <file> elements.
 '''
 
-import re
 import grit.format.rc_header
 
-from grit.node import base
-from grit import exception
-from grit import util
 from grit import xtb_reader
+from grit.node import base
 
 
 class FileNode(base.Node):
   '''A <file> element.'''
 
   def __init__(self):
-    super(type(self), self).__init__()
+    super(FileNode, self).__init__()
     self.re = None
     self.should_load_ = True
 
@@ -116,7 +113,7 @@ class EmitNode(base.ContentNode):
     if t == 'rc_header':
       return grit.format.rc_header.EmitAppender()
     else:
-      return super(type(self), self).ItemFormatter(t)
+      return super(EmitNode, self).ItemFormatter(t)
 
 
 

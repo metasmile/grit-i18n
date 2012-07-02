@@ -14,8 +14,6 @@ import unittest
 import StringIO
 
 from grit import grd_reader
-from grit import constants
-from grit import util
 from grit.node import empty
 
 
@@ -71,7 +69,7 @@ class GrdReaderUnittest(unittest.TestCase):
     </includes>
   </release>
 </grit>'''
-    pseudo_file = util.WrapInputStream(StringIO.StringIO(input))
+    pseudo_file = StringIO.StringIO(input)
     tree = grd_reader.Parse(pseudo_file, '.', stop_after='outputs')
     # only an <outputs> child
     self.failUnless(len(tree.children) == 1)

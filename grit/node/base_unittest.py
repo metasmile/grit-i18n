@@ -14,13 +14,10 @@ if __name__ == '__main__':
 import StringIO
 import unittest
 
-from grit.node import base
-from grit.node import message
-from grit.node import structure
-from grit.node import variant
-
 from grit import grd_reader
 from grit import util
+from grit.node import base
+from grit.node import message
 
 
 def MakePlaceholder(phname='BINGO'):

@@ -341,7 +341,6 @@ class Node(grit.format.interface.ItemFormatter):
     Used to determine whether to return item formatters for formats that
     obey conditional output of resources (e.g. the RC formatters).
     '''
-    from grit.node import misc
     if self.parent:
       return self.parent.SatisfiesOutputCondition()
     else:

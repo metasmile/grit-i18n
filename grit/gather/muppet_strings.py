@@ -6,15 +6,15 @@
 '''Support for "strings.xml" format used by Muppet plug-ins in Google Desktop.'''
 
 import StringIO
-import re
 import xml.sax
 import xml.sax.handler
 import xml.sax.saxutils
 
-from grit.gather import regexp
 from grit import lazy_re
 from grit import tclib
 from grit import util
+from grit.gather import regexp
+
 
 # Placeholders can be defined in strings.xml files by putting the name of the
 # placeholder between [![ and ]!] e.g. <MSG>Hello [![USER]!] how are you<MSG>
@@ -118,7 +118,7 @@ class MuppetStrings(regexp.RegexpGatherer):
       return
     self.have_parsed_ = True
 
-    text = self._LoadInputFile('r').encode(self.encoding)
+    text = self._LoadInputFile().encode(self.encoding)
     if util.IsExtraVerbose():
       print text
     self.text_ = text.strip()

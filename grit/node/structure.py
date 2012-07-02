@@ -6,14 +6,13 @@
 '''The <structure> element.
 '''
 
+import codecs
 import os
 
-from grit.node import base
-from grit.node import variant
-
-from grit import constants
 from grit import exception
 from grit import util
+from grit.node import base
+from grit.node import variant
 
 import grit.gather.admin_template
 import grit.gather.chrome_html
@@ -73,7 +72,7 @@ class StructureNode(base.Node):
   '''A <structure> element.'''
 
   def __init__(self):
-    base.Node.__init__(self)
+    super(StructureNode, self).__init__()
 
     # Keep track of the last filename we flattened to, so we can
     # avoid doing it more than once.
@@ -147,9 +146,8 @@ class StructureNode(base.Node):
     if self._last_flat_filename == flat_filename:
       return
 
-    outfile = open(flat_filename, 'wb')
-    outfile.write(self.gatherer.GetData('', 'utf-8'))
-    outfile.close()
+    with open(flat_filename, 'wb') as outfile:
+      outfile.write(self.gatherer.GetData('', 'utf-8'))
 
     self._last_flat_filename = flat_filename
     return os.path.basename(flat_filename)
@@ -210,7 +208,7 @@ class StructureNode(base.Node):
       from grit.format import resource_map
       return resource_map.SourceFileInclude()
     else:
-      return super(type(self), self).ItemFormatter(t)
+      return super(StructureNode, self).ItemFormatter(t)
 
   def RunGatherers(self, recursive=False, debug=False):
     if debug:
@@ -289,18 +287,16 @@ class StructureNode(base.Node):
           fallback_to_english=self.ShouldFallbackToEnglish(),
           skeleton_gatherer=self.GetSkeletonGatherer())
 
-      file_object = util.WrapOutputStream(file(filename, 'wb'),
-                                          self._GetOutputEncoding())
       file_contents = util.FixLineEnd(text, self.GetLineEnd())
       if self.ExpandVariables():
         # Note that we reapply substitution a second time here.
         # This is because a) we need to look inside placeholders
         # b) the substitution values are language-dependent
         file_contents = self.GetRoot().GetSubstituter().Substitute(file_contents)
-      if self._ShouldAddBom():
-        file_object.write(constants.BOM)
-      file_object.write(file_contents)
-      file_object.close()
+
+      with codecs.open(filename, 'wb',
+                       self.attrs['output_encoding']) as file_object:
+        file_object.write(file_contents)
 
       if self.attrs['run_command']:
         # Run arbitrary commands after translation is complete so that it
@@ -310,22 +306,6 @@ class StructureNode(base.Node):
         assert result == 0, '"%s" failed.' % command
 
     return filename
-
-  def _GetOutputEncoding(self):
-    '''Python doesn't natively support UTF encodings with a BOM signature,
-    so we add support by allowing you to append '-sig' to the encoding name.
-    This function returns the specified output encoding minus that part.
-    '''
-    enc = self.attrs['output_encoding']
-    if enc.endswith('-sig'):
-      return enc[0:len(enc) - len('-sig')]
-    else:
-      return enc
-
-  def _ShouldAddBom(self):
-    '''Returns true if output files should have the Unicode BOM prepended.
-    '''
-    return self.attrs['output_encoding'].endswith('-sig')
 
   @staticmethod
   def Construct(parent, name, type, file, encoding='cp1252'):

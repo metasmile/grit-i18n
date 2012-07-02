@@ -6,14 +6,10 @@
 '''Unit tests for ChromeScaledImage.'''
 
 
-import StringIO
-
-import os
 import re
 import unittest
 
 from grit import exception
-from grit import grd_reader
 from grit import util
 from grit.tool import build
 
@@ -30,8 +26,7 @@ _OUTFILETYPES = [
 def _GetFilesInPak(pakname):
   '''Get a list of the files that were actually included in the .pak output.
   '''
-  with open(pakname, 'rb') as f:
-    data = f.read()
+  data = util.ReadFile(pakname, util.BINARY)
   # Hackity hack...
   return [m.group(1) for m in re.finditer(r'CONTENTS_OF\((.*?)\)', data)]
 
@@ -39,8 +34,7 @@ def _GetFilesInPak(pakname):
 def _GetFilesInRc(rcname):
   '''Get a list of the files that were actually included in the .rc output.
   '''
-  with open(rcname, 'rb') as f:
-    data = f.read()
+  data = util.ReadFile(rcname, util.BINARY)
   return [m.group(1) for m in re.finditer(ur'(?m)^\w+\s+BINDATA\s+"([^"]+)"$',
                                           data.decode('utf-16'))]
 
@@ -93,11 +87,7 @@ def _RunBuildTest(self, structures, pngfiles, contexts_and_results):
       options.input = tmp_dir.GetPath('in/in.grd')
       options.verbose = False
       options.extra_verbose = False
-      try:
-        build.RcBuilder().Run(options, [])
-      except:
-        open('/w/illformed', 'wb').write(open('in/in.grd', 'rb').read())
-        raise
+      build.RcBuilder().Run(options, [])
     for context, expected_includes in contexts_and_results:
       self.assertEquals(_GetFilesInPak(tmp_dir.GetPath('out/%s.pak' % context)),
                         expected_includes)

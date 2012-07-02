@@ -15,7 +15,6 @@ import tempfile
 import unittest
 import StringIO
 
-from grit.format import rc
 from grit import grd_reader
 from grit import util
 from grit.tool import build
@@ -202,9 +201,7 @@ END'''.strip()
     output = re.sub('"[c-zC-Z]:', '"', output)
     self.failUnless(output.strip() == expected)
 
-    fo = file(output_file)
-    file_contents = fo.read()
-    fo.close()
+    file_contents = util.ReadFile(output_file, util.RAW_TEXT)
 
     # Check for the content added by the <include> tag.
     self.failUnless(file_contents.find('Hello Include!') != -1)
@@ -238,9 +235,7 @@ END'''.strip()
     fr_file = root.FileForLanguage('fr', output_dir)
     self.failUnless(fr_file == os.path.join(output_dir, 'fr_simple.html'))
 
-    fo = file(fr_file)
-    contents = fo.read()
-    fo.close()
+    contents = util.ReadFile(fr_file, util.RAW_TEXT)
 
     self.failUnless(contents.find('<p>') != -1)  # should contain the markup
     self.failUnless(contents.find('Hello!') == -1)  # should be translated
@@ -250,8 +245,8 @@ END'''.strip()
     input_file = util.PathFromRoot('grit/testdata/chrome_html.html')
     output_file = '%s/HTML_FILE1_chrome_html.html' % tempfile.gettempdir()
     root = grd_reader.Parse(StringIO.StringIO(
-      '<structure type="chrome_html" name="HTML_FILE1" file="%s" flattenhtml="true" />' %
-      input_file), flexible_root = True)
+        '<structure type="chrome_html" name="HTML_FILE1" file="%s" flattenhtml="true" />' %
+        input_file), flexible_root = True)
     util.FixRootForUnittest(root, '.')
     # We must run the gatherers since we'll be wanting the chrome_html output.
     # The file exists in the location pointed to.
@@ -266,9 +261,7 @@ END'''.strip()
     output = re.sub('"[c-zC-Z]:', '"', output)
     self.failUnless(output.strip() == expected)
 
-    fo = file(output_file)
-    file_contents = fo.read()
-    fo.close()
+    file_contents = util.ReadFile(output_file, util.RAW_TEXT)
 
     # Check for the content added by the <include> tag.
     self.failUnless(file_contents.find('Hello Include!') != -1)
@@ -300,9 +293,7 @@ END'''.strip()
     self.failUnless(ar_file == os.path.join(output_dir,
                                             'ar_toolbar_about.html'))
 
-    fo = file(ar_file)
-    contents = fo.read()
-    fo.close()
+    contents = util.ReadFile(ar_file, util.RAW_TEXT)
 
     self.failUnless(contents.find('dir="RTL"') != -1)
 

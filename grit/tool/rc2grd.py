@@ -191,16 +191,10 @@ C preprocessor on the .rc file or manually edit it before using this tool.
     out_path = os.path.join(util.dirname(path),
                 os.path.splitext(os.path.basename(path))[0] + '.grd')
 
-    rcfile = util.WrapInputStream(file(path, 'r'), self.input_encoding)
-    rctext = rcfile.read()
-
+    rctext = util.ReadFile(path, self.input_encoding)
     grd_text = unicode(self.Process(rctext, path))
-
-    rcfile.close()
-
-    outfile = util.WrapOutputStream(file(out_path, 'w'), 'utf-8')
-    outfile.write(grd_text)
-    outfile.close()
+    with util.WrapOutputStream(file(out_path, 'w'), 'utf-8') as outfile:
+      outfile.write(grd_text)
 
     print 'Wrote output file %s.\nPlease check for TODO items in the file.' % out_path
 

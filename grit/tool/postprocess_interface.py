@@ -6,7 +6,6 @@
 ''' Base class for postprocessing of RC files.
 '''
 
-import sys
 
 class PostProcessor(object):
   ''' Base class for postprocessing of the RC file data before being
