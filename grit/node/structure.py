@@ -50,7 +50,8 @@ _GATHERERS = {
 _RC_FORMATTERS = {
   'accelerators'        : grit.format.rc.RcSection(),
   'admin_template'      : grit.format.rc.RcInclude('ADM'),
-  'chrome_html'         : grit.format.rc.RcInclude('HTML', process_html=True),
+  'chrome_html'         : grit.format.rc.RcInclude('BINDATA',
+                                                   process_html=True),
   'chrome_scaled_image' : grit.format.rc.RcInclude('BINDATA'),
   'dialog'              : grit.format.rc.RcSection(),
   'igoogle'             : grit.format.rc.RcInclude('XML'),

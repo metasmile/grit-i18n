@@ -256,7 +256,7 @@ END'''.strip()
     build.RcBuilder.ProcessNode(root, DummyOutput('rc_all', 'en', output_file),
                                 buf)
     output = buf.getvalue()
-    expected = u'HTML_FILE1         HTML               "HTML_FILE1_chrome_html.html"'
+    expected = u'HTML_FILE1         BINDATA            "HTML_FILE1_chrome_html.html"'
     # hackety hack to work on win32&lin
     output = re.sub('"[c-zC-Z]:', '"', output)
     self.failUnless(output.strip() == expected)
