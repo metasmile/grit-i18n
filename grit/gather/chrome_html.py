@@ -108,7 +108,7 @@ def InsertImageSets(
   # or *-image.
   return _CSS_IMAGE_URLS.sub(
       lambda m: InsertImageSet(m, filepath, scale_factors, distribution),
-      text).decode('utf-8').encode('ascii', 'ignore')
+      text).decode('utf-8').encode('utf-8')
 
 
 def RemoveImagesNotIn(scale_factors, src_match):
