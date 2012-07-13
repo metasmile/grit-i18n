@@ -74,6 +74,10 @@ def ToolFactoryXmb():
   import grit.tool.xmb
   return grit.tool.xmb.OutputXmb()
 
+def ToolAndroid2Grd():
+  import grit.tool.android2grd
+  return grit.tool.android2grd.Android2Grd()
+
 # Keys for the following map
 _FACTORY = 1
 _REQUIRES_INPUT = 2
@@ -101,6 +105,9 @@ _TOOLS = [
                   _REQUIRES_INPUT : False }],
   ['unit', { _FACTORY : ToolFactoryUnit, _REQUIRES_INPUT : False }],
   ['xmb', { _FACTORY : ToolFactoryXmb, _REQUIRES_INPUT : True }],
+  ['android2grd', {
+      _FACTORY: ToolAndroid2Grd,
+      _REQUIRES_INPUT : False }],
 ]
 
 
@@ -269,4 +276,3 @@ def Main(args):
 
 if __name__ == '__main__':
   sys.exit(Main(sys.argv[1:]))
-

@@ -45,6 +45,7 @@ class TestSuiteAll(unittest.TestSuite):
     from grit.node import message_unittest
     from grit.node import misc_unittest
     from grit.node.custom import filename_unittest
+    from grit.tool import android2grd_unittest
     from grit.tool import build_unittest
     from grit.tool import buildinfo_unittest
     from grit.tool import postprocess_unittest
@@ -52,6 +53,7 @@ class TestSuiteAll(unittest.TestSuite):
     from grit.tool import rc2grd_unittest
     from grit.tool import transl2tc_unittest
     from grit.tool import xmb_unittest
+    import grit.format.android_xml_unittest
     import grit.format.c_format_unittest
     import grit.format.data_pack_unittest
     import grit.format.js_map_format_unittest
@@ -60,6 +62,7 @@ class TestSuiteAll(unittest.TestSuite):
 
     test_classes = [
         admin_template_unittest.AdmGathererUnittest,
+        android2grd_unittest.Android2GrdUnittest,
         base_unittest.NodeUnittest,
         build_unittest.BuildUnittest,
         buildinfo_unittest.BuildInfoUnittest,
@@ -68,6 +71,7 @@ class TestSuiteAll(unittest.TestSuite):
         clique_unittest.MessageCliqueUnittest,
         filename_unittest.WindowsFilenameUnittest,
         grd_reader_unittest.GrdReaderUnittest,
+        grit.format.android_xml_unittest.AndroidXmlUnittest,
         grit.format.c_format_unittest.CFormatUnittest,
         grit.format.data_pack_unittest.FormatDataPackUnittest,
         grit.format.js_map_format_unittest.JsMapFormatUnittest,
