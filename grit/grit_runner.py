@@ -170,7 +170,7 @@ class Options(object):
 
   def ReadOptions(self, args):
     """Reads options from the start of args and returns the remainder."""
-    (opts, args) = getopt.getopt(args, 'g:dvxc:i:p:h:', ('psyco',))
+    (opts, args) = getopt.getopt(args, 'g:qdvxc:i:p:h:', ('psyco',))
     for (key, val) in opts:
       if key == '-d': self.disconnected = True
       elif key == '-c': self.client = val
