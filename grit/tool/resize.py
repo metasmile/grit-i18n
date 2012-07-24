@@ -6,7 +6,6 @@
 '''The 'grit resize' tool.
 '''
 
-import codecs
 import getopt
 import os
 
@@ -294,5 +293,6 @@ near the top of the file, before you open it in Visual Studio.
     print "Wrote %s" % fname
 
   def WriteFile(self, filename, contents, encoding='cp1252'):
-    with codecs.open(filename, 'wb', encoding) as f:
-      f.write(contents)
+    with open(filename, 'wb') as f:
+      writer = util.WrapOutputStream(f, encoding)
+      writer.write(contents)
