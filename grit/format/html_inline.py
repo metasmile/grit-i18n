@@ -81,8 +81,13 @@ def SrcInlineAsDataURL(
   mimetype = mimetypes.guess_type(filename)[0] or 'text/plain'
   inline_data = base64.standard_b64encode(util.ReadFile(filepath, util.BINARY))
 
-  prefix = src_match.string[src_match.start():src_match.start('filename')-1]
-  return "%s\"data:%s;base64,%s\"" % (prefix, mimetype, inline_data)
+  prefix = src_match.string[src_match.start():src_match.start('filename')]
+  suffix = src_match.string[src_match.end('filename'):src_match.end()]
+  if prefix and prefix[-1] in '\'"':
+    prefix = prefix[:-1]
+  if suffix and suffix[0] in '\'"':
+    suffix = suffix[1:]
+  return '%s"data:%s;base64,%s"%s' % (prefix, mimetype, inline_data, suffix)
 
 
 class InlinedData:
@@ -237,18 +242,18 @@ def DoInline(
     """Helper function that inlines external images in CSS backgrounds."""
     # Replace contents of url() for css attributes: content, background,
     # or *-image.
-    return re.sub('(?:content|background|[\w-]*-image):[^;]*' +
-                  '(?:url\((?:\'|\")([^"\'\)\(]*)(?:\'|\")\)|' +
+    return re.sub('(content|background|[\w-]*-image):[^;]*' +
+                  '(url\((?P<quote1>"|\'|)[^"\'()]*(?P=quote1)\)|' +
                       'image-set\(' +
-                          '([ ]*url\((?:\'|\")([^"\'\)\(]*)(?:\'|\")\)' +
-                              '[ ]*[0-9.]*x[ ]*(,[ ]*)?)*\))',
+                          '([ ]*url\((?P<quote2>"|\'|)[^"\'()]*(?P=quote2)\)' +
+                              '[ ]*[0-9.]*x[ ]*(,[ ]*)?)+\))',
                   lambda m: InlineCSSUrls(m, filepath),
                   text)
 
   def InlineCSSUrls(src_match, filepath=input_filepath):
     """Helper function that inlines each url on a CSS image rule match."""
     # Replace contents of url() references in matches.
-    return re.sub('url\((?:\'|\")(?P<filename>[^"\'\)\(]*)(?:\'|\")',
+    return re.sub('url\((?P<quote>"|\'|)(?P<filename>[^"\'()]*)(?P=quote)\)',
                   lambda m: SrcReplace(m, filepath),
                   src_match.group(0))
 

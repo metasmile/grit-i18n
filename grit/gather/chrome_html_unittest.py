@@ -111,6 +111,54 @@ class ChromeHtmlUnittest(unittest.TestCase):
       '''))
     tmp_dir.CleanUp()
 
+  def testFileResourcesDoubleQuotes(self):
+    '''Tests inlined image file resources if url() filename is double quoted.'''
+
+    tmp_dir = util.TempDir({
+      'test.css': '''
+      .image {
+        background: url("test.png");
+      }
+      ''',
+
+      'test.png': 'PNG DATA',
+    })
+
+    html = chrome_html.ChromeHtml(tmp_dir.GetPath('test.css'))
+    html.SetAttributes({'flattenhtml': 'true'})
+    html.Parse()
+    self.failUnlessEqual(StandardizeHtml(html.GetData('en', 'utf-8')),
+                         StandardizeHtml('''
+      .image {
+        background: -webkit-image-set(url("data:image/png;base64,UE5HIERBVEE=") 1x);
+      }
+      '''))
+    tmp_dir.CleanUp()
+
+  def testFileResourcesNoQuotes(self):
+    '''Tests inlined image file resources when url() filename is unquoted.'''
+
+    tmp_dir = util.TempDir({
+      'test.css': '''
+      .image {
+        background: url(test.png);
+      }
+      ''',
+
+      'test.png': 'PNG DATA',
+    })
+
+    html = chrome_html.ChromeHtml(tmp_dir.GetPath('test.css'))
+    html.SetAttributes({'flattenhtml': 'true'})
+    html.Parse()
+    self.failUnlessEqual(StandardizeHtml(html.GetData('en', 'utf-8')),
+                         StandardizeHtml('''
+      .image {
+        background: -webkit-image-set(url("data:image/png;base64,UE5HIERBVEE=") 1x);
+      }
+      '''))
+    tmp_dir.CleanUp()
+
   def testFileResourcesNoFile(self):
     '''Tests inlined image file resources without available high DPI assets.'''
 

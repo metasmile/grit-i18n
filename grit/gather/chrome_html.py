@@ -33,16 +33,16 @@ _THEME_SOURCE = lazy_re.compile('chrome://theme/IDR_[A-Z0-9_]*')
 # Matches CSS image urls with the capture group 'filename'.
 _CSS_IMAGE_URLS = lazy_re.compile(
     '(?P<attribute>content|background|[\w-]*-image):[ ]*' +
-    'url\((?:\'|\")(?P<filename>[^"\'\)\(]*)(?:\'|\")')
+    'url\((?P<quote>"|\'|)(?P<filename>[^"\'()]*)(?P=quote)')
 # Matches CSS image sets.
 _CSS_IMAGE_SETS = lazy_re.compile(
     '(?P<attribute>content|background|[\w-]*-image):[ ]*' +
         '-webkit-image-set\((?P<images>' +
-        '([,\n ]*url\((\'|\")[^"\'\)\(]*(\'|\")\)[ ]*[0-9.]*x)*)\)',
+        '([,\n ]*url\((?P<quote>"|\'|)[^"\'()]*(?P=quote)\)[ ]*[0-9.]*x)*)\)',
     re.MULTILINE)
 # Matches a single image in a CSS image set with the capture group scale.
 _CSS_IMAGE_SET_IMAGE = lazy_re.compile(
-    '[,\n ]*url\((\'|\")[^"\'\)\(]*(\'|\")\)[ ]*(?P<scale>[0-9.]*x)',
+    '[,\n ]*url\((?P<quote>"|\'|)[^"\'()]*(?P=quote)\)[ ]*(?P<scale>[0-9.]*x)',
     re.MULTILINE)
 
 
