@@ -55,7 +55,8 @@ def SrcInlineAsDataURL(
   it with distribution.
 
   Args:
-    src_match: regex match object with 'filename' named capturing group
+    src_match: regex match object with 'filename' and 'quote' named capturing
+               groups
     base_path: path that to look for files in
     distribution: string that should replace DIST_SUBSTR
     inlined_files: The name of the opened file is appended to this list.
@@ -66,6 +67,7 @@ def SrcInlineAsDataURL(
     string
   """
   filename = src_match.group('filename')
+  quote = src_match.group('quote')
 
   if filename.find(':') != -1:
     # filename is probably a URL, which we don't want to bother inlining
@@ -83,11 +85,7 @@ def SrcInlineAsDataURL(
 
   prefix = src_match.string[src_match.start():src_match.start('filename')]
   suffix = src_match.string[src_match.end('filename'):src_match.end()]
-  if prefix and prefix[-1] in '\'"':
-    prefix = prefix[:-1]
-  if suffix and suffix[0] in '\'"':
-    suffix = suffix[1:]
-  return '%s"data:%s;base64,%s"%s' % (prefix, mimetype, inline_data, suffix)
+  return '%sdata:%s;base64,%s%s' % (prefix, mimetype, inline_data, suffix)
 
 
 class InlinedData:
@@ -282,20 +280,20 @@ def DoInline(
   # Check conditional elements, remove unsatisfied ones from the file.
   flat_text = CheckConditionalElements(flat_text)
 
-  flat_text = re.sub('<(?!script)[^>]+?src="(?P<filename>[^"\']*)"',
-                     SrcReplace,
-                     flat_text)
-
   # Allow custom modifications before inlining images.
   if rewrite_function:
     flat_text = rewrite_function(input_filepath, flat_text, distribution)
 
+  flat_text = re.sub(
+      '<(?!script)[^>]+?src=(?P<quote>")(?P<filename>[^"\']*)\\1',
+      SrcReplace, flat_text)
+
   # TODO(arv): Only do this inside <style> tags.
   flat_text = InlineCSSImages(flat_text)
 
-  flat_text = re.sub('<link rel="icon".+?href="(?P<filename>[^"\']*)"',
-                     SrcReplace,
-                     flat_text)
+  flat_text = re.sub(
+      '<link rel="icon".+?href=(?P<quote>")(?P<filename>[^"\']*)\\1',
+      SrcReplace, flat_text)
 
   if names_only:
     flat_text = None  # Will contains garbage if the flag is set anyway.

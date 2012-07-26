@@ -71,12 +71,46 @@ class ChromeHtmlUnittest(unittest.TestCase):
         <head>
           <style>
       .image {
-        background: -webkit-image-set(url("data:image/png;base64,UE5HIERBVEE=") 1x, url("data:image/png;base64,MS40eCBQTkcgREFUQQ==") 1.4x, url("data:image/png;base64,MS44eCBQTkcgREFUQQ==") 1.8x);
+        background: -webkit-image-set(url('data:image/png;base64,UE5HIERBVEE=') 1x, url('data:image/png;base64,MS40eCBQTkcgREFUQQ==') 1.4x, url('data:image/png;base64,MS44eCBQTkcgREFUQQ==') 1.8x);
       }
       </style>
         </head>
         <body>
           <!-- Don't need a body. -->
+        </body>
+      </html>
+      '''))
+    tmp_dir.CleanUp()
+
+  def testFileResourcesImageTag(self):
+    '''Tests inlined image file resources with available high DPI assets on
+    an image tag.'''
+
+    tmp_dir = util.TempDir({
+      'index.html': '''
+      <!DOCTYPE HTML>
+      <html>
+        <body>
+          <img id="foo" src="test.png">
+        </body>
+      </html>
+      ''',
+
+      'test.png': 'PNG DATA',
+
+      '2x/test.png': '2x PNG DATA',
+    })
+
+    html = chrome_html.ChromeHtml(tmp_dir.GetPath('index.html'))
+    html.SetDefines({'scale_factors': '2x'})
+    html.SetAttributes({'flattenhtml': 'true'})
+    html.Parse()
+    self.failUnlessEqual(StandardizeHtml(html.GetData('en', 'utf-8')),
+                         StandardizeHtml('''
+      <!DOCTYPE HTML>
+      <html>
+        <body>
+          <img id="foo" src="data:image/png;base64,UE5HIERBVEE=" style="content: -webkit-image-set(url('data:image/png;base64,UE5HIERBVEE=') 1x, url('data:image/png;base64,MnggUE5HIERBVEE=') 2x);">
         </body>
       </html>
       '''))
@@ -106,7 +140,7 @@ class ChromeHtmlUnittest(unittest.TestCase):
     self.failUnlessEqual(StandardizeHtml(html.GetData('en', 'utf-8')),
                          StandardizeHtml('''
       .image {
-        background: -webkit-image-set(url("test.png") 1x, url("1.4x/test.png") 1.4x, url("1.8x/test.png") 1.8x);
+        background: -webkit-image-set(url('test.png') 1x, url('1.4x/test.png') 1.4x, url('1.8x/test.png') 1.8x);
       }
       '''))
     tmp_dir.CleanUp()
@@ -122,15 +156,18 @@ class ChromeHtmlUnittest(unittest.TestCase):
       ''',
 
       'test.png': 'PNG DATA',
+
+      '2x/test.png': '2x PNG DATA',
     })
 
     html = chrome_html.ChromeHtml(tmp_dir.GetPath('test.css'))
+    html.SetDefines({'scale_factors': '2x'})
     html.SetAttributes({'flattenhtml': 'true'})
     html.Parse()
     self.failUnlessEqual(StandardizeHtml(html.GetData('en', 'utf-8')),
                          StandardizeHtml('''
       .image {
-        background: -webkit-image-set(url("data:image/png;base64,UE5HIERBVEE=") 1x);
+        background: -webkit-image-set(url("data:image/png;base64,UE5HIERBVEE=") 1x, url("data:image/png;base64,MnggUE5HIERBVEE=") 2x);
       }
       '''))
     tmp_dir.CleanUp()
@@ -146,15 +183,18 @@ class ChromeHtmlUnittest(unittest.TestCase):
       ''',
 
       'test.png': 'PNG DATA',
+
+      '2x/test.png': '2x PNG DATA',
     })
 
     html = chrome_html.ChromeHtml(tmp_dir.GetPath('test.css'))
+    html.SetDefines({'scale_factors': '2x'})
     html.SetAttributes({'flattenhtml': 'true'})
     html.Parse()
     self.failUnlessEqual(StandardizeHtml(html.GetData('en', 'utf-8')),
                          StandardizeHtml('''
       .image {
-        background: -webkit-image-set(url("data:image/png;base64,UE5HIERBVEE=") 1x);
+        background: -webkit-image-set(url(data:image/png;base64,UE5HIERBVEE=) 1x, url(data:image/png;base64,MnggUE5HIERBVEE=) 2x);
       }
       '''))
     tmp_dir.CleanUp()
@@ -195,7 +235,7 @@ class ChromeHtmlUnittest(unittest.TestCase):
         <head>
           <style>
       .image {
-        background: -webkit-image-set(url("data:image/png;base64,UE5HIERBVEE=") 1x);
+        background: url('data:image/png;base64,UE5HIERBVEE=');
       }
       </style>
         </head>
@@ -240,7 +280,7 @@ class ChromeHtmlUnittest(unittest.TestCase):
         <head>
           <style>
       .image {
-        background: -webkit-image-set(url("chrome://theme/IDR_RESOURCE_NAME") 1x, url("chrome://theme/IDR_RESOURCE_NAME@2x") 2x);
+        background: -webkit-image-set(url('chrome://theme/IDR_RESOURCE_NAME') 1x, url('chrome://theme/IDR_RESOURCE_NAME@2x') 2x);
       }
       </style>
         </head>
@@ -293,8 +333,8 @@ class ChromeHtmlUnittest(unittest.TestCase):
         <head>
           <style>
       .image {
-        background: -webkit-image-set(url("data:image/png;base64,UE5HIERBVEE=") 1x,
-                                      url("data:image/png;base64,MS44eCBQTkcgREFUQQ==") 1.8x);
+        background: -webkit-image-set(url('data:image/png;base64,UE5HIERBVEE=') 1x,
+                                      url('data:image/png;base64,MS44eCBQTkcgREFUQQ==') 1.8x);
       }
       </style>
         </head>

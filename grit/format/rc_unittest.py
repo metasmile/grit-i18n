@@ -248,6 +248,7 @@ END'''.strip()
         '<structure type="chrome_html" name="HTML_FILE1" file="%s" flattenhtml="true" />' %
         input_file), flexible_root = True)
     util.FixRootForUnittest(root, '.')
+    root.gatherer.SetDefines({'scale_factors': '2x'})
     # We must run the gatherers since we'll be wanting the chrome_html output.
     # The file exists in the location pointed to.
     root.RunGatherers(recursive=True)
