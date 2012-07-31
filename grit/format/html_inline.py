@@ -259,6 +259,12 @@ def DoInline(
 
   flat_text = util.ReadFile(input_filename, util.BINARY)
 
+  # Check conditional elements, remove unsatisfied ones from the file. We do
+  # this twice. The first pass is so that we don't even bother calling
+  # InlineScript, InlineCSSFile and InlineIncludeFiles on text we're eventually
+  # going to throw out anyway.
+  flat_text = CheckConditionalElements(flat_text)
+
   if not allow_external_script:
     # We need to inline css and js before we inline images so that image
     # references gets inlined in the css and js
@@ -277,7 +283,8 @@ def DoInline(
       InlineIncludeFiles,
       flat_text)
 
-  # Check conditional elements, remove unsatisfied ones from the file.
+  # Check conditional elements, second pass. This catches conditionals in any
+  # of the text we just inlined.
   flat_text = CheckConditionalElements(flat_text)
 
   # Allow custom modifications before inlining images.
