@@ -5,13 +5,16 @@
 
 '''Unit tests for grit.format.data_pack'''
 
+
 import os
 import sys
 if __name__ == '__main__':
-  sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '../..'))
+  sys.path[0] = os.path.abspath(os.path.join(sys.path[0], '../..'))
+
 import unittest
 
 from grit.format import data_pack
+
 
 class FormatDataPackUnittest(unittest.TestCase):
   def testWriteDataPack(self):

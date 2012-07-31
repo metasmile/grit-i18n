@@ -11,7 +11,7 @@ import sys
 import unittest
 
 if __name__ == '__main__':
-  sys.path.append(os.path.join(os.path.dirname(sys.argv[0]), '../..'))
+  sys.path[0] = os.path.abspath(os.path.join(sys.path[0], '../..'))
 
 from grit import grd_reader
 from grit import util
