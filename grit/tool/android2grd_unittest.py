@@ -13,6 +13,12 @@ if __name__ == '__main__':
 import unittest
 import xml.dom.minidom
 
+from grit import grd_reader
+from grit import util
+from grit.node import empty
+from grit.node import io
+from grit.node import message
+from grit.node import misc
 from grit.tool import android2grd
 
 
@@ -73,6 +79,103 @@ class Android2GrdUnittest(unittest.TestCase):
         '<string translatable="false">Hi</string>')
     self.assertFalse(tool.IsTranslatable(string_el))
 
+  def __ParseAndroidXml(self, options = []):
+    tool = android2grd.Android2Grd()
+
+    tool.ParseOptions(options)
+
+    android_path = util.PathFromRoot('grit/testdata/android.xml')
+    with open(android_path) as android_file:
+      android_dom = xml.dom.minidom.parse(android_file)
+
+    grd = tool.AndroidDomToGrdDom(android_dom)
+    self.assertTrue(isinstance(grd, misc.GritNode))
+
+    return grd
+
+  def testAndroidDomToGrdDom(self):
+    grd = self.__ParseAndroidXml(['--languages', 'en-US,en-GB,ru'])
+
+    # Check that the structure of the GritNode is as expected.
+    messages = grd.GetChildrenOfType(message.MessageNode)
+    translations = grd.GetChildrenOfType(empty.TranslationsNode)
+    files = grd.GetChildrenOfType(io.FileNode)
+
+    self.assertEqual(len(translations), 1)
+    self.assertEqual(len(files), 3)
+    self.assertEqual(len(messages), 4)
+
+    # Check that a message node is constructed correctly.
+    msg = filter(lambda x: x.GetTextualIds()[0] == "IDS_PLACEHOLDERS", messages)
+    self.assertTrue(msg)
+    msg = msg[0]
+
+    self.assertTrue(msg.IsTranslateable())
+    self.assertEqual(msg.attrs["desc"], "A string with placeholder.")
+
+  def testProductAttribute(self):
+    grd = self.__ParseAndroidXml([])
+    messages = grd.GetChildrenOfType(message.MessageNode)
+    msg = filter(lambda x: x.GetTextualIds()[0] ==
+                   "IDS_SIMPLE_product_nosdcard",
+                 messages)
+    self.assertTrue(msg)
+
+  def testTranslations(self):
+    grd = self.__ParseAndroidXml(['--languages', 'en-US,en-GB,ru,id'])
+
+    files = grd.GetChildrenOfType(io.FileNode)
+    us_file = filter(lambda x: x.attrs['lang'] == 'en-US', files)
+    self.assertTrue(us_file)
+    self.assertEqual(us_file[0].GetInputPath(),
+                     'chrome_android_strings_en-US.xtb')
+
+    id_file = filter(lambda x: x.attrs['lang'] == 'id', files)
+    self.assertTrue(id_file)
+    self.assertEqual(id_file[0].GetInputPath(),
+                     'chrome_android_strings_id.xtb')
+
+  def testOutputs(self):
+    grd = self.__ParseAndroidXml(['--languages', 'en-US,ru,id',
+                                  '--rc-dir', 'rc/dir',
+                                  '--header-dir', 'header/dir',
+                                  '--xtb-dir', 'xtb/dir',
+                                  '--xml-dir', 'xml/dir'])
+
+    outputs = grd.GetChildrenOfType(io.OutputNode)
+    self.assertEqual(len(outputs), 7)
+
+    header_outputs = filter(lambda x: x.GetType() == 'rc_header', outputs)
+    rc_outputs = filter(lambda x: x.GetType() == 'rc_all', outputs)
+    xml_outputs = filter(lambda x: x.GetType() == 'android', outputs)
+
+    self.assertEqual(len(header_outputs), 1)
+    self.assertEqual(len(rc_outputs), 3)
+    self.assertEqual(len(xml_outputs), 3)
+
+    # The header node should have an "<emit>" child and the proper filename.
+    self.assertTrue(header_outputs[0].GetChildrenOfType(io.EmitNode))
+    self.assertEqual(header_outputs[0].GetFilename(),
+                     'header/dir/chrome_android_strings.h')
+
+    id_rc = filter(lambda x: x.GetLanguage() == 'id', rc_outputs)
+    id_xml = filter(lambda x: x.GetLanguage() == 'id', xml_outputs)
+    self.assertTrue(id_rc)
+    self.assertTrue(id_xml)
+    self.assertEqual(id_rc[0].GetFilename(),
+                     'rc/dir/chrome_android_strings_id.rc')
+    self.assertEqual(id_xml[0].GetFilename(),
+                     'xml/dir/values-in/strings.xml')
+
+    us_rc = filter(lambda x: x.GetLanguage() == 'en-US', rc_outputs)
+    us_xml = filter(lambda x: x.GetLanguage() == 'en-US', xml_outputs)
+    self.assertTrue(us_rc)
+    self.assertTrue(us_xml)
+    self.assertEqual(us_rc[0].GetFilename(),
+                     'rc/dir/chrome_android_strings_en-US.rc')
+    self.assertEqual(us_xml[0].GetFilename(),
+                     'xml/dir/values-en-rUS/strings.xml')
+
+
 if __name__ == '__main__':
   unittest.main()
-
