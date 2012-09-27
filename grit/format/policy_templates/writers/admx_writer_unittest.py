@@ -258,7 +258,8 @@ class AdmxWriterTest(xml_writer_base_unittest.XmlWriterBaseTest):
         '  <parentCategory ref="PolicyGroup"/>\n'
         '  <supportedOn ref="SUPPORTED_TESTOS"/>\n'
         '  <elements>\n'
-        '    <decimal id="SampleIntPolicy" valueName="SampleIntPolicy"/>\n'
+        '    <decimal id="SampleIntPolicy" maxValue="2000000000" '
+        'valueName="SampleIntPolicy"/>\n'
         '  </elements>\n'
         '</policy>')
     self.AssertXMLEquals(output, expected_output)

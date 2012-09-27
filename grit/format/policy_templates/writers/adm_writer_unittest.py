@@ -256,6 +256,7 @@ StringPolicy_Part="Caption of policy."
 
       PART !!IntPolicy_Part  NUMERIC
         VALUENAME "IntPolicy"
+        MIN 0 MAX 2000000000
       END PART
     END POLICY
 
@@ -272,6 +273,7 @@ StringPolicy_Part="Caption of policy."
 
       PART !!IntPolicy_Part  NUMERIC
         VALUENAME "IntPolicy"
+        MIN 0 MAX 2000000000
       END PART
     END POLICY
 

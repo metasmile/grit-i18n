@@ -113,6 +113,9 @@ class AdmWriter(template_writer.TemplateWriter):
       builder.AddLine('VALUEPREFIX ""')
     else:
       builder.AddLine('VALUENAME "%s"' % policy['name'])
+    if policy['type'] == 'int':
+      # The default max for NUMERIC values is 9999 which is too small for us.
+      builder.AddLine('MIN 0 MAX 2000000000')
     if policy['type'] in ('int-enum', 'string-enum'):
       builder.AddLine('ITEMLIST', 1)
       for item in policy['items']:

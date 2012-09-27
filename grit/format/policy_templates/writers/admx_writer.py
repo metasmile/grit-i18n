@@ -176,6 +176,7 @@ class ADMXWriter(xml_formatted_writer.XMLFormattedWriter):
     attributes = {
       'id': name,
       'valueName': name,
+      'maxValue': '2000000000',
     }
     self.AddElement(parent, 'decimal', attributes)
 
