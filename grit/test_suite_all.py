@@ -31,6 +31,7 @@ class TestSuiteAll(unittest.TestSuite):
     from grit import tclib_unittest
     from grit import util_unittest
     from grit import xtb_reader_unittest
+    from grit.format import html_inline_unittest
     from grit.gather import admin_template_unittest
     from grit.gather import chrome_html_unittest
     from grit.gather import chrome_scaled_image_unittest
@@ -78,6 +79,7 @@ class TestSuiteAll(unittest.TestSuite):
         grit.format.rc_header_unittest.RcHeaderFormatterUnittest,
         grit.format.rc_unittest.FormatRcUnittest,
         grit_runner_unittest.OptionArgsUnittest,
+        html_inline_unittest.HtmlInlineUnittest,
         igoogle_strings_unittest.IgoogleStringsUnittest,
         io_unittest.FileNodeUnittest,
         lazy_re_unittest.LazyReUnittest,
