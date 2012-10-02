@@ -444,10 +444,6 @@ def IsVerbose():
 def IsExtraVerbose():
   return extra_verbose
 
-def GetCurrentYear():
-  '''Returns the current 4-digit year as an integer.'''
-  return time.localtime()[0]
-
 def ParseDefine(define):
   '''Parses a define argument and returns the name and value.
 
