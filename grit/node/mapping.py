@@ -20,25 +20,26 @@ from grit.node import io
 
 
 _ELEMENT_TO_CLASS = {
+  'identifiers'   : empty.IdentifiersNode,
   'includes'      : empty.IncludesNode,
   'messages'      : empty.MessagesNode,
+  'outputs'       : empty.OutputsNode,
   'structures'    : empty.StructuresNode,
   'translations'  : empty.TranslationsNode,
-  'outputs'       : empty.OutputsNode,
-  'message'       : message.MessageNode,
-  'ph'            : message.PhNode,
-  'ex'            : message.ExNode,
-  'grit'          : misc.GritNode,
   'include'       : include.IncludeNode,
-  'structure'     : structure.StructureNode,
-  'skeleton'      : variant.SkeletonNode,
-  'release'       : misc.ReleaseNode,
+  'emit'          : io.EmitNode,
   'file'          : io.FileNode,
   'output'        : io.OutputNode,
-  'emit'          : io.EmitNode,
-  'identifiers'   : empty.IdentifiersNode,
+  'ex'            : message.ExNode,
+  'message'       : message.MessageNode,
+  'ph'            : message.PhNode,
+  'grit'          : misc.GritNode,
   'identifier'    : misc.IdentifierNode,
   'if'            : misc.IfNode,
+  'part'          : misc.PartNode,
+  'release'       : misc.ReleaseNode,
+  'structure'     : structure.StructureNode,
+  'skeleton'      : variant.SkeletonNode,
 }
 
 
@@ -52,7 +53,7 @@ def ElementToClass(name, typeattr):
   Return:
     type
   '''
-  if not _ELEMENT_TO_CLASS.has_key(name):
+  if name not in _ELEMENT_TO_CLASS:
     raise exception.UnknownElement()
   return _ELEMENT_TO_CLASS[name]
 

@@ -30,13 +30,13 @@ class GroupingNode(base.Node):
 class IncludesNode(GroupingNode):
   '''The <includes> element.'''
   def _IsValidChild(self, child):
-    return isinstance(child, (include.IncludeNode, misc.IfNode))
+    return isinstance(child, (include.IncludeNode, misc.SplicingNode))
 
 
 class MessagesNode(GroupingNode):
   '''The <messages> element.'''
   def _IsValidChild(self, child):
-    return isinstance(child, (message.MessageNode, misc.IfNode))
+    return isinstance(child, (message.MessageNode, misc.SplicingNode))
 
   def ItemFormatter(self, t):
     '''Return the stringtable itemformatter if an RC is being formatted.'''
@@ -57,19 +57,19 @@ class MessagesNode(GroupingNode):
 class StructuresNode(GroupingNode):
   '''The <structures> element.'''
   def _IsValidChild(self, child):
-    return isinstance(child, (structure.StructureNode, misc.IfNode))
+    return isinstance(child, (structure.StructureNode, misc.SplicingNode))
 
 
 class TranslationsNode(base.Node):
   '''The <translations> element.'''
   def _IsValidChild(self, child):
-    return isinstance(child, (io.FileNode, misc.IfNode))
+    return isinstance(child, (io.FileNode, misc.SplicingNode))
 
 
 class OutputsNode(base.Node):
   '''The <outputs> element.'''
   def _IsValidChild(self, child):
-    return isinstance(child, (io.OutputNode, misc.IfNode))
+    return isinstance(child, (io.OutputNode, misc.SplicingNode))
 
 
 class IdentifiersNode(GroupingNode):

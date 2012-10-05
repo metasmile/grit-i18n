@@ -236,14 +236,12 @@ class Node(grit.format.interface.ItemFormatter):
     inside_content = self.ContentsAsXml(indent, content_one_line)
 
     # Then the attributes for this node.
-    attribs = u' '
-    for (attrib, value) in self.attrs.iteritems():
+    attribs = u''
+    default_attribs = self.DefaultAttributes()
+    for attrib, value in sorted(self.attrs.items()):
       # Only print an attribute if it is other than the default value.
-      if (not self.DefaultAttributes().has_key(attrib) or
-          value != self.DefaultAttributes()[attrib]):
-        attribs += u'%s=%s ' % (attrib, saxutils.quoteattr(value))
-    attribs = attribs.rstrip()  # if no attribs, we end up with '', otherwise
-                                # we end up with a space-prefixed string
+      if attrib not in default_attribs or value != default_attribs[attrib]:
+        attribs += u' %s=%s' % (attrib, saxutils.quoteattr(value))
 
     # Finally build the XML for our node and return it
     if len(inside_content) > 0:
@@ -441,7 +439,7 @@ class Node(grit.format.interface.ItemFormatter):
 
   def GetChildrenOfType(self, type):
     '''Returns a list of all subnodes (recursing to all leaves) of this node
-    that are of the indicated type.
+    that are of the indicated type (or tuple of types).
 
     Args:
       type: A type you could use with isinstance().

@@ -103,6 +103,9 @@ def Inputs(filename, defines):
         # If it's a flattened node, grab inlined resources too.
         if node.attrs['flattenhtml'] == 'true':
           files.update(node.GetHtmlResourceFilenames())
+    elif node.name == 'part':
+      if node.SatisfiesOutputCondition():
+        files.add(grd.ToRealPath(node.GetInputPath()))
 
   cwd = os.getcwd()
   return [os.path.relpath(f, cwd) for f in sorted(files)]
@@ -146,13 +149,14 @@ def DoMain(argv):
 
     if len(args) == 1:
       # Include grd file as second input (works around gyp expecting it).
-      inputs = [inputs[0], args[0]] + inputs[1:]
+      inputs.insert(1, args[0])
     if options.whitelist_files:
       inputs.extend(options.whitelist_files)
     return '\n'.join(inputs)
   elif options.outputs:
     if len(args) != 2:
-      raise WrongNumberOfArguments("Expected exactly 2 arguments for --ouputs.")
+      raise WrongNumberOfArguments(
+          "Expected exactly 2 arguments for --outputs.")
 
     prefix, filename = args
     outputs = [posixpath.join(prefix, f) for f in Outputs(filename, defines)]

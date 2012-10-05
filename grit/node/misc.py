@@ -67,35 +67,21 @@ def _ReadFirstIdsFromFile(filename, defines):
   return (src_root_dir, first_ids_dict)
 
 
-class IfNode(base.Node):
-  """A node for conditional inclusion of resources.
+class SplicingNode(base.Node):
+  """A node whose children should be considered to be at the same level as
+  its siblings for most purposes. This includes <if> and <part> nodes.
   """
 
   def _IsValidChild(self, child):
-    from grit.node import empty
-    parent = self.parent
-    while isinstance(parent, IfNode):
-      parent = parent.parent
-    assert parent, '<if> node should never be root.'
-    if isinstance(child, IfNode):
-      return True
-    elif isinstance(parent, empty.IncludesNode):
-      from grit.node import include
-      return isinstance(child, include.IncludeNode)
-    elif isinstance(parent, empty.MessagesNode):
-      from grit.node import message
-      return isinstance(child, message.MessageNode)
-    elif isinstance(parent, empty.StructuresNode):
-      from grit.node import structure
-      return isinstance(child, structure.StructureNode)
-    elif isinstance(parent, empty.OutputsNode):
-      from grit.node import io
-      return isinstance(child, io.OutputNode)
-    elif isinstance(parent, empty.TranslationsNode):
-      from grit.node import io
-      return isinstance(child, io.FileNode)
-    else:
-      return False
+    assert self.parent, '<%s> node should never be root.' % self.name
+    if isinstance(child, SplicingNode):
+      return True  # avoid O(n^2) behavior
+    return self.parent._IsValidChild(child)
+
+
+class IfNode(SplicingNode):
+  """A node for conditional inclusion of resources.
+  """
 
   def MandatoryAttributes(self):
     return ['expr']
@@ -112,6 +98,21 @@ class IfNode(base.Node):
       return False
     else:
       return super(IfNode, self).SatisfiesOutputCondition()
+
+
+class PartNode(SplicingNode):
+  """A node for inclusion of sub-grd (*.grp) files.
+  """
+
+  def __init__(self):
+    super(PartNode, self).__init__()
+    self.started_inclusion = False
+
+  def MandatoryAttributes(self):
+    return ['file']
+
+  def _IsValidChild(self, child):
+    return self.started_inclusion and super(PartNode, self)._IsValidChild(child)
 
 
 class ReleaseNode(base.Node):
@@ -213,6 +214,11 @@ class GritNode(base.Node):
         continue  # PhNode objects have a 'name' attribute which is not an ID
       if node.attrs.get('generateid', 'true') == 'false':
         continue  # Duplication not relevant in that case
+      if not node.SatisfiesOutputCondition():
+        # To avoid false positives from mutually exclusive <if> clauses, check
+        # against whatever the output condition happens to be right now.
+        # TODO(benrg): do something better.
+        continue
 
       node_ids = node.GetTextualIds()
       if node_ids:
@@ -220,10 +226,7 @@ class GritNode(base.Node):
           if util.SYSTEM_IDENTIFIERS.match(node_id):
             continue  # predefined IDs are sometimes used more than once
 
-          # Don't complain about duplicate IDs if they occur in a node that is
-          # inside an <if> node.
-          if (node_id in unique_names and node_id not in duplicate_names and
-              (not node.parent or not isinstance(node.parent, IfNode))):
+          if node_id in unique_names and node_id not in duplicate_names:
             duplicate_names.append(node_id)
           unique_names[node_id] = 1
 
@@ -285,18 +288,17 @@ class GritNode(base.Node):
 
   def GetInputFiles(self):
     """Returns the list of files that are read to produce the output."""
-    input_nodes = []
 
     # Importing this here avoids a circular dependency in the imports.
     # pylint: disable-msg=C6204
     from grit.node import include
+    from grit.node import misc
     from grit.node import structure
     from grit.node import variant
 
-    input_nodes.extend(self.GetChildrenOfType(io.FileNode))
-    input_nodes.extend(self.GetChildrenOfType(include.IncludeNode))
-    input_nodes.extend(self.GetChildrenOfType(structure.StructureNode))
-    input_nodes.extend(self.GetChildrenOfType(variant.SkeletonNode))
+    input_nodes = self.GetChildrenOfType((
+        io.FileNode, include.IncludeNode, structure.StructureNode,
+        variant.SkeletonNode, misc.PartNode))
 
     # Collect all output languages and contexts.
     configs = set()
