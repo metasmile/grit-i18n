@@ -75,7 +75,7 @@ def Inputs(filename, defines):
   # files.  For now, since Chrome is the only user of grit_info.py,
   # this is fine.
   grd = grd_reader.Parse(
-      filename, debug=False, defines=defines, tags_to_ignore=set(['messages']),
+      filename, debug=False, defines=defines, tags_to_ignore=set(['message']),
       first_ids_file='GRIT_DIR/../gritsettings/resource_ids')
   files = set()
   contexts = set(output.GetContext() for output in grd.GetOutputFiles())
@@ -105,7 +105,8 @@ def Inputs(filename, defines):
           files.update(node.GetHtmlResourceFilenames())
     elif node.name == 'part':
       if node.SatisfiesOutputCondition():
-        files.add(grd.ToRealPath(node.GetInputPath()))
+        files.add(util.normpath(os.path.join(os.path.dirname(filename),
+                                             node.GetInputPath())))
 
   cwd = os.getcwd()
   return [os.path.relpath(f, cwd) for f in sorted(files)]
