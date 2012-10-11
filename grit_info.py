@@ -18,16 +18,10 @@ class WrongNumberOfArguments(Exception):
   pass
 
 
-def Outputs(filename, defines):
-  # TODO(joi@chromium.org): The first_ids_file can now be specified
-  # via an attribute on the <grit> node.  Once a change lands in
-  # WebKit to use this attribute, we can stop specifying the
-  # first_ids_file parameter here and instead specify it in all grd
-  # files.  For now, since Chrome is the only user of grit_info.py,
-  # this is fine.
+def Outputs(filename, defines, ids_file):
   grd = grd_reader.Parse(
       filename, defines=defines, tags_to_ignore=set(['messages']),
-      first_ids_file='GRIT_DIR/../gritsettings/resource_ids')
+      first_ids_file=ids_file)
 
   target = []
   lang_folders = {}
@@ -67,16 +61,10 @@ def GritSourceFiles():
   return files
 
 
-def Inputs(filename, defines):
-  # TODO(joi@chromium.org): The first_ids_file can now be specified
-  # via an attribute on the <grit> node.  Once a change lands in
-  # WebKit to use this attribute, we can stop specifying the
-  # first_ids_file parameter here and instead specify it in all grd
-  # files.  For now, since Chrome is the only user of grit_info.py,
-  # this is fine.
+def Inputs(filename, defines, ids_file):
   grd = grd_reader.Parse(
       filename, debug=False, defines=defines, tags_to_ignore=set(['message']),
-      first_ids_file='GRIT_DIR/../gritsettings/resource_ids')
+      first_ids_file=ids_file)
   files = set()
   contexts = set(output.GetContext() for output in grd.GetOutputFiles())
   for node in grd:
@@ -113,8 +101,9 @@ def Inputs(filename, defines):
 
 
 def PrintUsage():
-  print 'USAGE: ./grit_info.py --inputs [-D foo] <grd-file>'
-  print '       ./grit_info.py --outputs [-D foo] <out-prefix> <grd-file>'
+  print 'USAGE: ./grit_info.py --inputs [-D foo] [-f resource_ids] <grd-file>'
+  print ('       ./grit_info.py --outputs [-D foo] [-f resource_ids] ' +
+      '<out-prefix> <grd-file>')
 
 
 def DoMain(argv):
@@ -126,6 +115,8 @@ def DoMain(argv):
   # line flags.
   parser.add_option("-E", action="append", dest="build_env", default=[])
   parser.add_option("-w", action="append", dest="whitelist_files", default=[])
+  parser.add_option("-f", dest="ids_file",
+                    default="GRIT_DIR/../gritsettings/resource_ids")
 
   options, args = parser.parse_args(argv)
 
@@ -141,7 +132,7 @@ def DoMain(argv):
     inputs = []
     if len(args) == 1:
       filename = args[0]
-      inputs = Inputs(filename, defines)
+      inputs = Inputs(filename, defines, options.ids_file)
 
     # Add in the grit source files.  If one of these change, we want to re-run
     # grit.
@@ -160,7 +151,8 @@ def DoMain(argv):
           "Expected exactly 2 arguments for --outputs.")
 
     prefix, filename = args
-    outputs = [posixpath.join(prefix, f) for f in Outputs(filename, defines)]
+    outputs = [posixpath.join(prefix, f)
+               for f in Outputs(filename, defines, options.ids_file)]
     return '\n'.join(outputs)
   else:
     raise WrongNumberOfArguments("Expected --inputs or --outputs.")
