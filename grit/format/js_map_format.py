@@ -43,10 +43,12 @@ class Message(interface.ItemFormatter):
     # Remove position numbers from placeholders.
     en_message = re.sub(r'%\d\$([a-z])', r'%\1', en_message)
     # Escape double quotes.
+    en_message = re.sub(r'\\', r'\\\\', en_message)
     en_message = re.sub(r'"', r'\"', en_message)
 
     loc_message = item.ws_at_start + item.Translate(lang) + item.ws_at_end
     # Escape double quotes.
+    loc_message = re.sub(r'\\', r'\\\\', loc_message)
     loc_message = re.sub(r'"', r'\"', loc_message)
 
     return '\nlocalizedStrings["%s"] = "%s";' % (en_message, loc_message)

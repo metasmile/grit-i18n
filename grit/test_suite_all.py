@@ -56,6 +56,7 @@ class TestSuiteAll(unittest.TestSuite):
     from grit.tool import xmb_unittest
     import grit.format.android_xml_unittest
     import grit.format.c_format_unittest
+    import grit.format.chrome_messages_json_unittest
     import grit.format.data_pack_unittest
     import grit.format.js_map_format_unittest
     import grit.format.rc_header_unittest
@@ -74,6 +75,8 @@ class TestSuiteAll(unittest.TestSuite):
         grd_reader_unittest.GrdReaderUnittest,
         grit.format.android_xml_unittest.AndroidXmlUnittest,
         grit.format.c_format_unittest.CFormatUnittest,
+        grit.format.chrome_messages_json_unittest.
+            ChromeMessagesJsonFormatUnittest,
         grit.format.data_pack_unittest.FormatDataPackUnittest,
         grit.format.js_map_format_unittest.JsMapFormatUnittest,
         grit.format.rc_header_unittest.RcHeaderFormatterUnittest,

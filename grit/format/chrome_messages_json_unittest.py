@@ -3,7 +3,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Unittest for js_map_format.py.
+"""Unittest for chrome_messages_json.py.
 """
 
 import os
@@ -18,8 +18,7 @@ from grit import grd_reader
 from grit import util
 from grit.tool import build
 
-
-class JsMapFormatUnittest(unittest.TestCase):
+class ChromeMessagesJsonFormatUnittest(unittest.TestCase):
 
   def testMessages(self):
     grd_text = u"""
@@ -49,15 +48,29 @@ class JsMapFormatUnittest(unittest.TestCase):
     util.FixRootForUnittest(root)
 
     buf = StringIO.StringIO()
-    build.RcBuilder.ProcessNode(root, DummyOutput('js_map_format', 'en'), buf)
+    build.RcBuilder.ProcessNode(root, DummyOutput('chrome_messages_json', 'en'), buf)
     output = buf.getvalue()
     test = u"""
-localizedStrings["Simple message."] = "Simple message.";
-localizedStrings["element\u2019s \u201c%s\u201d attribute"] = "element\u2019s \u201c%s\u201d attribute";
-localizedStrings["%d error, %d warning"] = "%1$d error, %2$d warning";
-localizedStrings[" (%d)"] = " (%d)";
-localizedStrings["A \\\"double quoted\\\" message."] = "A \\\"double quoted\\\" message.";
-localizedStrings["\\\\"] = "\\\\";
+{
+  "IDS_SIMPLE_MESSAGE": {
+    "message": "Simple message."
+  },
+  "IDS_QUOTES": {
+    "message": "element\u2019s \u201c%s\u201d attribute"
+  },
+  "IDS_PLACEHOLDERS": {
+    "message": "%1$d error, %2$d warning"
+  },
+  "IDS_STARTS_WITH_SPACE": {
+    "message": "(%d)"
+  },
+  "IDS_DOUBLE_QUOTES": {
+    "message": "A \\"double quoted\\" message."
+  },
+  "IDS_BACKSLASH": {
+    "message": "\\\\"
+  }
+}
 """
     self.failUnless(output.strip() == test.strip())
 
@@ -72,11 +85,17 @@ localizedStrings["\\\\"] = "\\\\";
     util.FixRootForUnittest(root)
 
     buf = StringIO.StringIO()
-    build.RcBuilder.ProcessNode(root, DummyOutput('js_map_format', 'fr'), buf)
+    build.RcBuilder.ProcessNode(root, DummyOutput('chrome_messages_json', 'fr'), buf)
     output = buf.getvalue()
     test = u"""
-localizedStrings["Hello!"] = "H\xe9P\xe9ll\xf4P\xf4!";
-localizedStrings["Hello %s"] = "H\xe9P\xe9ll\xf4P\xf4 %s";
+{
+  "ID_HELLO": {
+    "message": "H\xe9P\xe9ll\xf4P\xf4!"
+  },
+  "ID_HELLO_USER": {
+    "message": "H\xe9P\xe9ll\xf4P\xf4 %s"
+  }
+}
 """
     self.failUnless(output.strip() == test.strip())
 
@@ -95,6 +114,7 @@ class DummyOutput(object):
 
   def GetOutputFilename(self):
     return 'hello.gif'
+
 
 if __name__ == '__main__':
   unittest.main()

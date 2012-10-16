@@ -222,7 +222,8 @@ are exported to translation interchange files (e.g. XMB files), etc.
           'resource_map_source', 'resource_file_map_source'):
         encoding = 'cp1252'
       elif output.GetType() in ('android', 'c_format', 'js_map_format', 'plist',
-                                'plist_strings', 'doc', 'json'):
+                                'plist_strings', 'doc', 'json',
+                                'chrome_messages_json'):
         encoding = 'utf_8'
       else:
         # TODO(gfeher) modify here to set utf-8 encoding for admx/adml
