@@ -7,10 +7,13 @@
 
 
 import re
+import struct
 import unittest
+import zlib
 
 from grit import exception
 from grit import util
+from grit.format import data_pack
 from grit.tool import build
 
 
@@ -23,20 +26,36 @@ _OUTFILETYPES = [
 ]
 
 
+_PNG_HEADER = (
+    '\x89\x50\x4e\x47\x0d\x0a\x1a\x0a\x00\x00\x00\x0d\x49\x48\x44\x52'
+    '\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90\x77\x53'
+    '\xde')
+_PNG_FOOTER = (
+    '\x00\x00\x00\x0c\x49\x44\x41\x54\x18\x57\x63\xf8\xff\xff\x3f\x00'
+    '\x05\xfe\x02\xfe\xa7\x35\x81\x84\x00\x00\x00\x00\x49\x45\x4e\x44'
+    '\xae\x42\x60\x82')
+
+
+def _MakePNG(chunks):
+  pack_int32 = struct.Struct('>i').pack
+  chunks = [pack_int32(len(payload)) + type + payload + pack_int32(zlib.crc32(type + payload))
+            for type, payload in chunks]
+  return _PNG_HEADER + ''.join(chunks) + _PNG_FOOTER
+
+
 def _GetFilesInPak(pakname):
-  '''Get a list of the files that were actually included in the .pak output.
+  '''Get a set of the files that were actually included in the .pak output.
   '''
-  data = util.ReadFile(pakname, util.BINARY)
-  # Hackity hack...
-  return [m.group(1) for m in re.finditer(r'CONTENTS_OF\((.*?)\)', data)]
+  return set(data_pack.DataPack.ReadDataPack(pakname).resources.values())
 
 
-def _GetFilesInRc(rcname):
-  '''Get a list of the files that were actually included in the .rc output.
+def _GetFilesInRc(rcname, tmp_dir, contents):
+  '''Get a set of the files that were actually included in the .rc output.
   '''
-  data = util.ReadFile(rcname, util.BINARY)
-  return [m.group(1) for m in re.finditer(ur'(?m)^\w+\s+BINDATA\s+"([^"]+)"$',
-                                          data.decode('utf-16'))]
+  data = util.ReadFile(rcname, util.BINARY).decode('utf-16')
+  contents = dict((tmp_dir.GetPath(k), v) for k, v in contents.items())
+  return set(contents[m.group(1)]
+             for m in re.finditer(ur'(?m)^\w+\s+BINDATA\s+"([^"]+)"$', data))
 
 
 def _MakeFallbackAttr(fallback):
@@ -60,11 +79,11 @@ def _If(expr, *body):
   return '<if expr="%s">\n%s\n</if>' % (expr, '\n'.join(body))
 
 
-def _RunBuildTest(self, structures, pngfiles, contexts_and_results):
+def _RunBuildTest(self, structures, inputs, expected_outputs, skip_rc=False):
   outputs = '\n'.join('<output filename="out/%s%s" type="%s" context="%s" />'
                               % (context, ext, type, context)
                       for ext, type in _OUTFILETYPES
-                      for context, expected_includes in contexts_and_results)
+                      for context in expected_outputs)
   infiles = {
     'in/in.grd': '''<?xml version="1.0" encoding="UTF-8"?>
       <grit latest_public_release="0" current_release="1">
@@ -77,8 +96,8 @@ def _RunBuildTest(self, structures, pngfiles, contexts_and_results):
       </grit>
       ''' % (outputs, structures),
   }
-  for pngpath in pngfiles:
-    infiles['in/' + pngpath] = 'CONTENTS_OF(%s)' % pngpath
+  for pngpath, pngdata in inputs.items():
+    infiles['in/' + pngpath] = pngdata
   class Options(object):
     pass
   with util.TempDir(infiles) as tmp_dir:
@@ -88,29 +107,32 @@ def _RunBuildTest(self, structures, pngfiles, contexts_and_results):
       options.verbose = False
       options.extra_verbose = False
       build.RcBuilder().Run(options, [])
-    for context, expected_includes in contexts_and_results:
-      self.assertEquals(_GetFilesInPak(tmp_dir.GetPath('out/%s.pak' % context)),
-                        expected_includes)
-      self.assertEquals(_GetFilesInRc(tmp_dir.GetPath('out/%s.rc' % context)),
-                        [tmp_dir.GetPath('in/' + x) for x in expected_includes])
+    for context, expected_data in expected_outputs.items():
+      self.assertEquals(expected_data,
+                        _GetFilesInPak(tmp_dir.GetPath('out/%s.pak' % context)))
+      if not skip_rc:
+        self.assertEquals(expected_data,
+                          _GetFilesInRc(tmp_dir.GetPath('out/%s.rc' % context),
+                                        tmp_dir, infiles))
 
 
 class ChromeScaledImageUnittest(unittest.TestCase):
   def testNormalFallback(self):
+    d123a = _MakePNG([('AbCd', '')])
+    t123a = _MakePNG([('EfGh', '')])
+    d123b = _MakePNG([('IjKl', '')])
     _RunBuildTest(self,
         _Structures(None,
             _Structure('IDR_A', 'a.png'),
             _Structure('IDR_B', 'b.png'),
         ),
-        ['default_123_percent/a.png',
-         'tactile_123_percent/a.png',
-         'default_123_percent/b.png',
-        ],
-        [('default_123_percent', ['default_123_percent/a.png',
-                                  'default_123_percent/b.png']),
-         ('tactile_123_percent', ['tactile_123_percent/a.png',
-                                  'default_123_percent/b.png']),
-        ])
+        {'default_123_percent/a.png': d123a,
+         'tactile_123_percent/a.png': t123a,
+         'default_123_percent/b.png': d123b,
+        },
+        {'default_123_percent': set([d123a, d123b]),
+         'tactile_123_percent': set([t123a, d123b]),
+        })
 
   def testNormalFallbackFailure(self):
     self.assertRaises(exception.FileNotFound,
@@ -118,13 +140,14 @@ class ChromeScaledImageUnittest(unittest.TestCase):
             _Structures(None,
                 _Structure('IDR_A', 'a.png'),
             ),
-            ['default_100_percent/a.png',
-             'tactile_100_percent/a.png',
-            ],
-            [('tactile_123_percent', ['should fail before using this']),
-            ])
+            {'default_100_percent/a.png': _MakePNG([('AbCd', '')]),
+             'tactile_100_percent/a.png': _MakePNG([('EfGh', '')]),
+            },
+            {'tactile_123_percent': 'should fail before using this'})
 
   def testLowresFallback(self):
+    png = _MakePNG([])
+    png_with_csCl = '\0\0\0\0csCl\xc1\x30\x60\x4d' + png
     for outer in (None, False, True):
       for inner in (None, False, True):
         args = (
@@ -132,13 +155,11 @@ class ChromeScaledImageUnittest(unittest.TestCase):
             _Structures(outer,
                 _Structure('IDR_A', 'a.png', inner),
             ),
-            ['default_100_percent/a.png',
-            ],
-            [('tactile_123_percent', ['default_100_percent/a.png']),
-            ])
+            {'default_100_percent/a.png': png},
+            {'tactile_200_percent': set([png_with_csCl])})
         if inner or (inner is None and outer):
           # should fall back to 100%
-          _RunBuildTest(*args)
+          _RunBuildTest(*args, skip_rc=True)
         else:
           # shouldn't fall back
           self.assertRaises(exception.FileNotFound, _RunBuildTest, *args)
@@ -149,6 +170,5 @@ class ChromeScaledImageUnittest(unittest.TestCase):
             _Structures(True,
                 _Structure('IDR_A', 'a.png'),
             ),
-            [],  # no files
-            [('tactile_123_percent', ['should fail before using this']),
-            ])
+            {},  # no files
+            {'tactile_123_percent': 'should fail before using this'})
