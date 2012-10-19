@@ -125,7 +125,6 @@ class TestSuiteAll(unittest.TestSuite):
         grit.node.message_unittest.MessageUnittest,
         grit.node.misc_unittest.GritNodeUnittest,
         grit.node.misc_unittest.IfNodeUnittest,
-        grit.node.misc_unittest.IfNodeChildrenUnittest,
         grit.node.misc_unittest.ReleaseNodeUnittest,
         grit.node.structure_unittest.StructureUnittest,
         grit.node.custom.filename_unittest.WindowsFilenameUnittest,

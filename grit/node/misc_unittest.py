@@ -101,6 +101,46 @@ class IfNodeUnittest(unittest.TestCase):
     self.failUnless(hello_message not in active)
     self.failUnless(french_message in active)
 
+  def testElsiness(self):
+    grd = util.ParseGrdForUnittest('''
+        <messages>
+          <if expr="True">
+            <then> <message name="IDS_YES1"></message> </then>
+            <else> <message name="IDS_NO1"></message> </else>
+          </if>
+          <if expr="True">
+            <then> <message name="IDS_YES2"></message> </then>
+            <else> </else>
+          </if>
+          <if expr="True">
+            <then> </then>
+            <else> <message name="IDS_NO2"></message> </else>
+          </if>
+          <if expr="True">
+            <then> </then>
+            <else> </else>
+          </if>
+          <if expr="False">
+            <then> <message name="IDS_NO3"></message> </then>
+            <else> <message name="IDS_YES3"></message> </else>
+          </if>
+          <if expr="False">
+            <then> <message name="IDS_NO4"></message> </then>
+            <else> </else>
+          </if>
+          <if expr="False">
+            <then> </then>
+            <else> <message name="IDS_YES4"></message> </else>
+          </if>
+          <if expr="False">
+            <then> </then>
+            <else> </else>
+          </if>
+        </messages>''')
+    included = [msg.attrs['name'] for msg in grd.ActiveDescendants()
+                                  if msg.name == 'message']
+    self.assertEqual(['IDS_YES1', 'IDS_YES2', 'IDS_YES3', 'IDS_YES4'], included)
+
   def testIffynessWithOutputNodes(self):
     grd = grd_reader.Parse(StringIO.StringIO('''
       <grit latest_public_release="2" source_lang_id="en-US" current_release="3" base_dir=".">
@@ -165,8 +205,6 @@ class IfNodeUnittest(unittest.TestCase):
     outputs = [output.GetFilename() for output in grd.GetOutputFiles()]
     self.assertNotEquals(outputs, ['uncond1.rc', 'uncond2.adm', 'iftest.h'])
 
-
-class IfNodeChildrenUnittest(unittest.TestCase):
   def testChildrenAccepted(self):
     grd = grd_reader.Parse(StringIO.StringIO('''<?xml version="1.0"?>
       <grit latest_public_release="2" source_lang_id="en-US" current_release="3" base_dir=".">

@@ -86,10 +86,37 @@ class IfNode(SplicingNode):
   def MandatoryAttributes(self):
     return ['expr']
 
+  def _IsValidChild(self, child):
+    return (isinstance(child, (ThenNode, ElseNode)) or
+            super(IfNode, self)._IsValidChild(child))
+
+  def EndParsing(self):
+    children = self.children
+    self.if_then_else = False
+    if any(isinstance(node, (ThenNode, ElseNode)) for node in children):
+      if (len(children) != 2 or not isinstance(children[0], ThenNode) or
+                                not isinstance(children[1], ElseNode)):
+        raise exception.UnexpectedChild(
+            '<if> element must be <if><then>...</then><else>...</else></if>')
+      self.if_then_else = True
+
   def ActiveChildren(self):
-    if not self.EvaluateCondition(self.attrs['expr']):
-      return []
-    return super(IfNode, self).ActiveChildren()
+    cond = self.EvaluateCondition(self.attrs['expr'])
+    if self.if_then_else:
+      return self.children[0 if cond else 1].ActiveChildren()
+    else:
+      # Equivalent to having all children inside <then> with an empty <else>
+      return super(IfNode, self).ActiveChildren() if cond else []
+
+
+class ThenNode(SplicingNode):
+  """A <then> node. Can only appear directly inside an <if> node."""
+  pass
+
+
+class ElseNode(SplicingNode):
+  """An <else> node. Can only appear directly inside an <if> node."""
+  pass
 
 
 class PartNode(SplicingNode):

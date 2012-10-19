@@ -30,35 +30,35 @@ class GroupingNode(base.Node):
 class IncludesNode(GroupingNode):
   '''The <includes> element.'''
   def _IsValidChild(self, child):
-    return isinstance(child, (include.IncludeNode, misc.SplicingNode))
+    return isinstance(child, (include.IncludeNode, misc.IfNode, misc.PartNode))
 
 
 class MessagesNode(GroupingNode):
   '''The <messages> element.'''
   def _IsValidChild(self, child):
-    return isinstance(child, (message.MessageNode, misc.SplicingNode))
+    return isinstance(child, (message.MessageNode, misc.IfNode, misc.PartNode))
 
 
 class StructuresNode(GroupingNode):
   '''The <structures> element.'''
   def _IsValidChild(self, child):
-    return isinstance(child, (structure.StructureNode, misc.SplicingNode))
+    return isinstance(child, (structure.StructureNode,
+                              misc.IfNode, misc.PartNode))
 
 
 class TranslationsNode(base.Node):
   '''The <translations> element.'''
   def _IsValidChild(self, child):
-    return isinstance(child, (io.FileNode, misc.SplicingNode))
+    return isinstance(child, (io.FileNode, misc.IfNode, misc.PartNode))
 
 
 class OutputsNode(base.Node):
   '''The <outputs> element.'''
   def _IsValidChild(self, child):
-    return isinstance(child, (io.OutputNode, misc.SplicingNode))
+    return isinstance(child, (io.OutputNode, misc.IfNode, misc.PartNode))
 
 
 class IdentifiersNode(GroupingNode):
   '''The <identifiers> element.'''
   def _IsValidChild(self, child):
-    from grit.node import misc
     return isinstance(child, misc.IdentifierNode)

@@ -33,11 +33,13 @@ _ELEMENT_TO_CLASS = {
   'ex'            : message.ExNode,
   'message'       : message.MessageNode,
   'ph'            : message.PhNode,
+  'else'          : misc.ElseNode,
   'grit'          : misc.GritNode,
   'identifier'    : misc.IdentifierNode,
   'if'            : misc.IfNode,
   'part'          : misc.PartNode,
   'release'       : misc.ReleaseNode,
+  'then'          : misc.ThenNode,
   'structure'     : structure.StructureNode,
   'skeleton'      : variant.SkeletonNode,
 }
