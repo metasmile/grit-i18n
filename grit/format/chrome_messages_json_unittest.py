@@ -21,7 +21,7 @@ from grit.tool import build
 class ChromeMessagesJsonFormatUnittest(unittest.TestCase):
 
   def testMessages(self):
-    grd_text = u"""
+    root = util.ParseGrdForUnittest(u"""
     <messages>
       <message name="IDS_SIMPLE_MESSAGE">
               Simple message.
@@ -42,10 +42,7 @@ class ChromeMessagesJsonFormatUnittest(unittest.TestCase):
               \\
       </message>
     </messages>
-    """
-    root = grd_reader.Parse(StringIO.StringIO(grd_text.encode('utf-8')),
-                            flexible_root=True)
-    util.FixRootForUnittest(root)
+    """)
 
     buf = StringIO.StringIO()
     build.RcBuilder.ProcessNode(root, DummyOutput('chrome_messages_json', 'en'), buf)
@@ -72,17 +69,16 @@ class ChromeMessagesJsonFormatUnittest(unittest.TestCase):
   }
 }
 """
-    self.failUnless(output.strip() == test.strip())
+    self.assertEqual(test.strip(), output.strip())
 
   def testTranslations(self):
-    root = grd_reader.Parse(StringIO.StringIO("""
+    root = util.ParseGrdForUnittest("""
     <messages>
         <message name="ID_HELLO">Hello!</message>
         <message name="ID_HELLO_USER">Hello <ph name="USERNAME">%s<ex>
           Joi</ex></ph></message>
       </messages>
-    """), flexible_root=True)
-    util.FixRootForUnittest(root)
+    """)
 
     buf = StringIO.StringIO()
     build.RcBuilder.ProcessNode(root, DummyOutput('chrome_messages_json', 'fr'), buf)
@@ -97,7 +93,7 @@ class ChromeMessagesJsonFormatUnittest(unittest.TestCase):
   }
 }
 """
-    self.failUnless(output.strip() == test.strip())
+    self.assertEqual(test.strip(), output.strip())
 
 
 class DummyOutput(object):

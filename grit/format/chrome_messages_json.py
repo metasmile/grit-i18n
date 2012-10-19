@@ -13,29 +13,27 @@ from grit import util
 from grit.format import interface
 from grit.node import message
 
-class StringTable(interface.ItemFormatter):
-  """Writes out the string table."""
+def Format(root, lang='en', output_dir='.'):
+  """Format the messages as JSON."""
+  yield '{\n'
 
-  def Format(self, item, lang='en', output_dir='.'):
-    out = []
-    out.append('{\n')
+  format = ('  "%s": {\n'
+            '    "message": "%s"\n'
+            '  }')
+  first = True
+  for child in root:
+    if isinstance(child, message.MessageNode):
+      loc_message = child.Translate(lang)
+      loc_message = re.sub(r'\\', r'\\\\', loc_message)
+      loc_message = re.sub(r'"', r'\"', loc_message)
 
-    format = ('  "%s": {\n'
-              '    "message": "%s"\n'
-              '  }')
-    for child in item.children:
-      if isinstance(child, message.MessageNode):
-        loc_message = child.Translate(lang)
-        loc_message = re.sub(r'\\', r'\\\\', loc_message)
-        loc_message = re.sub(r'"', r'\"', loc_message)
+      id = child.attrs['name']
+      if id.startswith('IDR_'):
+        id = id[4:]
 
-        id = child.attrs['name']
-        if id.startswith('IDR_'):
-          id = id[4:]
+      if not first:
+        yield ',\n'
+      first = False
+      yield format % (id, loc_message)
 
-        if len(out) > 1:
-          out.append(',\n')
-        out.append(format % (id, loc_message))
-
-    out.append('\n}\n')
-    return ''.join(out)
+  yield '\n}\n'

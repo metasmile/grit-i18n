@@ -12,6 +12,7 @@ import os
 from grit import grd_reader
 from grit import pseudo
 from grit import util
+from grit.format import rc
 from grit.format import rc_header
 from grit.node import include
 from grit.tool import interface
@@ -208,7 +209,7 @@ near the top of the file, before you open it in Visual Studio.
 
     res_tree = grd_reader.Parse(opts.input, debug=opts.extra_verbose)
     res_tree.OnlyTheseTranslations([self.lang])
-    res_tree.RunGatherers(True)
+    res_tree.RunGatherers()
 
     # Dialog IDs are either explicitly listed, or we output all dialogs from the
     # .grd file
@@ -255,11 +256,9 @@ near the top of the file, before you open it in Visual Studio.
     # Output all <include> nodes since the dialogs might depend on them (e.g.
     # for icons and bitmaps).
     include_items = []
-    for node in grd:
+    for node in grd.ActiveDescendants():
       if isinstance(node, include.IncludeNode):
-        formatter = node.ItemFormatter('rc_all')
-        if formatter:
-          include_items.append(formatter.Format(node, self.lang))
+        include_items.append(rc.FormatInclude(node, self.lang, '.'))
     rc_text = RC_TEMPLATE.replace('[[CODEPAGE_NUM]]',
                                   str(self.codepage_number))
     rc_text = rc_text.replace('[[INCLUDES]]', ''.join(include_items))
@@ -268,9 +267,9 @@ near the top of the file, before you open it in Visual Studio.
     dialogs = []
     for dialog_id in dialog_ids:
       node = grd.GetNodeById(dialog_id)
+      assert node.name == 'structure' and node.attrs['type'] == 'dialog'
       # TODO(joi) Add exception handling for better error reporting
-      formatter = node.ItemFormatter('rc_all')
-      dialogs.append(formatter.Format(node, self.lang))
+      dialogs.append(rc.FormatStructure(node, self.lang, '.'))
     rc_text = rc_text.replace('[[DIALOGS]]', ''.join(dialogs))
 
     fname = os.path.join(dir_path, '%s.rc' % project_name)
@@ -278,12 +277,8 @@ near the top of the file, before you open it in Visual Studio.
     print "Wrote %s" % fname
 
     # Create the resource.h file
-    header_defines = []
-    for node in grd:
-      formatter = node.ItemFormatter('rc_header')
-      if formatter and not isinstance(formatter, rc_header.TopLevel):
-        header_defines.append(formatter.Format(node, self.lang))
-    header_text = HEADER_TEMPLATE.replace('[[DEFINES]]', ''.join(header_defines))
+    header_defines = ''.join(rc_header.FormatDefines(grd))
+    header_text = HEADER_TEMPLATE.replace('[[DEFINES]]', header_defines)
     fname = os.path.join(dir_path, 'resource.h')
     self.WriteFile(fname, header_text)
     print "Wrote %s" % fname

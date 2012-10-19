@@ -14,7 +14,6 @@ if __name__ == '__main__':
 import unittest
 import StringIO
 
-from grit import grd_reader
 from grit import util
 from grit.tool import build
 
@@ -22,7 +21,7 @@ from grit.tool import build
 class JsMapFormatUnittest(unittest.TestCase):
 
   def testMessages(self):
-    grd_text = u"""
+    root = util.ParseGrdForUnittest(u"""
     <messages>
       <message name="IDS_SIMPLE_MESSAGE">
               Simple message.
@@ -43,42 +42,35 @@ class JsMapFormatUnittest(unittest.TestCase):
               \\
       </message>
     </messages>
-    """
-    root = grd_reader.Parse(StringIO.StringIO(grd_text.encode('utf-8')),
-                            flexible_root=True)
-    util.FixRootForUnittest(root)
+    """)
 
     buf = StringIO.StringIO()
     build.RcBuilder.ProcessNode(root, DummyOutput('js_map_format', 'en'), buf)
-    output = buf.getvalue()
-    test = u"""
+    output = util.StripBlankLinesAndComments(buf.getvalue())
+    self.assertEqual(u"""\
 localizedStrings["Simple message."] = "Simple message.";
 localizedStrings["element\u2019s \u201c%s\u201d attribute"] = "element\u2019s \u201c%s\u201d attribute";
 localizedStrings["%d error, %d warning"] = "%1$d error, %2$d warning";
 localizedStrings[" (%d)"] = " (%d)";
 localizedStrings["A \\\"double quoted\\\" message."] = "A \\\"double quoted\\\" message.";
-localizedStrings["\\\\"] = "\\\\";
-"""
-    self.failUnless(output.strip() == test.strip())
+localizedStrings["\\\\"] = "\\\\";""", output)
 
   def testTranslations(self):
-    root = grd_reader.Parse(StringIO.StringIO("""
+    root = util.ParseGrdForUnittest("""
     <messages>
         <message name="ID_HELLO">Hello!</message>
         <message name="ID_HELLO_USER">Hello <ph name="USERNAME">%s<ex>
           Joi</ex></ph></message>
       </messages>
-    """), flexible_root=True)
-    util.FixRootForUnittest(root)
+    """)
 
     buf = StringIO.StringIO()
     build.RcBuilder.ProcessNode(root, DummyOutput('js_map_format', 'fr'), buf)
-    output = buf.getvalue()
-    test = u"""
+    output = util.StripBlankLinesAndComments(buf.getvalue())
+    self.assertEqual(u"""\
 localizedStrings["Hello!"] = "H\xe9P\xe9ll\xf4P\xf4!";
-localizedStrings["Hello %s"] = "H\xe9P\xe9ll\xf4P\xf4 %s";
-"""
-    self.failUnless(output.strip() == test.strip())
+localizedStrings["Hello %s"] = "H\xe9P\xe9ll\xf4P\xf4 %s";\
+""", output)
 
 
 class DummyOutput(object):

@@ -38,15 +38,16 @@ def Outputs(filename, defines, ids_file):
   # Add all generated files, once for each output language.
   for node in grd:
     if node.name == 'structure':
-      # TODO(joi) Should remove the "if sconsdep is true" thing as it is a
-      # hack - see grit/node/structure.py
-      if node.HasFileForLanguage() and node.attrs['sconsdep'] == 'true':
-        for lang in lang_folders:
-          path = node.FileForLanguage(lang, lang_folders[lang],
-                                      create_file=False,
-                                      return_if_not_generated=False)
-          if path:
-            target.append(path)
+      with node:
+        # TODO(joi) Should remove the "if sconsdep is true" thing as it is a
+        # hack - see grit/node/structure.py
+        if node.HasFileForLanguage() and node.attrs['sconsdep'] == 'true':
+          for lang in lang_folders:
+            path = node.FileForLanguage(lang, lang_folders[lang],
+                                        create_file=False,
+                                        return_if_not_generated=False)
+            if path:
+              target.append(path)
 
   return [t.replace('\\', '/') for t in target]
 
@@ -66,35 +67,31 @@ def Inputs(filename, defines, ids_file):
       filename, debug=False, defines=defines, tags_to_ignore=set(['message']),
       first_ids_file=ids_file)
   files = set()
-  contexts = set(output.GetContext() for output in grd.GetOutputFiles())
-  for node in grd:
-    if (node.name == 'structure' or node.name == 'skeleton' or
-        (node.name == 'file' and node.parent and
-         node.parent.name == 'translations')):
-      # TODO(benrg): This is an awful hack. Do dependencies right.
-      for context in contexts:
-        grd.SetOutputContext(context)
-        if node.SatisfiesOutputCondition():
+  for lang, ctx in grd.GetConfigurations():
+    grd.SetOutputLanguage(lang or grd.GetSourceLanguage())
+    grd.SetOutputContext(ctx)
+    for node in grd.ActiveDescendants():
+      with node:
+        if (node.name == 'structure' or node.name == 'skeleton' or
+            (node.name == 'file' and node.parent and
+             node.parent.name == 'translations')):
           files.add(grd.ToRealPath(node.GetInputPath()))
-      # If it's a flattened node, grab inlined resources too.
-      if node.name == 'structure' and node.attrs['flattenhtml'] == 'true':
-        node.RunGatherers(recursive = True)
-        files.update(node.GetHtmlResourceFilenames())
-    elif node.name == 'grit':
-      first_ids_file = node.GetFirstIdsFile()
-      if first_ids_file:
-        files.add(first_ids_file)
-    elif node.name == 'include':
-      # Only include files that we actually plan on using.
-      if node.SatisfiesOutputCondition():
-        files.add(grd.ToRealPath(node.GetInputPath()))
-        # If it's a flattened node, grab inlined resources too.
-        if node.attrs['flattenhtml'] == 'true':
-          files.update(node.GetHtmlResourceFilenames())
-    elif node.name == 'part':
-      if node.SatisfiesOutputCondition():
-        files.add(util.normpath(os.path.join(os.path.dirname(filename),
-                                             node.GetInputPath())))
+          # If it's a flattened node, grab inlined resources too.
+          if node.name == 'structure' and node.attrs['flattenhtml'] == 'true':
+            node.RunPreSubstitutionGatherer()
+            files.update(node.GetHtmlResourceFilenames())
+        elif node.name == 'grit':
+          first_ids_file = node.GetFirstIdsFile()
+          if first_ids_file:
+            files.add(first_ids_file)
+        elif node.name == 'include':
+          files.add(grd.ToRealPath(node.GetInputPath()))
+          # If it's a flattened node, grab inlined resources too.
+          if node.attrs['flattenhtml'] == 'true':
+            files.update(node.GetHtmlResourceFilenames())
+        elif node.name == 'part':
+          files.add(util.normpath(os.path.join(os.path.dirname(filename),
+                                               node.GetInputPath())))
 
   cwd = os.getcwd()
   return [os.path.relpath(f, cwd) for f in sorted(files)]

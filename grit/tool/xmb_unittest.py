@@ -81,7 +81,7 @@ class XmbUnittest(unittest.TestCase):
   def testSubstitution(self):
     self.res_tree.SetOutputLanguage('en')
     os.chdir(util.PathFromRoot('.'))  # so it can find klonk.rc
-    self.res_tree.RunGatherers(True)
+    self.res_tree.RunGatherers()
     xmb.OutputXmb().Process(self.res_tree, self.xmb_file)
     output = self.xmb_file.getvalue()
     self.failUnless(output.count(
@@ -93,7 +93,7 @@ class XmbUnittest(unittest.TestCase):
     # message nodes already strip and store whitespace).
     self.res_tree.SetOutputLanguage('en')
     os.chdir(util.PathFromRoot('.'))  # so it can find klonk.rc
-    self.res_tree.RunGatherers(True)
+    self.res_tree.RunGatherers()
     xmb.OutputXmb().Process(self.res_tree, self.xmb_file)
     output = self.xmb_file.getvalue()
     self.failUnless(output.count('OK ? </msg>'))

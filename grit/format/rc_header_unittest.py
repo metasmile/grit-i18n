@@ -16,28 +16,16 @@ if __name__ == '__main__':
 import StringIO
 import unittest
 
-from grit.format import rc_header
-from grit.node import message
-from grit.node import structure
-from grit.node import include
-from grit.node import misc
-from grit import grd_reader
 from grit import exception
+from grit import grd_reader
+from grit import util
+from grit.format import rc_header
 
 
 class RcHeaderFormatterUnittest(unittest.TestCase):
-  def setUp(self):
-    self.formatter = rc_header.Item()
-    self.formatter.ids_ = {}  # need to reset this between tests
-
   def FormatAll(self, grd):
-    output = []
-    for node in grd:
-      if isinstance(node, (message.MessageNode, structure.StructureNode,
-                           include.IncludeNode, misc.IdentifierNode)):
-        output.append(self.formatter.Format(node))
-    output = ''.join(output)
-    return output.replace(' ', '')
+    output = rc_header.FormatDefines(grd, grd.ShouldOutputAllResourceDefines())
+    return ''.join(output).replace(' ', '')
 
   def testFormatter(self):
     grd = grd_reader.Parse(StringIO.StringIO('''<?xml version="1.0" encoding="UTF-8"?>
@@ -100,10 +88,9 @@ class RcHeaderFormatterUnittest(unittest.TestCase):
     output = self.FormatAll(grd)
     self.failUnless(output.count('IDS_FIRSTPRESENTSTRING10000'))
     self.failIf(output.count('IDS_MISSINGSTRING'))
-    self.failIf(output.count('10001'))
+    self.failIf(output.count('10001'))  # IDS_MISSINGSTRING should get this ID
     self.failUnless(output.count('IDS_LANGUAGESPECIFICSTRING10002'))
-    self.failIf(output.count('10003'))  # The "else" case causes an increment.
-    self.failUnless(output.count('IDS_THIRDPRESENTSTRING10004'))
+    self.failUnless(output.count('IDS_THIRDPRESENTSTRING10003'))
 
   def testExplicitFirstIdOverlaps(self):
     # second first_id will overlap preexisting range
@@ -142,6 +129,30 @@ class RcHeaderFormatterUnittest(unittest.TestCase):
         </release>
       </grit>'''), '.')
     self.assertRaises(exception.IdRangeOverlap, self.FormatAll, grd)
+
+  def testEmit(self):
+    grd = grd_reader.Parse(StringIO.StringIO('''<?xml version="1.0" encoding="UTF-8"?>
+      <grit latest_public_release="2" source_lang_id="en" current_release="3" base_dir=".">
+        <outputs>
+          <output type="rc_all" filename="dummy">
+            <emit emit_type="prepend">Wrong</emit>
+          </output>
+          <if expr="False">
+            <output type="rc_header" filename="dummy">
+              <emit emit_type="prepend">No</emit>
+            </output>
+          </if>
+          <output type="rc_header" filename="dummy">
+            <emit emit_type="append">Error</emit>
+          </output>
+          <output type="rc_header" filename="dummy">
+            <emit emit_type="prepend">Bingo</emit>
+          </output>
+        </outputs>
+      </grit>'''), '.')
+    output = ''.join(rc_header.Format(grd, 'en', '.'))
+    output = util.StripBlankLinesAndComments(output)
+    self.assertEqual('#pragma once\nBingo', output)
 
 
 if __name__ == '__main__':

@@ -133,14 +133,9 @@ class GrdPartContentHandler(xml.sax.handler.ContentHandler):
     self.parent.ignorableWhitespace(whitespace)
 
 
-def Parse(filename_or_stream, dir=None, flexible_root=False,
-          stop_after=None, first_ids_file=None, debug=False,
-          defines=None, tags_to_ignore=None):
+def Parse(filename_or_stream, dir=None, stop_after=None, first_ids_file=None,
+          debug=False, defines=None, tags_to_ignore=None):
   '''Parses a GRD file into a tree of nodes (from grit.node).
-
-  If flexible_root is False, the root node must be a <grit> element.  Otherwise
-  it can be any element.  The "own" directory of the file will only be fixed up
-  if the root node is a <grit> element.
 
   If filename_or_stream is a stream, 'dir' should point to the directory
   notionally containing the stream (this feature is only used in unit tests).
@@ -157,7 +152,6 @@ def Parse(filename_or_stream, dir=None, flexible_root=False,
   Args:
     filename_or_stream: './bla.xml'
     dir: None (if filename_or_stream is a filename) or '.'
-    flexible_root: True | False
     stop_after: 'inputs'
     first_ids_file: 'GRIT_DIR/../gritsettings/resource_ids'
     debug: False
@@ -185,9 +179,8 @@ def Parse(filename_or_stream, dir=None, flexible_root=False,
       print "parse exception: run GRIT with the -x flag to debug .grd problems"
     raise
 
-  if not flexible_root:
-    if handler.root.name != 'grit':
-      raise exception.MissingElement("root tag must be <grit>")
+  if handler.root.name != 'grit':
+    raise exception.MissingElement("root tag must be <grit>")
 
   if hasattr(handler.root, 'SetOwnDir'):
     # Fix up the base_dir so it is relative to the input file.

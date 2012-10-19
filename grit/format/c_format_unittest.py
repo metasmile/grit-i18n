@@ -14,7 +14,6 @@ if __name__ == '__main__':
 import unittest
 import StringIO
 
-from grit import grd_reader
 from grit import util
 from grit.tool import build
 
@@ -22,7 +21,7 @@ from grit.tool import build
 class CFormatUnittest(unittest.TestCase):
 
   def testMessages(self):
-    root = grd_reader.Parse(StringIO.StringIO("""
+    root = util.ParseGrdForUnittest("""
     <messages>
       <message name="IDS_QUESTIONS">Do you want to play questions?</message>
       <message name="IDS_QUOTES">
@@ -37,13 +36,13 @@ Statement.  Two all.  Game point.
          \xc3\xb5\\xc2\\xa4\\\xc2\xa4\\\\xc3\\xb5\xe4\xa4\xa4
       </message>
     </messages>
-      """), flexible_root=True)
-    util.FixRootForUnittest(root)
+      """)
 
     buf = StringIO.StringIO()
     build.RcBuilder.ProcessNode(root, DummyOutput('c_format', 'en'), buf)
-    output = buf.getvalue()
-    test = u"""
+    output = util.StripBlankLinesAndComments(buf.getvalue())
+    self.assertEqual(u"""\
+#include "resource.h"
 const char* GetString(int id) {
   switch (id) {
     case IDS_QUESTIONS:
@@ -57,8 +56,7 @@ const char* GetString(int id) {
     default:
       return 0;
   }
-}"""
-    self.failUnless(output.strip() == test.strip())
+}""", output)
 
 
 class DummyOutput(object):

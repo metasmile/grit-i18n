@@ -188,7 +188,7 @@ use with the 'grit transl2tc' tool's -l option.
     res_tree.SetOutputLanguage('en')
     res_tree.SetDefines(self.defines)
     res_tree.OnlyTheseTranslations([])
-    res_tree.RunGatherers(True)
+    res_tree.RunGatherers()
 
     with open(xmb_path, 'wb') as output_file:
       self.Process(

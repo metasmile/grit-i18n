@@ -44,26 +44,6 @@ _GATHERERS = {
 }
 
 
-# Formatter instance to use for each type attribute
-# when formatting .rc files.
-_RC_FORMATTERS = {
-  'accelerators'        : grit.format.rc.RcSection(),
-  'admin_template'      : grit.format.rc.RcInclude('ADM'),
-  'chrome_html'         : grit.format.rc.RcInclude('BINDATA',
-                                                   process_html=True),
-  'chrome_scaled_image' : grit.format.rc.RcInclude('BINDATA'),
-  'dialog'              : grit.format.rc.RcSection(),
-  'igoogle'             : grit.format.rc.RcInclude('XML'),
-  'menu'                : grit.format.rc.RcSection(),
-  'muppet'              : grit.format.rc.RcInclude('XML'),
-  'rcdata'              : grit.format.rc.RcSection(),
-  'tr_html'             : grit.format.rc.RcInclude('HTML'),
-  'txt'                 : grit.format.rc.RcInclude('TXT'),
-  'version'             : grit.format.rc.RcSection(),
-  'policy_template_metafile': None,
-}
-
-
 # TODO(joi) Print a warning if the 'variant_of_revision' attribute indicates
 # that a skeleton variant is older than the original file.
 
@@ -175,7 +155,7 @@ class StructureNode(base.Node):
     generate the data pack data file.
     """
     from grit.format import rc_header
-    id_map = rc_header.Item.tids_
+    id_map = rc_header.GetIds(self.GetRoot())
     id = id_map[self.GetTextualIds()[0]]
     data = self.gatherer.GetData(lang, encoding)
     return id, data
@@ -195,22 +175,7 @@ class StructureNode(base.Node):
       return [self.attrs['name']]
     return self.gatherer.GetTextualIds()
 
-  def ItemFormatter(self, t):
-    if t == 'rc_header':
-      return grit.format.rc_header.Item()
-    elif (t in ['rc_all', 'rc_translateable', 'rc_nontranslateable'] and
-          self.SatisfiesOutputCondition()):
-      return _RC_FORMATTERS[self.attrs['type']]
-    elif t == 'resource_map_source':
-      from grit.format import resource_map
-      return resource_map.SourceInclude()
-    elif t == 'resource_file_map_source':
-      from grit.format import resource_map
-      return resource_map.SourceFileInclude()
-    else:
-      return super(StructureNode, self).ItemFormatter(t)
-
-  def RunGatherers(self, recursive=False, debug=False):
+  def RunPreSubstitutionGatherer(self, debug=False):
     if debug:
       print 'Running gatherer %s for file %s' % (
           str(type(self.gatherer)), self.GetInputPath())

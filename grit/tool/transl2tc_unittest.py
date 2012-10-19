@@ -85,7 +85,7 @@ how are you?
         </release>
       </grit>'''), path)
     current_grd.SetOutputLanguage('en')
-    current_grd.RunGatherers(recursive=True)
+    current_grd.RunGatherers()
 
     source_rc_path = util.PathFromRoot('grit/testdata/source.rc')
     source_rc = util.ReadFile(source_rc_path, util.RAW_TEXT)

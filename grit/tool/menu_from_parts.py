@@ -36,7 +36,7 @@ to being one message for the whole menu.'''
 
     grd = grd_reader.Parse(self.o.input, debug=self.o.extra_verbose)
     grd.OnlyTheseTranslations([])  # don't load translations
-    grd.RunGatherers(recursive = True)
+    grd.RunGatherers()
 
     xtb = {}
     def Callback(msg_id, parts):

@@ -24,7 +24,7 @@ class CountMessage(interface.Tool):
     id = args[0]
     res_tree = grd_reader.Parse(opts.input, debug=opts.extra_verbose)
     res_tree.OnlyTheseTranslations([])
-    res_tree.RunGatherers(True)
+    res_tree.RunGatherers()
 
     count = 0
     for c in res_tree.UberClique().AllCliques():

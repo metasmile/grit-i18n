@@ -104,7 +104,7 @@ class MessageCliqueUnittest(unittest.TestCase):
   </release>
 </grit>'''), util.PathFromRoot('.'))
     resources.SetOutputLanguage('en')
-    resources.RunGatherers(True)
+    resources.RunGatherers()
     content_list = []
     for clique_list in resources.UberClique().cliques_.values():
       for clique in clique_list:
@@ -124,7 +124,7 @@ class MessageCliqueUnittest(unittest.TestCase):
     </structures>
   </release>
 </grit>'''), util.PathFromRoot('.'))
-    self.assertRaises(exception.SectionNotFound, resources.RunGatherers, True)
+    self.assertRaises(exception.SectionNotFound, resources.RunGatherers)
 
   def testSemiIdenticalCliques(self):
     messages = [

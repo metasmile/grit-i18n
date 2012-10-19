@@ -13,7 +13,6 @@ import unittest
 if __name__ == '__main__':
   sys.path[0] = os.path.abspath(os.path.join(sys.path[0], '../..'))
 
-from grit import grd_reader
 from grit import util
 from grit.tool import build
 
@@ -21,7 +20,7 @@ from grit.tool import build
 class AndroidXmlUnittest(unittest.TestCase):
 
   def testMessages(self):
-    root = grd_reader.Parse(StringIO.StringIO(ur"""
+    root = util.ParseGrdForUnittest(ur"""
         <messages>
           <message name="IDS_SIMPLE" desc="A vanilla string">
             Martha
@@ -46,8 +45,7 @@ a sledge hammer.
             I'll buy a <ph name="WAVELENGTH">%d<ex>200</ex></ph> nm laser at <ph name="STORE_NAME">%s<ex>the grocery store</ex></ph>.
           </message>
         </messages>
-        """), flexible_root=True)
-    util.FixRootForUnittest(root)
+        """)
 
     buf = StringIO.StringIO()
     build.RcBuilder.ProcessNode(root, DummyOutput('android', 'en'), buf)

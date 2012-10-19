@@ -134,8 +134,8 @@ def _ProcessNodes(grd, base_dir, lang_folders):
 
   # Go through nodes, figuring out resources.  Also output certain resources
   # as build targets, based on the sconsdep flag.
-  for node in grd:
-    if node.SatisfiesOutputCondition():
+  for node in grd.ActiveDescendants():
+    with node:
       file = node.ToRealPath(node.GetInputPath())
       if node.name == 'structure':
         translated_files.append(os.path.abspath(file))
@@ -150,9 +150,8 @@ def _ProcessNodes(grd, base_dir, lang_folders):
               structure_outputs.append(path)
               if _IsDebugEnabled():
                 print 'GRIT: Added target %s' % path
-      elif (node.name == 'skeleton' or
-            (node.name == 'file' and node.parent and
-             node.parent.name == 'translations')):
+      elif (node.name == 'skeleton' or (node.name == 'file' and node.parent and
+                                        node.parent.name == 'translations')):
         translated_files.append(os.path.abspath(file))
       elif node.name == 'include':
         # If it's added by file name and the file isn't easy to find, don't make

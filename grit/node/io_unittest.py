@@ -63,7 +63,7 @@ class FileNodeUnittest(unittest.TestCase):
     grd = grd_reader.Parse(StringIO.StringIO(xml),
                            util.PathFromRoot('grit/testdata'))
     grd.SetOutputLanguage('en')
-    grd.RunGatherers(recursive=True)
+    grd.RunGatherers()
     self.VerifyCliquesContainEnglishAndFrenchAndNothingElse(grd.GetCliques())
 
   def testIffyness(self):
@@ -82,10 +82,10 @@ class FileNodeUnittest(unittest.TestCase):
         </release>
       </grit>'''), util.PathFromRoot('grit/testdata'))
     grd.SetOutputLanguage('en')
-    grd.RunGatherers(recursive=True)
+    grd.RunGatherers()
 
     grd.SetOutputLanguage('fr')
-    grd.RunGatherers(recursive=True)
+    grd.RunGatherers()
 
   def testConditionalLoadTranslations(self):
     xml = '''<?xml version="1.0" encoding="UTF-8"?>
@@ -110,7 +110,7 @@ class FileNodeUnittest(unittest.TestCase):
     grd = grd_reader.Parse(StringIO.StringIO(xml),
                            util.PathFromRoot('grit/testdata'))
     grd.SetOutputLanguage('en')
-    grd.RunGatherers(recursive=True)
+    grd.RunGatherers()
     self.VerifyCliquesContainEnglishAndFrenchAndNothingElse(grd.GetCliques())
 
   def testConditionalOutput(self):
@@ -136,15 +136,15 @@ class FileNodeUnittest(unittest.TestCase):
                            util.PathFromRoot('grit/test/data'),
                            defines={})
     grd.SetOutputLanguage('en')
-    grd.RunGatherers(recursive=True)
+    grd.RunGatherers()
     outputs = grd.GetChildrenOfType(io.OutputNode)
-    self.failUnless(outputs[0].SatisfiesOutputCondition())
+    active = set(grd.ActiveDescendants())
+    self.failUnless(outputs[0] in active)
     self.failUnless(outputs[0].GetType() == 'rc_header')
-    self.failUnless(outputs[1].SatisfiesOutputCondition())
+    self.failUnless(outputs[1] in active)
     self.failUnless(outputs[1].GetType() == 'rc_all')
-    self.failUnless(not outputs[2].SatisfiesOutputCondition())
-    self.failUnless(outputs[2].GetType() ==
-                    'output_condition_not_satisfied_rc_all')
+    self.failUnless(outputs[2] not in active)
+    self.failUnless(outputs[2].GetType() == 'rc_all')
 
 
 if __name__ == '__main__':

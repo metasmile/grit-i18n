@@ -21,7 +21,7 @@ def main(argv):
     print ("Usage:\n  %s <output_filename> <input_file1> [input_file2] ... " %
            argv[0])
     sys.exit(-1)
-  grit.format.data_pack.DataPack.RePack(argv[1], argv[2:])
+  grit.format.data_pack.RePack(argv[1], argv[2:])
 
 if '__main__' == __name__:
   main(sys.argv)

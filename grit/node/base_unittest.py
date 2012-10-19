@@ -83,7 +83,7 @@ class NodeUnittest(unittest.TestCase):
     node.AddChild(ph)
     node.EndParsing()
 
-    non_indented_xml = node.Format(node)
+    non_indented_xml = node.FormatXml()
     self.failUnless(non_indented_xml == u'<message name="name">\n  Hello '
                     u'&lt;young&gt; <ph name="USERNAME">$1<ex>Joi</ex></ph>'
                     u'\n</message>')
@@ -116,7 +116,7 @@ class NodeUnittest(unittest.TestCase):
     node.AppendContent(u" yessiree '''")
     node.EndParsing()
 
-    non_indented_xml = node.Format(node)
+    non_indented_xml = node.FormatXml()
     self.failUnless(non_indented_xml ==
                     u"<message name=\"name\">\n  '''   Hello"
                     u' &lt;young&gt; <ph name="USERNAME">$1<ex>Joi</ex></ph>'

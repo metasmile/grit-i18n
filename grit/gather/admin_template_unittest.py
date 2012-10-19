@@ -86,7 +86,7 @@ class AdmGathererUnittest(unittest.TestCase):
         </outputs>
       </grit>'''), util.PathFromRoot('grit/testdata'))
     grd.SetOutputLanguage('en')
-    grd.RunGatherers(recursive=True)
+    grd.RunGatherers()
     return grd
 
   def testInGrd(self):

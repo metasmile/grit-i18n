@@ -29,7 +29,7 @@ class FormatDataPackUnittest(unittest.TestCase):
         '\x00\x00\x3f\x00\x00\x00'          # extra entry for the size of last
         'this is id 4this is id 6')         # data
     input = { 1: "", 4: "this is id 4", 6: "this is id 6", 10: "" }
-    output = data_pack.DataPack.WriteDataPackToString(input, data_pack.UTF8)
+    output = data_pack.WriteDataPackToString(input, data_pack.UTF8)
     self.failUnless(output == expected)
 
 

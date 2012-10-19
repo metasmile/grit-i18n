@@ -32,8 +32,8 @@ class FileNode(base.Node):
   def MandatoryAttributes(self):
     return ['path', 'lang']
 
-  def RunGatherers(self, recursive=False, debug=False):
-    if not self.should_load_ or not self.SatisfiesOutputCondition():
+  def RunPostSubstitutionGatherer(self, debug=False):
+    if not self.should_load_:
       return
 
     root = self.GetRoot()
@@ -75,10 +75,7 @@ class OutputNode(base.Node):
     }
 
   def GetType(self):
-    if self.SatisfiesOutputCondition():
-      return self.attrs['type']
-    else:
-      return 'output_condition_not_satisfied_%s' % self.attrs['type']
+    return self.attrs['type']
 
   def GetLanguage(self):
     '''Returns the language ID, default 'en'.'''
@@ -108,12 +105,4 @@ class EmitNode(base.ContentNode):
   def GetEmitType(self):
     '''Returns the emit_type for this node. Default is 'append'.'''
     return self.attrs['emit_type']
-
-  def ItemFormatter(self, t):
-    if t == 'rc_header':
-      return grit.format.rc_header.EmitAppender()
-    else:
-      return super(EmitNode, self).ItemFormatter(t)
-
-
 

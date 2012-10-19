@@ -57,7 +57,7 @@ class WriterUnittestCommon(unittest.TestCase):
     # Parse the grit tree and load the policies' JSON with a gatherer.
     grd = grd_reader.Parse(grd_string_io, dir=tmp_dir_name)
     grd.SetOutputLanguage('en')
-    grd.RunGatherers(recursive=True)
+    grd.RunGatherers()
     # Remove the policies' JSON.
     os.unlink(json_file_path)
     return grd
@@ -74,7 +74,7 @@ class WriterUnittestCommon(unittest.TestCase):
       out_lang: Language of the output node for which output will be generated.
 
     Returns:
-      The string of the tamplete created by the writer.
+      The string of the template created by the writer.
     '''
     grd.SetOutputLanguage(env_lang)
     grd.SetDefines(env_defs)

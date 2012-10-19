@@ -17,6 +17,7 @@ import StringIO
 from grit import grd_reader
 import grit.exception
 from grit import util
+from grit.format import rc
 from grit.node import misc
 
 
@@ -81,21 +82,24 @@ class IfNodeUnittest(unittest.TestCase):
 
     grd.SetOutputLanguage('fr')
     grd.SetDefines({'hello': '1'})
-    self.failUnless(not bingo_message.SatisfiesOutputCondition())
-    self.failUnless(hello_message.SatisfiesOutputCondition())
-    self.failUnless(french_message.SatisfiesOutputCondition())
+    active = set(grd.ActiveDescendants())
+    self.failUnless(bingo_message not in active)
+    self.failUnless(hello_message in active)
+    self.failUnless(french_message in active)
 
     grd.SetOutputLanguage('en')
     grd.SetDefines({'bingo': 1})
-    self.failUnless(bingo_message.SatisfiesOutputCondition())
-    self.failUnless(not hello_message.SatisfiesOutputCondition())
-    self.failUnless(not french_message.SatisfiesOutputCondition())
+    active = set(grd.ActiveDescendants())
+    self.failUnless(bingo_message in active)
+    self.failUnless(hello_message not in active)
+    self.failUnless(french_message not in active)
 
     grd.SetOutputLanguage('en')
     grd.SetDefines({'FORCE_FRENCH': '1', 'bingo': '1'})
-    self.failUnless(bingo_message.SatisfiesOutputCondition())
-    self.failUnless(not hello_message.SatisfiesOutputCondition())
-    self.failUnless(french_message.SatisfiesOutputCondition())
+    active = set(grd.ActiveDescendants())
+    self.failUnless(bingo_message in active)
+    self.failUnless(hello_message not in active)
+    self.failUnless(french_message in active)
 
   def testIffynessWithOutputNodes(self):
     grd = grd_reader.Parse(StringIO.StringIO('''
@@ -336,7 +340,7 @@ class ReleaseNodeUnittest(unittest.TestCase):
         </release>
       </grit>'''), util.PathFromRoot('grit/testdata'))
     grd.SetOutputLanguage('en')
-    grd.RunGatherers(recursive=True)
+    grd.RunGatherers()
 
     hello = grd.GetNodeById('IDS_HELLO')
     aboutbox = grd.GetNodeById('IDD_ABOUTBOX')
@@ -349,20 +353,13 @@ class ReleaseNodeUnittest(unittest.TestCase):
     for node in [bingo, menu]:
       self.failUnless(node.PseudoIsAllowed())
 
-    for node in [hello, aboutbox]:
-      try:
-        formatter = node.ItemFormatter('rc_all')
-        formatter.Format(node, 'xyz-pseudo')
-        self.fail('Should have failed during Format since pseudo is not allowed')
-      except:
-        pass  # expected case
+    # TODO(benrg): There was a test here that formatting hello and aboutbox with
+    # a pseudo language should fail, but they do not fail and the test was
+    # broken and failed to catch it. Fix this.
 
-    for node in [bingo, menu]:
-      try:
-        formatter = node.ItemFormatter('rc_all')
-        formatter.Format(node, 'xyz-pseudo')
-      except:
-        self.fail('Should not have gotten exception since pseudo is allowed')
+    # Should not raise an exception since pseudo is allowed
+    rc.FormatMessage(bingo, 'xyz-pseudo')
+    rc.FormatStructure(menu, 'xyz-pseudo', '.')
 
 
 if __name__ == '__main__':

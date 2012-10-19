@@ -47,14 +47,16 @@ class DetermineBuildInfo(interface.Tool):
     for lang, dirname in langs.iteritems():
       old_output_language = res_tree.output_language
       res_tree.SetOutputLanguage(lang)
-      for node in res_tree.GetChildrenOfType(structure.StructureNode):
-        if node.HasFileForLanguage() and node.SatisfiesOutputCondition():
-          path = node.FileForLanguage(lang, dirname, create_file=False,
-                                      return_if_not_generated=False)
-          if path:
-            path = os.path.join(self.output_directory, path)
-            path = os.path.normpath(path)
-            print '%s|%s' % ('rc_all', path)
+      for node in res_tree.ActiveDescendants():
+        with node:
+          if (isinstance(node, structure.StructureNode) and
+              node.HasFileForLanguage()):
+            path = node.FileForLanguage(lang, dirname, create_file=False,
+                                        return_if_not_generated=False)
+            if path:
+              path = os.path.join(self.output_directory, path)
+              path = os.path.normpath(path)
+              print '%s|%s' % ('rc_all', path)
       res_tree.SetOutputLanguage(old_output_language)
 
     for output in res_tree.GetOutputFiles():
