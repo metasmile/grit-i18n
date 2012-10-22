@@ -7,6 +7,7 @@
 '''
 
 import os
+import platform
 
 from grit import exception
 from grit import util
@@ -99,7 +100,14 @@ class StructureNode(base.Node):
              'expand_variables' : 'false',
              'output_filename' : '',
              'fold_whitespace': 'false',
+             # Run an arbitrary command after translation is complete
+             # so that it doesn't interfere with what's in translation
+             # console.
              'run_command' : '',
+             # Leave empty to run on all platforms, comma-separated
+             # for one or more specific platforms. Values must match
+             # output of platform.system().
+             'run_command_on_platforms' : '',
              'allowexternalscript': 'false',
              'flattenhtml': 'false',
              'fallback_to_low_resolution': 'default',
@@ -215,6 +223,13 @@ class StructureNode(base.Node):
       return (self.attrs['expand_variables'] == 'true' or
               self.attrs['file'].lower().endswith('.rc'))
 
+  def RunCommandOnCurrentPlatform(self):
+    if self.attrs['run_command_on_platforms'] == '':
+      return True
+    else:
+      target_platforms = self.attrs['run_command_on_platforms'].split(',')
+      return platform.system() in target_platforms
+
   def FileForLanguage(self, lang, output_dir, create_file=True,
                       return_if_not_generated=True):
     '''Returns the filename of the file associated with this structure,
@@ -230,7 +245,8 @@ class StructureNode(base.Node):
     # use the existing file.
     if ((not lang or lang == self.GetRoot().GetSourceLanguage()) and
         self.attrs['expand_variables'] != 'true' and
-        not self.attrs['run_command']):
+        (not self.attrs['run_command'] or
+         not self.RunCommandOnCurrentPlatform())):
       if return_if_not_generated:
         return self.ToRealPath(self.GetInputPath())
       else:
@@ -264,7 +280,7 @@ class StructureNode(base.Node):
                                               self.attrs['output_encoding'])
         output_stream.write(file_contents)
 
-      if self.attrs['run_command']:
+      if self.attrs['run_command'] and self.RunCommandOnCurrentPlatform():
         # Run arbitrary commands after translation is complete so that it
         # doesn't interfere with what's in translation console.
         command = self.attrs['run_command'] % {'filename': filename}

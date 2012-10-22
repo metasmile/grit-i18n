@@ -146,6 +146,15 @@ The -i option causes 'grit xmb' to output an "IDs only" file instead of an XMB
 file.  The "IDs only" file contains the message ID of each message that would
 normally be output to the XMB file, one message ID per line.  It is designed for
 use with the 'grit transl2tc' tool's -l option.
+
+Other options:
+
+  -D NAME[=VAL]     Specify a C-preprocessor-like define NAME with optional
+                    value VAL (defaults to 1) which will be used to control
+                    conditional inclusion of resources.
+
+  -E NAME=VALUE     Set environment variable NAME to VALUE (within grit).
+
 """
   # The different output formats supported by this tool
   FORMAT_XMB = 0
@@ -178,6 +187,9 @@ use with the 'grit transl2tc' tool's -l option.
       elif key == '-D':
         name, val = util.ParseDefine(val)
         self.defines[name] = val
+      elif key == '-E':
+        (env_name, env_value) = val.split('=')
+        os.environ[env_name] = env_value
     if not len(args) == 1:
       print ('grit xmb takes exactly one argument, the path to the XMB file '
              'to output.')

@@ -6,6 +6,8 @@
 '''The <output> and <file> elements.
 '''
 
+import os
+
 import grit.format.rc_header
 
 from grit import xtb_reader
@@ -58,7 +60,7 @@ class FileNode(base.Node):
             'by the \'lang\' attribute.')
 
   def GetInputPath(self):
-    return self.attrs['path']
+    return os.path.expandvars(self.attrs['path'])
 
 
 class OutputNode(base.Node):
@@ -88,10 +90,12 @@ class OutputNode(base.Node):
     return self.attrs['filename']
 
   def GetOutputFilename(self):
+    path = None
     if hasattr(self, 'output_filename'):
-      return self.output_filename
+      path = self.output_filename
     else:
-      return self.attrs['filename']
+      path = self.attrs['filename']
+    return os.path.expandvars(path)
 
   def _IsValidChild(self, child):
     return isinstance(child, EmitNode)

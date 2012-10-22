@@ -11,10 +11,12 @@ import sys
 if __name__ == '__main__':
   sys.path[0] = os.path.abspath(os.path.join(sys.path[0], '../..'))
 
+import platform
 import unittest
 import StringIO
 
 from grit import util
+from grit.node import structure
 from grit.format import rc
 
 
@@ -32,6 +34,16 @@ class StructureUnittest(unittest.TestCase):
     self.failUnless(transl.count('040704') and transl.count('110978'))
     self.failUnless(transl.count('2005",IDC_STATIC'))
 
+  def testRunCommandOnCurrentPlatform(self):
+    node = structure.StructureNode()
+    node.attrs = node.DefaultAttributes()
+    self.failUnless(node.RunCommandOnCurrentPlatform())
+    node.attrs['run_command_on_platforms'] = 'Nosuch'
+    self.failIf(node.RunCommandOnCurrentPlatform())
+    node.attrs['run_command_on_platforms'] = (
+        'Nosuch,%s,Othernot' % platform.system())
+    self.failUnless(node.RunCommandOnCurrentPlatform())
+
+
 if __name__ == '__main__':
   unittest.main()
-
