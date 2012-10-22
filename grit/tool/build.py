@@ -289,8 +289,8 @@ are exported to translation interchange files (e.g. XMB files), etc.
     # and non-official build.
     warnings = (self.res.UberClique().MissingTranslationsReport().
         encode('ascii', 'replace'))
-    if warnings and self.defines.get('_google_chrome', False):
-      print warnings
+    if warnings:
+      self.VerboseOut(warnings)
     if self.res.UberClique().HasMissingTranslations():
       print self.res.UberClique().missing_translations_
       sys.exit(-1)

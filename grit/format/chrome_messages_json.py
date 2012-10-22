@@ -10,7 +10,6 @@ import re
 import types
 
 from grit import util
-from grit.format import interface
 from grit.node import message
 
 def Format(root, lang='en', output_dir='.'):
