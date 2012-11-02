@@ -146,8 +146,8 @@ class ChromeScaledImageUnittest(unittest.TestCase):
             {'tactile_123_percent': 'should fail before using this'})
 
   def testLowresFallback(self):
-    png = _MakePNG([])
-    png_with_csCl = '\0\0\0\0csCl\xc1\x30\x60\x4d' + png
+    png = _MakePNG([('Abcd', '')])
+    png_with_csCl = _MakePNG([('csCl', ''),('Abcd', '')])
     for outer in (None, False, True):
       for inner in (None, False, True):
         args = (
