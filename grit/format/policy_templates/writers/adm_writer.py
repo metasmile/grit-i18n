@@ -203,7 +203,7 @@ class AdmWriter(template_writer.TemplateWriter):
                        self.messages['win_supported_winxpsp2']['text'])
     category_path = self.config['win_mandatory_category_path']
     recommended_category_path = self.config['win_recommended_category_path']
-    recommended_name = '%s (%s)' % \
+    recommended_name = '%s - %s' % \
         (self.config['app_name'], self.messages['doc_recommended']['text'])
     if self.config['build'] == 'chrome':
       self._AddGuiString(category_path[0], 'Google')

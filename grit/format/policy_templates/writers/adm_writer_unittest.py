@@ -73,7 +73,7 @@ class AdmWriterUnittest(writer_unittest_common.WriterUnittestCommon):
 ''', '''[Strings]
 SUPPORTED_WINXPSP2="At least "Windows 3.11"
 chromium="Chromium"
-chromium_recommended="Chromium (Recommended)"''')
+chromium_recommended="Chromium - Recommended"''')
     self.CompareOutputs(output, expected_output)
 
   def testMainPolicy(self):
@@ -142,7 +142,7 @@ chromium_recommended="Chromium (Recommended)"''')
 SUPPORTED_WINXPSP2="At least Windows 3.12"
 google="Google"
 googlechrome="Google Chrome"
-googlechrome_recommended="Google Chrome (Recommended)"
+googlechrome_recommended="Google Chrome - Recommended"
 MainPolicy_Policy="Caption of main."
 MainPolicy_Explain="Description of main."''')
     self.CompareOutputs(output, expected_output)
@@ -211,7 +211,7 @@ With a newline.""",
 ''', '''[Strings]
 SUPPORTED_WINXPSP2="At least Windows 3.13"
 chromium="Chromium"
-chromium_recommended="Chromium (Recommended)"
+chromium_recommended="Chromium - Recommended"
 StringPolicy_Policy="Caption of policy."
 StringPolicy_Explain="Description of group.\\nWith a newline."
 StringPolicy_Part="Caption of policy."
@@ -283,7 +283,7 @@ StringPolicy_Part="Caption of policy."
 ''', '''[Strings]
 SUPPORTED_WINXPSP2="At least Windows 3.13"
 chromium="Chromium"
-chromium_recommended="Chromium (Recommended)"
+chromium_recommended="Chromium - Recommended"
 IntPolicy_Policy="Caption of policy."
 IntPolicy_Explain="Description of policy."
 IntPolicy_Part="Caption of policy."
@@ -378,7 +378,7 @@ IntPolicy_Part="Caption of policy."
 SUPPORTED_WINXPSP2="At least Windows 3.14"
 google="Google"
 googlechrome="Google Chrome"
-googlechrome_recommended="Google Chrome (Recommended)"
+googlechrome_recommended="Google Chrome - Recommended"
 EnumPolicy_Policy="Caption of policy."
 EnumPolicy_Explain="Description of policy."
 EnumPolicy_Part="Caption of policy."
@@ -469,7 +469,7 @@ ProxyServerAutoDetect_DropDown="Option2"
 SUPPORTED_WINXPSP2="At least Windows 3.14"
 google="Google"
 googlechrome="Google Chrome"
-googlechrome_recommended="Google Chrome (Recommended)"
+googlechrome_recommended="Google Chrome - Recommended"
 EnumPolicy_Policy="Caption of policy."
 EnumPolicy_Explain="Description of policy."
 EnumPolicy_Part="Caption of policy."
@@ -545,7 +545,7 @@ With a newline.""",
 ''', '''[Strings]
 SUPPORTED_WINXPSP2="At least Windows 3.15"
 chromium="Chromium"
-chromium_recommended="Chromium (Recommended)"
+chromium_recommended="Chromium - Recommended"
 ListPolicy_Policy="Caption of list policy."
 ListPolicy_Explain="Description of list policy.\\nWith a newline."
 ListPolicy_Part="Label of list policy."
@@ -615,7 +615,7 @@ ListPolicy_Part="Label of list policy."
 ''', '''[Strings]
 SUPPORTED_WINXPSP2="At least Windows 3.13"
 chromium="Chromium"
-chromium_recommended="Chromium (Recommended)"
+chromium_recommended="Chromium - Recommended"
 DictionaryPolicy_Policy="Caption of policy."
 DictionaryPolicy_Explain="Description of group."
 DictionaryPolicy_Part="Caption of policy."
@@ -669,7 +669,7 @@ DictionaryPolicy_Part="Caption of policy."
 ''', '''[Strings]
 SUPPORTED_WINXPSP2="At least Windows 3.16"
 chromium="Chromium"
-chromium_recommended="Chromium (Recommended)"
+chromium_recommended="Chromium - Recommended"
 ''')
     self.CompareOutputs(output, expected_output)
 
@@ -728,7 +728,7 @@ chromium_recommended="Chromium (Recommended)"
 SUPPORTED_WINXPSP2="At least Windows 3.12"
 google="Google"
 googlechrome="Google Chrome"
-googlechrome_recommended="Google Chrome (Recommended)"
+googlechrome_recommended="Google Chrome - Recommended"
 MainPolicy_Policy="Caption of main."
 MainPolicy_Explain="Description of main."''')
     self.CompareOutputs(output, expected_output)
@@ -829,7 +829,7 @@ With a newline."""
 ''', '''[Strings]
 SUPPORTED_WINXPSP2="At least Windows 3.16"
 chromium="Chromium"
-chromium_recommended="Chromium (Recommended)"
+chromium_recommended="Chromium - Recommended"
 Group1_Category="Caption of group."
 Policy1_Policy="Caption of policy1."
 Policy1_Explain="Description of policy1.\\nWith a newline."
