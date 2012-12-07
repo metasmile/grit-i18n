@@ -19,7 +19,7 @@ from xml.sax import saxutils
 
 from grit import lazy_re
 
-_root_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
+_root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 
 # Unique constants for use by ReadFile().

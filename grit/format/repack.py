@@ -12,7 +12,7 @@ for details about the file format.
 import os
 import sys
 if __name__ == '__main__':
-  sys.path[0] = os.path.abspath(os.path.join(sys.path[0], '../..'))
+  sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 
 import grit.format.data_pack
 

@@ -11,7 +11,7 @@ import sys
 import unittest
 
 if __name__ == '__main__':
-  sys.path[0] = os.path.abspath(os.path.join(sys.path[0], '../..'))
+  sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 
 from grit import util
 from grit.tool import build
