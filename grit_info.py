@@ -123,7 +123,7 @@ def DoMain(argv):
     defines[name] = val
 
   for env_pair in options.build_env:
-    (env_name, env_value) = env_pair.split('=')
+    (env_name, env_value) = env_pair.split('=', 1)
     os.environ[env_name] = env_value
 
   if options.inputs:

@@ -101,7 +101,7 @@ are exported to translation interchange files (e.g. XMB files), etc.
         name, val = util.ParseDefine(val)
         self.defines[name] = val
       elif key == '-E':
-        (env_name, env_value) = val.split('=')
+        (env_name, env_value) = val.split('=', 1)
         os.environ[env_name] = env_value
       elif key == '-f':
         # TODO(joi@chromium.org): Remove this override once change

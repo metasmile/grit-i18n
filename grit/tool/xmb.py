@@ -188,7 +188,7 @@ Other options:
         name, val = util.ParseDefine(val)
         self.defines[name] = val
       elif key == '-E':
-        (env_name, env_value) = val.split('=')
+        (env_name, env_value) = val.split('=', 1)
         os.environ[env_name] = env_value
     if not len(args) == 1:
       print ('grit xmb takes exactly one argument, the path to the XMB file '

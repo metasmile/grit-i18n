@@ -474,7 +474,7 @@ def ParseDefine(define):
   Returns:
     A (name, value) pair. name is a string, value a string or boolean.
   '''
-  parts = [part.strip() for part in define.split('=')]
+  parts = [part.strip() for part in define.split('=', 1)]
   assert len(parts) >= 1
   name = parts[0]
   val = True
