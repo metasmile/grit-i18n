@@ -607,12 +607,12 @@ class DocWriter(xml_formatted_writer.XMLFormattedWriter):
       'chrome_frame': self.config['frame_name'],
       'chrome_os': self.config['os_name'],
     }
-    # Human-readable names of supported features.
-    self._FEATURE_MAP = {
-      'dynamic_refresh': self._GetLocalizedMessage('feature_dynamic_refresh'),
-      'can_be_recommended': self._GetLocalizedMessage(
-          'feature_can_be_recommended'),
-    }
+    # Human-readable names of supported features. Each supported feature has
+    # a 'doc_feature_X' entry in |self.messages|.
+    self._FEATURE_MAP = {}
+    for message in self.messages:
+      if message.startswith('doc_feature_'):
+        self._FEATURE_MAP[message[12:]] = self.messages[message]['text']
     # Human-readable names of types.
     self._TYPE_MAP = {
       'string': 'String (REG_SZ)',
