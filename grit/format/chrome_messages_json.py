@@ -20,7 +20,7 @@ def Format(root, lang='en', output_dir='.'):
             '    "message": "%s"\n'
             '  }')
   first = True
-  for child in root:
+  for child in root.ActiveDescendants():
     if isinstance(child, message.MessageNode):
       loc_message = child.Translate(lang)
       loc_message = re.sub(r'\\', r'\\\\', loc_message)
