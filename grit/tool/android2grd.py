@@ -215,7 +215,8 @@ OPTIONS may be any of the following:
         self.__CreateRcOutputNode(outputs, lang, self.rc_dir)
       if self.xml_res_dir:
         self.__CreateAndroidXmlOutputNode(outputs, lang, self.xml_res_dir)
-      self.__CreateFileNode(translations, lang)
+      if lang != 'en':
+        self.__CreateFileNode(translations, lang)
     # Convert all the strings.xml strings into grd messages.
     self.__CreateMessageNodes(messages, android_dom.documentElement)
 
@@ -468,9 +469,9 @@ OPTIONS may be any of the following:
       lang_map = {'no': 'nb', 'fil': 'tl', 'id': 'in', 'he': 'iw', 'yi': 'ji'}
       android_lang = lang_map.get(android_lang, android_lang)
       android_locale = android_lang + ('-r' + region if region else '')
-    xml_file_name = "strings.xml"
+    values = 'values-' + android_locale if android_locale != 'en' else 'values'
     xml_path = os.path.normpath(os.path.join(
-        xml_res_dir, 'values-%s' % android_locale, 'strings.xml'))
+        xml_res_dir, values, 'strings.xml'))
 
     node = io.OutputNode()
     node.StartParsing(u'output', outputs_node)
