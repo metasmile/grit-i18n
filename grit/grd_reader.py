@@ -146,8 +146,10 @@ def Parse(filename_or_stream, dir=None, stop_after=None, first_ids_file=None,
   If 'debug' is true, lots of information about the parsing events will be
   printed out during parsing of the file.
 
-  If 'first_ids_file' is non-empty, it is used to override the setting
-  for the first_ids_file attribute of the <grit> root node.
+  If 'first_ids_file' is non-empty, it is used to override the setting for the
+  first_ids_file attribute of the <grit> root node. Note that the first_ids_file
+  parameter should be relative to the cwd, even though the first_ids_file
+  attribute of the <grit> node is relative to the grd file.
 
   Args:
     filename_or_stream: './bla.xml'
@@ -189,6 +191,13 @@ def Parse(filename_or_stream, dir=None, stop_after=None, first_ids_file=None,
 
   if isinstance(handler.root, misc.GritNode):
     if first_ids_file:
+      # Make the path to the first_ids_file relative to the grd file,
+      # unless it begins with GRIT_DIR.
+      GRIT_DIR_PREFIX = 'GRIT_DIR'
+      if not (first_ids_file.startswith(GRIT_DIR_PREFIX)
+          and first_ids_file[len(GRIT_DIR_PREFIX)] in ['/', '\\']):
+        rel_dir = os.path.relpath(os.getcwd(), dir)
+        first_ids_file = util.normpath(os.path.join(rel_dir, first_ids_file))
       handler.root.attrs['first_ids_file'] = first_ids_file
     # Assign first ids to the nodes that don't have them.
     handler.root.AssignFirstIds(filename_or_stream, defines)
