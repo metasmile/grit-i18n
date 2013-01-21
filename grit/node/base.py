@@ -454,6 +454,7 @@ class Node(object):
     lang = getattr(root, 'output_language', '')
     context = getattr(root, 'output_context', '')
     defs = getattr(root, 'defines', {})
+    target_platform = getattr(root, 'target_platform', '')
     def pp_ifdef(symbol):
       return symbol in defs
     def pp_if(symbol):
@@ -462,12 +463,12 @@ class Node(object):
         'lang' : lang,
         'context' : context,
         'defs' : defs,
-        'os': sys.platform,
-        'is_linux': sys.platform.startswith('linux'),
-        'is_macosx': sys.platform == 'darwin',
-        'is_win': sys.platform in ('cygwin', 'win32'),
-        'is_posix': (sys.platform in ('darwin', 'linux2', 'linux3', 'sunos5')
-                     or 'bsd' in sys.platform),
+        'os': target_platform,
+        'is_linux': target_platform.startswith('linux'),
+        'is_macosx': target_platform == 'darwin',
+        'is_win': target_platform in ('cygwin', 'win32'),
+        'is_posix': (target_platform in ('darwin', 'linux2', 'linux3', 'sunos5')
+                     or 'bsd' in target_platform),
         'pp_ifdef' : pp_ifdef,
         'pp_if' : pp_if,
     }

@@ -134,7 +134,7 @@ class GrdPartContentHandler(xml.sax.handler.ContentHandler):
 
 
 def Parse(filename_or_stream, dir=None, stop_after=None, first_ids_file=None,
-          debug=False, defines=None, tags_to_ignore=None):
+          debug=False, defines=None, tags_to_ignore=None, target_platform=None):
   '''Parses a GRD file into a tree of nodes (from grit.node).
 
   If filename_or_stream is a stream, 'dir' should point to the directory
@@ -151,6 +151,9 @@ def Parse(filename_or_stream, dir=None, stop_after=None, first_ids_file=None,
   parameter should be relative to the cwd, even though the first_ids_file
   attribute of the <grit> node is relative to the grd file.
 
+  If 'target_platform' is set, this is used to determine the target
+  platform of builds, instead of using |sys.platform|.
+
   Args:
     filename_or_stream: './bla.xml'
     dir: None (if filename_or_stream is a filename) or '.'
@@ -158,6 +161,8 @@ def Parse(filename_or_stream, dir=None, stop_after=None, first_ids_file=None,
     first_ids_file: 'GRIT_DIR/../gritsettings/resource_ids'
     debug: False
     defines: dictionary of defines, like {'chromeos': '1'}
+    target_platform: None or the value that would be returned by sys.platform
+        on your target platform.
 
   Return:
     Subclass of grit.node.base.Node
@@ -190,6 +195,8 @@ def Parse(filename_or_stream, dir=None, stop_after=None, first_ids_file=None,
     handler.root.SetOwnDir(dir)
 
   if isinstance(handler.root, misc.GritNode):
+    if target_platform:
+      handler.root.SetTargetPlatform(target_platform)
     if first_ids_file:
       # Make the path to the first_ids_file relative to the grd file,
       # unless it begins with GRIT_DIR.
