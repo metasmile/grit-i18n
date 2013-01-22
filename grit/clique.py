@@ -95,8 +95,9 @@ class UberClique(object):
     # Enable others to find this clique by its message ID
     if message.GetId() in self.cliques_:
       presentable_text = clique.GetMessage().GetPresentableContent()
-      for c in self.cliques_[message.GetId()]:
-        assert c.GetMessage().GetPresentableContent() == presentable_text
+      if not message.HasAssignedId():
+        for c in self.cliques_[message.GetId()]:
+          assert c.GetMessage().GetPresentableContent() == presentable_text
       self.cliques_[message.GetId()].append(clique)
     else:
       self.cliques_[message.GetId()] = [clique]
