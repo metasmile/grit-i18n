@@ -103,7 +103,7 @@ class Android2GrdUnittest(unittest.TestCase):
 
     self.assertEqual(len(translations), 1)
     self.assertEqual(len(files), 3)
-    self.assertEqual(len(messages), 4)
+    self.assertEqual(len(messages), 5)
 
     # Check that a message node is constructed correctly.
     msg = filter(lambda x: x.GetTextualIds()[0] == "IDS_PLACEHOLDERS", messages)
@@ -120,6 +120,13 @@ class Android2GrdUnittest(unittest.TestCase):
                    "IDS_SIMPLE_product_nosdcard",
                  messages)
     self.assertTrue(msg)
+
+  def testTranslatableAttribute(self):
+    grd = self.__ParseAndroidXml([])
+    messages = grd.GetChildrenOfType(message.MessageNode)
+    msgs = filter(lambda x: x.GetTextualIds()[0] == "IDS_CONSTANT", messages)
+    self.assertTrue(msgs)
+    self.assertFalse(msgs[0].IsTranslateable())
 
   def testTranslations(self):
     grd = self.__ParseAndroidXml(['--languages', 'en-US,en-GB,ru,id'])

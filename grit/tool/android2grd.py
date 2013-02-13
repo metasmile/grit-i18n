@@ -240,7 +240,8 @@ OPTIONS may be any of the following:
       elif child.nodeType == Node.ELEMENT_NODE:
         if child.tagName != 'string':
           print 'Warning: ignoring unknown tag <%s>' % child.tagName
-        elif self.IsTranslatable(child):
+        else:
+          translatable = self.IsTranslatable(child)
           raw_name = child.getAttribute('name')
           product = child.getAttribute('product') or None
           grd_name = self.__FormatName(raw_name, product)
@@ -249,7 +250,7 @@ OPTIONS may be any of the following:
           # and coverting <xliff:g> placeholders into <ph> placeholders.
           msg = self.CreateTclibMessage(child)
           msg_node = self.__CreateMessageNode(messages, grd_name, description,
-              msg)
+              msg, translatable)
           messages.AddChild(msg_node)
           # Reset the description once a message has been parsed.
           description = ''
@@ -387,7 +388,8 @@ OPTIONS may be any of the following:
         assert False, 'Unknown node type in ' + placeholder_node.toxml()
     return self.__FormatAndroidString(''.join(text), inside_placeholder=True)
 
-  def __CreateMessageNode(self, messages_node, grd_name, description, msg):
+  def __CreateMessageNode(self, messages_node, grd_name, description, msg,
+                          translatable):
     """Creates and initializes a <message> element.
 
     Message elements correspond to Android <string> elements in that they
@@ -407,7 +409,7 @@ OPTIONS may be any of the following:
                                          name=grd_name,
                                          message=msg,
                                          desc=description,
-                                         translateable=True)
+                                         translateable=translatable)
 
   def __CreateFileNode(self, translations_node, lang):
     """Creates and initializes the <file> elements.
