@@ -83,6 +83,63 @@ class HtmlInlineUnittest(unittest.TestCase):
     self.failUnlessEqual(resources, source_resources)
     tmp_dir.CleanUp()
 
+  def testInlineCSSImports(self):
+    '''Tests that @import directives in inlined CSS files are inlined too.
+    '''
+
+    files = {
+      'index.html': '''
+      <html>
+      <head>
+      <link rel="stylesheet" href="test.css">
+      </head>
+      </html>
+      ''',
+
+      'test.css': '''
+      @import url('test2.css')
+      blink {
+        display: none;
+      }
+      ''',
+
+      'test2.css': '''
+      .image {
+        background: url('test.png');
+      }
+      '''.strip(),
+
+      'test.png': 'PNG DATA'
+    }
+
+    expected_inlined = '''
+      <html>
+      <head>
+      <style>
+      .image {
+        background: url('data:image/png;base64,UE5HIERBVEE=');
+      }
+      blink {
+        display: none;
+      }
+      </style>
+      </head>
+      </html>
+      '''
+
+    source_resources = set()
+    tmp_dir = util.TempDir(files)
+    for filename in files:
+      source_resources.add(tmp_dir.GetPath(filename))
+
+    result = html_inline.DoInline(tmp_dir.GetPath('index.html'), None)
+    resources = result.inlined_files
+    resources.add(tmp_dir.GetPath('index.html'))
+    self.failUnlessEqual(resources, source_resources)
+    self.failUnlessEqual(expected_inlined, result.inlined_data)
+
+    tmp_dir.CleanUp()
+
 
 if __name__ == '__main__':
   unittest.main()

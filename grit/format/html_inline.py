@@ -214,7 +214,8 @@ def DoInline(
     # Allow custom modifications before inlining images.
     if rewrite_function:
       text = rewrite_function(filepath, text, distribution)
-    return InlineCSSImages(text, filepath)
+    text = InlineCSSImages(text, filepath)
+    return InlineCSSImports(text, filepath)
 
   def InlineCSSFile(src_match, inlined_files=inlined_files):
     """Helper function to inline external css files.
@@ -234,8 +235,7 @@ def DoInline(
     inlined_files.add(filepath)
     # When resolving CSS files we need to pass in the path so that relative URLs
     # can be resolved.
-    return '<style>%s</style>' % InlineCSSText(
-        util.ReadFile(filepath, util.BINARY), filepath)
+    return InlineCSSText(util.ReadFile(filepath, util.BINARY), filepath)
 
   def InlineCSSImages(text, filepath=input_filepath):
     """Helper function that inlines external images in CSS backgrounds."""
@@ -256,6 +256,14 @@ def DoInline(
                   lambda m: SrcReplace(m, filepath),
                   src_match.group(0))
 
+  def InlineCSSImports(text, filepath=input_filepath):
+    """Helper function that inlines CSS files included via the @import
+       directive.
+    """
+    return re.sub('@import\s+url\((?P<quote>"|\'|)(?P<filename>[^"\'()]*)' +
+                  '(?P=quote)\)',
+                  InlineCSSFile,
+                  text)
 
 
   flat_text = util.ReadFile(input_filename, util.BINARY)
@@ -276,7 +284,7 @@ def DoInline(
 
   flat_text = re.sub(
       '<link rel="stylesheet".+?href="(?P<filename>[^"]*)".*?>',
-      InlineCSSFile,
+      lambda m: '<style>%s</style>' % InlineCSSFile(m),
       flat_text)
 
   flat_text = re.sub(
@@ -318,14 +326,10 @@ def InlineToString(input_filename, grd_node, allow_external_script=False,
   Returns:
     the inlined data as a string
   """
-  try:
-    return DoInline(input_filename,
-                    grd_node,
-                    allow_external_script=allow_external_script,
-                    rewrite_function=rewrite_function).inlined_data
-  except IOError, e:
-    raise Exception("Failed to open %s while trying to flatten %s. (%s)" %
-                    (e.filename, input_filename, e.strerror))
+  return DoInline(input_filename,
+                  grd_node,
+                  allow_external_script=allow_external_script,
+                  rewrite_function=rewrite_function).inlined_data
 
 
 def InlineToFile(input_filename, output_filename, grd_node):
