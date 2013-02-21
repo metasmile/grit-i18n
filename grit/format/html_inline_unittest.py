@@ -30,15 +30,23 @@ class HtmlInlineUnittest(unittest.TestCase):
       <html>
         <head>
           <link rel="stylesheet" href="test.css">
+          <link rel="stylesheet"
+              href="really-long-long-long-long-long-test.css">
         </head>
         <body>
           <include src="test.html">
+          <include
+              src="really-long-long-long-long-long-test-file-omg-so-long.html">
         </body>
       </html>
       ''',
 
       'test.html': '''
       <include src="test2.html">
+      ''',
+
+      'really-long-long-long-long-long-test-file-omg-so-long.html': '''
+      <!-- This really long named resource should be included. -->
       ''',
 
       'test2.html': '''
@@ -48,6 +56,12 @@ class HtmlInlineUnittest(unittest.TestCase):
       'test.css': '''
       .image {
         background: url('test.png');
+      }
+      ''',
+
+      'really-long-long-long-long-long-test.css': '''
+      a:hover {
+        font-weight: bold;  /* Awesome effect is awesome! */
       }
       ''',
 

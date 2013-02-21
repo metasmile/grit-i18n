@@ -286,14 +286,16 @@ def DoInline(
                        flat_text)
 
   flat_text = re.sub(
-      '<link rel="stylesheet".+?href="(?P<filename>[^"]*)".*?>',
+      '<link rel="stylesheet"[^>]+?href="(?P<filename>[^"]*)".*?>',
       lambda m: InlineCSSFile(m, '<style>%s</style>'),
-      flat_text)
+      flat_text,
+      flags=re.MULTILINE)
 
   flat_text = re.sub(
-      '<include\s+src="(?P<filename>[^"\']*)".*>',
+      '<include[^>]+?src="(?P<filename>[^"\']*)".*>',
       InlineIncludeFiles,
-      flat_text)
+      flat_text,
+      flags=re.MULTILINE)
 
   # Check conditional elements, second pass. This catches conditionals in any
   # of the text we just inlined.
@@ -304,15 +306,19 @@ def DoInline(
     flat_text = rewrite_function(input_filepath, flat_text, distribution)
 
   flat_text = re.sub(
-      '<(?!script)(?:[^>]+?\s)src=(?P<quote>")(?P<filename>[^"\']*)\\1',
-      SrcReplace, flat_text)
+      r'<(?!script)(?:[^>]+?\s)src=(?P<quote>")(?P<filename>[^"\']*)\1',
+      SrcReplace,
+      flat_text,
+      flags=re.MULTILINE)
 
   # TODO(arv): Only do this inside <style> tags.
   flat_text = InlineCSSImages(flat_text)
 
   flat_text = re.sub(
-      '<link rel="icon"\s(?:[^>]+?\s)?href=(?P<quote>")(?P<filename>[^"\']*)\\1',
-      SrcReplace, flat_text)
+      r'<link rel="icon"\s(?:[^>]+?\s)?href=(?P<quote>")(?P<filename>[^"\']*)\1',
+      SrcReplace,
+      flat_text,
+      flags=re.MULTILINE)
 
   if names_only:
     flat_text = None  # Will contains garbage if the flag is set anyway.
