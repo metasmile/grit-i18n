@@ -31,16 +31,20 @@ _BEGIN_IF_BLOCK = lazy_re.compile(
 _END_IF_BLOCK = lazy_re.compile('\s*</if>')
 
 # Used by DoInline to replace various links with inline content.
-_STYLESHEET_RE = lazy_re.compile(
+#
+# These _must not_ use lazy_re as this will cause re.sub to complain
+# on Python versions before 2.7 (it does a strict type check to see if
+# a string or a regular expression object is passed).
+_STYLESHEET_RE = re.compile(
     '<link rel="stylesheet"[^>]+?href="(?P<filename>[^"]*)".*?>',
     re.MULTILINE)
-_INCLUDE_RE = lazy_re.compile(
+_INCLUDE_RE = re.compile(
     '<include[^>]+?src="(?P<filename>[^"\']*)".*>',
     re.MULTILINE)
-_SRC_RE = lazy_re.compile(
+_SRC_RE = re.compile(
     r'<(?!script)(?:[^>]+?\s)src=(?P<quote>")(?P<filename>[^"\']*)\1',
     re.MULTILINE)
-_ICON_RE = lazy_re.compile(
+_ICON_RE = re.compile(
     r'<link rel="icon"\s(?:[^>]+?\s)?'
     'href=(?P<quote>")(?P<filename>[^"\']*)\1',
     re.MULTILINE)
