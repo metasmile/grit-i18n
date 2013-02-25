@@ -30,6 +30,22 @@ _BEGIN_IF_BLOCK = lazy_re.compile(
 # Matches ending of an "if" block with preceding spaces.
 _END_IF_BLOCK = lazy_re.compile('\s*</if>')
 
+# Used by DoInline to replace various links with inline content.
+_STYLESHEET_RE = lazy_re.compile(
+    '<link rel="stylesheet"[^>]+?href="(?P<filename>[^"]*)".*?>',
+    re.MULTILINE)
+_INCLUDE_RE = lazy_re.compile(
+    '<include[^>]+?src="(?P<filename>[^"\']*)".*>',
+    re.MULTILINE)
+_SRC_RE = lazy_re.compile(
+    r'<(?!script)(?:[^>]+?\s)src=(?P<quote>")(?P<filename>[^"\']*)\1',
+    re.MULTILINE)
+_ICON_RE = lazy_re.compile(
+    r'<link rel="icon"\s(?:[^>]+?\s)?'
+    'href=(?P<quote>")(?P<filename>[^"\']*)\1',
+    re.MULTILINE)
+
+
 
 def GetDistribution():
   """Helper function that gets the distribution we are building.
@@ -285,17 +301,11 @@ def DoInline(
                        InlineScript,
                        flat_text)
 
-  flat_text = re.sub(
-      '<link rel="stylesheet"[^>]+?href="(?P<filename>[^"]*)".*?>',
-      lambda m: InlineCSSFile(m, '<style>%s</style>'),
-      flat_text,
-      flags=re.MULTILINE)
+  flat_text = re.sub(_STYLESHEET_RE,
+                     lambda m: InlineCSSFile(m, '<style>%s</style>'),
+                     flat_text)
 
-  flat_text = re.sub(
-      '<include[^>]+?src="(?P<filename>[^"\']*)".*>',
-      InlineIncludeFiles,
-      flat_text,
-      flags=re.MULTILINE)
+  flat_text = re.sub(_INCLUDE_RE, InlineIncludeFiles, flat_text)
 
   # Check conditional elements, second pass. This catches conditionals in any
   # of the text we just inlined.
@@ -305,20 +315,12 @@ def DoInline(
   if rewrite_function:
     flat_text = rewrite_function(input_filepath, flat_text, distribution)
 
-  flat_text = re.sub(
-      r'<(?!script)(?:[^>]+?\s)src=(?P<quote>")(?P<filename>[^"\']*)\1',
-      SrcReplace,
-      flat_text,
-      flags=re.MULTILINE)
+  flat_text = re.sub(_SRC_RE, SrcReplace, flat_text)
 
   # TODO(arv): Only do this inside <style> tags.
   flat_text = InlineCSSImages(flat_text)
 
-  flat_text = re.sub(
-      r'<link rel="icon"\s(?:[^>]+?\s)?href=(?P<quote>")(?P<filename>[^"\']*)\1',
-      SrcReplace,
-      flat_text,
-      flags=re.MULTILINE)
+  flat_text = re.sub(_ICON_RE, SrcReplace, flat_text)
 
   if names_only:
     flat_text = None  # Will contains garbage if the flag is set anyway.
