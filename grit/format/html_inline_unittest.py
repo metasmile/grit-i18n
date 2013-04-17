@@ -144,13 +144,14 @@ class HtmlInlineUnittest(unittest.TestCase):
     source_resources = set()
     tmp_dir = util.TempDir(files)
     for filename in files:
-      source_resources.add(tmp_dir.GetPath(filename))
+      source_resources.add(tmp_dir.GetPath(util.normpath(filename)))
 
     result = html_inline.DoInline(tmp_dir.GetPath('index.html'), None)
     resources = result.inlined_files
     resources.add(tmp_dir.GetPath('index.html'))
     self.failUnlessEqual(resources, source_resources)
-    self.failUnlessEqual(expected_inlined, result.inlined_data)
+    self.failUnlessEqual(expected_inlined,
+                         util.FixLineEnd(result.inlined_data, '\n'))
 
     tmp_dir.CleanUp()
 
@@ -198,7 +199,8 @@ class HtmlInlineUnittest(unittest.TestCase):
     resources = result.inlined_files
     resources.add(tmp_dir.GetPath('index.html'))
     self.failUnlessEqual(resources, source_resources)
-    self.failUnlessEqual(expected_inlined, result.inlined_data)
+    self.failUnlessEqual(expected_inlined,
+                         util.FixLineEnd(result.inlined_data, '\n'))
 
 
 if __name__ == '__main__':

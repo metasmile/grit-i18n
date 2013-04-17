@@ -76,7 +76,14 @@ class MessageUnittest(unittest.TestCase):
         'foo': '123',
         'bar': '',
         'qux': 'low'}
-    self.assertDictEqual(msg.formatter_data, expected_formatter_data)
+
+    # Can't use assertDictEqual, not available in Python 2.6, so do it
+    # by hand.
+    self.failUnlessEqual(len(expected_formatter_data),
+                         len(msg.formatter_data))
+    for key in expected_formatter_data:
+      self.failUnlessEqual(expected_formatter_data[key],
+                           msg.formatter_data[key])
 
 
 if __name__ == '__main__':
