@@ -77,7 +77,7 @@ class StructureNode(base.Node):
   def _ParseVariables(self, variables):
     '''Parse a variable string into a dictionary.'''
     matches = StructureNode.variable_pattern.findall(variables)
-    return { name: value.replace(',,', ',') for name, value in matches }
+    return dict((name, value.replace(',,', ',')) for name, value in matches)
 
   def EndParsing(self):
     super(StructureNode, self).EndParsing()
