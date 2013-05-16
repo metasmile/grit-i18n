@@ -38,11 +38,11 @@ _CSS_IMAGE_URLS = lazy_re.compile(
 _CSS_IMAGE_SETS = lazy_re.compile(
     '(?P<attribute>content|background|[\w-]*-image):[ ]*' +
         '-webkit-image-set\((?P<images>' +
-        '([,\n ]*url\((?P<quote>"|\'|)[^"\'()]*(?P=quote)\)[ ]*[0-9.]*x)*)\)',
+        '([,\r\n ]*url\((?P<quote>"|\'|)[^"\'()]*(?P=quote)\)[ ]*[0-9.]*x)*)\)',
     re.MULTILINE)
 # Matches a single image in a CSS image set with the capture group scale.
-_CSS_IMAGE_SET_IMAGE = lazy_re.compile(
-    '[,\n ]*url\((?P<quote>"|\'|)[^"\'()]*(?P=quote)\)[ ]*(?P<scale>[0-9.]*x)',
+_CSS_IMAGE_SET_IMAGE = lazy_re.compile('[,\r\n ]*' +
+    'url\((?P<quote>"|\'|)[^"\'()]*(?P=quote)\)[ ]*(?P<scale>[0-9.]*x)',
     re.MULTILINE)
 _HTML_IMAGE_SRC = lazy_re.compile(
     '<img[^>]+src=\"(?P<filename>[^">]*)\"[^>]*>')
