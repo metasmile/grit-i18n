@@ -47,6 +47,16 @@ _ICON_RE = lazy_re.compile(
 
 
 
+def FixupMimeType(mime_type):
+  """Helper function that normalizes platform differences in the mime type
+     returned by the Python's mimetypes.guess_type API.
+  """
+  mappings = {
+    'image/x-png': 'image/png'
+  }
+  return mappings[mime_type] if mime_type in mappings else mime_type
+
+
 def GetDistribution():
   """Helper function that gets the distribution we are building.
 
@@ -96,7 +106,7 @@ def SrcInlineAsDataURL(
   if names_only:
     return ""
 
-  mimetype = mimetypes.guess_type(filename)[0] or 'text/plain'
+  mimetype = FixupMimeType(mimetypes.guess_type(filename)[0]) or 'text/plain'
   inline_data = base64.standard_b64encode(util.ReadFile(filepath, util.BINARY))
 
   prefix = src_match.string[src_match.start():src_match.start('filename')]
