@@ -265,6 +265,7 @@ class ChromeHtmlUnittest(unittest.TestCase):
       'test.css': '''
       .image {
         background: url('chrome://theme/IDR_RESOURCE_NAME');
+        content: url('chrome://theme/IDR_RESOURCE_NAME_WITH_Q?$1');
       }
       ''',
     })
@@ -281,6 +282,7 @@ class ChromeHtmlUnittest(unittest.TestCase):
           <style>
       .image {
         background: -webkit-image-set(url('chrome://theme/IDR_RESOURCE_NAME') 1x, url('chrome://theme/IDR_RESOURCE_NAME@2x') 2x);
+        content: -webkit-image-set(url('chrome://theme/IDR_RESOURCE_NAME_WITH_Q?$1') 1x, url('chrome://theme/IDR_RESOURCE_NAME_WITH_Q@2x?$1') 2x);
       }
       </style>
         </head>

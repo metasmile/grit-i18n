@@ -29,7 +29,8 @@ DIST_SUBSTR = '%DISTRIBUTION%'
 
 
 # Matches a chrome theme source URL.
-_THEME_SOURCE = lazy_re.compile('chrome://theme/IDR_[A-Z0-9_]*')
+_THEME_SOURCE = lazy_re.compile(
+    '(?P<baseurl>chrome://theme/IDR_[A-Z0-9_]*)(?P<query>\?.*)?')
 # Matches CSS image urls with the capture group 'filename'.
 _CSS_IMAGE_URLS = lazy_re.compile(
     '(?P<attribute>content|background|[\w-]*-image):[ ]*' +
@@ -69,10 +70,14 @@ def GetImageList(
   """
   # Any matches for which a chrome URL handler will serve all scale factors
   # can simply request all scale factors.
-  if _THEME_SOURCE.match(filename):
+  theme_match = _THEME_SOURCE.match(filename)
+  if theme_match:
     images = [('1x', filename)]
     for scale_factor in scale_factors:
-      images.append((scale_factor, "%s@%s" % (filename, scale_factor)))
+      scale_filename = "%s@%s" % (theme_match.group('baseurl'), scale_factor)
+      if theme_match.group('query'):
+        scale_filename += theme_match.group('query')
+      images.append((scale_factor, scale_filename))
     return images
 
   if filename.find(':') != -1:
