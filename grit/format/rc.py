@@ -81,7 +81,7 @@ _LANGUAGE_CHARSET_PAIR = {
   'ar'          : '040104e8',
   'fi'          : '040b04e4',
   'ko'          : '041203b5',
-  'es'          : '040a04e4',
+  'es'          : '0c0a04e4',
   'bg'          : '040204e3',
   # No codepage for filipino, use unicode(1200).
   'fil'         : '046404e4',
