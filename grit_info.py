@@ -18,10 +18,10 @@ class WrongNumberOfArguments(Exception):
   pass
 
 
-def Outputs(filename, defines, ids_file):
+def Outputs(filename, defines, ids_file, target_platform):
   grd = grd_reader.Parse(
       filename, defines=defines, tags_to_ignore=set(['messages']),
-      first_ids_file=ids_file)
+      first_ids_file=ids_file, target_platform=target_platform)
 
   target = []
   lang_folders = {}
@@ -155,7 +155,8 @@ def DoMain(argv):
 
     prefix, filename = args
     outputs = [posixpath.join(prefix, f)
-               for f in Outputs(filename, defines, options.ids_file)]
+               for f in Outputs(filename, defines,
+                                options.ids_file, options.target_platform)]
     return '\n'.join(outputs)
   else:
     raise WrongNumberOfArguments("Expected --inputs or --outputs.")
