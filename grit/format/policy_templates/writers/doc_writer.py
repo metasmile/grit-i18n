@@ -464,19 +464,21 @@ class DocWriter(xml_formatted_writer.XMLFormattedWriter):
         self._REG_TYPE_MAP.get(policy['type'], None)):
       data_type += ' (%s)' % self._REG_TYPE_MAP[policy['type']]
     self._AddPolicyAttribute(dl, 'data_type', data_type)
-    if self.IsPolicySupportedOnPlatform(policy, 'win'):
-      self._AddPolicyAttribute(
-          dl,
-          'win_reg_loc',
-          self.config['win_reg_mandatory_key_name'] + '\\' + policy['name'],
-          ['.monospace'])
-    if (self.IsPolicySupportedOnPlatform(policy, 'linux') or
-        self.IsPolicySupportedOnPlatform(policy, 'mac')):
-      self._AddPolicyAttribute(
-          dl,
-          'mac_linux_pref_name',
-          policy['name'],
-          ['.monospace'])
+    if policy['type'] != 'external':
+      # All types except 'external' can be set through platform policy.
+      if self.IsPolicySupportedOnPlatform(policy, 'win'):
+        self._AddPolicyAttribute(
+            dl,
+            'win_reg_loc',
+            self.config['win_reg_mandatory_key_name'] + '\\' + policy['name'],
+            ['.monospace'])
+      if (self.IsPolicySupportedOnPlatform(policy, 'linux') or
+          self.IsPolicySupportedOnPlatform(policy, 'mac')):
+        self._AddPolicyAttribute(
+            dl,
+            'mac_linux_pref_name',
+            policy['name'],
+            ['.monospace'])
     dd = self._AddPolicyAttribute(dl, 'supported_on')
     self._AddSupportedOnList(dd, policy['supported_on'])
     dd = self._AddPolicyAttribute(dl, 'supported_features')
@@ -487,8 +489,10 @@ class DocWriter(xml_formatted_writer.XMLFormattedWriter):
         self.IsPolicySupportedOnPlatform(policy, 'linux') or
         self.IsPolicySupportedOnPlatform(policy, 'mac')):
       # Don't add an example for ChromeOS-only policies.
-      dd = self._AddPolicyAttribute(dl, 'example_value')
-      self._AddExample(dd, policy)
+      if policy['type'] != 'external':
+        # All types except 'external' can be set through platform policy.
+        dd = self._AddPolicyAttribute(dl, 'example_value')
+        self._AddExample(dd, policy)
 
   def _AddPolicyNote(self, parent, policy):
     '''If a policy has an additional web page assigned with it, then add
@@ -644,6 +648,7 @@ class DocWriter(xml_formatted_writer.XMLFormattedWriter):
       'string-enum': 'String',
       'list': 'List of strings',
       'dict': 'Dictionary',
+      'external': 'External data reference',
     }
     self._REG_TYPE_MAP = {
       'string': 'REG_SZ',
