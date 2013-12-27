@@ -442,6 +442,23 @@ class Node(object):
     return []
 
   @classmethod
+  def GetPlatformAssertion(cls, target_platform):
+    '''If the platform is a specific well-known platform, this returns
+    the is_xyz string representing that platform (e.g. is_linux),
+    otherwise the empty string.
+    '''
+    platform = ''
+    if target_platform == 'darwin':
+      platform = 'is_macosx'
+    elif target_platform.startswith('linux'):
+      platform = 'is_linux'
+    elif target_platform in ('cygwin', 'win32'):
+      platform = 'is_win'
+    elif target_platform in ('android', 'ios'):
+      platform = 'is_%s' % target_platform
+    return platform
+
+  @classmethod
   def EvaluateExpression(cls, expr, defs, target_platform, extra_variables=None):
     '''Worker for EvaluateCondition (below) and conditions in XTB files.'''
     cache_dict = cls.eval_expr_cache[
@@ -452,17 +469,18 @@ class Node(object):
       return symbol in defs
     def pp_if(symbol):
       return defs.get(symbol, False)
+    platform_assertion = Node.GetPlatformAssertion(target_platform)
     variable_map = {
         'defs' : defs,
         'os': target_platform,
-        'is_linux': target_platform.startswith('linux'),
-        'is_macosx': target_platform == 'darwin',
-        'is_win': target_platform in ('cygwin', 'win32'),
-        'is_android': target_platform == 'android',
-        'is_ios': target_platform == 'ios',
-        'is_posix': (target_platform in ('darwin', 'linux2', 'linux3', 'sunos5',
-                                         'android', 'ios')
-                    or 'bsd' in target_platform),
+        'is_linux': platform_assertion == 'is_linux',
+        'is_macosx': platform_assertion == 'is_macosx',
+        'is_win': platform_assertion == 'is_win',
+        'is_android': platform_assertion == 'is_android',
+        'is_ios': platform_assertion == 'is_ios',
+        # is_posix is not mutually exclusive of the others
+        'is_posix': (target_platform in ('darwin', 'linux2', 'linux3', 'sunos5')
+                     or 'bsd' in sys.platform),
         'pp_ifdef' : pp_ifdef,
         'pp_if' : pp_if,
     }
