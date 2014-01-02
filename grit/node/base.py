@@ -469,21 +469,28 @@ class Node(object):
       return symbol in defs
     def pp_if(symbol):
       return defs.get(symbol, False)
-    platform_assertion = Node.GetPlatformAssertion(target_platform)
     variable_map = {
         'defs' : defs,
         'os': target_platform,
-        'is_linux': platform_assertion == 'is_linux',
-        'is_macosx': platform_assertion == 'is_macosx',
-        'is_win': platform_assertion == 'is_win',
-        'is_android': platform_assertion == 'is_android',
-        'is_ios': platform_assertion == 'is_ios',
-        # is_posix is not mutually exclusive of the others
+
+        # One of these is_xyz assertions gets set to True in the line
+        # following this initializer block.
+        'is_linux': False,
+        'is_macosx': False,
+        'is_win': False,
+        'is_android': False,
+        'is_ios': False,
+
+        # is_posix is not mutually exclusive of the others and gets
+        # set here, not below.
         'is_posix': (target_platform in ('darwin', 'linux2', 'linux3', 'sunos5')
                      or 'bsd' in sys.platform),
+
         'pp_ifdef' : pp_ifdef,
         'pp_if' : pp_if,
     }
+    variable_map[Node.GetPlatformAssertion(target_platform)] = True
+
     if extra_variables:
       variable_map.update(extra_variables)
     eval_result = cache_dict[expr] = eval(expr, {}, variable_map)
