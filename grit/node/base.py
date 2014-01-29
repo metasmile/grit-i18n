@@ -483,8 +483,9 @@ class Node(object):
 
         # is_posix is not mutually exclusive of the others and gets
         # set here, not below.
-        'is_posix': (target_platform in ('darwin', 'linux2', 'linux3', 'sunos5')
-                     or 'bsd' in sys.platform),
+        'is_posix': (target_platform in ('darwin', 'linux2', 'linux3', 'sunos5',
+                                         'android', 'ios')
+                     or 'bsd' in target_platform),
 
         'pp_ifdef' : pp_ifdef,
         'pp_if' : pp_if,
