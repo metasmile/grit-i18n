@@ -289,14 +289,6 @@ class GrdReaderUnittest(unittest.TestCase):
   def testEarlyEnoughPlatformSpecification(self):
     # This is a regression test for issue
     # https://code.google.com/p/grit-i18n/issues/detail?id=23
-    #
-    # This test only works on platforms for which one of the is_xyz
-    # shortcuts in .grd expressions is true. If this string remains
-    # empty, abort the test.
-    platform = base.Node.GetPlatformAssertion(sys.platform)
-    if not platform:
-      return
-
     grd_text = u'''<?xml version="1.0" encoding="UTF-8"?>
       <grit latest_public_release="1" current_release="1">
         <release seq="1">
@@ -307,12 +299,12 @@ class GrdReaderUnittest(unittest.TestCase):
             <!-- The assumption is that use_titlecase is never true for
                  this platform. When the platform isn't set to 'android'
                  early enough, we get a duplicate message name. -->
-            <if expr="%s">
+            <if expr="os == '%s'">
               <message name="IDS_XYZ">boo</message>
             </if>
           </messages>
         </release>
-      </grit>''' % platform
+      </grit>''' % sys.platform
     with util.TempDir({}) as temp_dir:
       grd_reader.Parse(StringIO.StringIO(grd_text), temp_dir.GetPath(),
                        target_platform='android')
