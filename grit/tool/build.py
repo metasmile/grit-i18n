@@ -85,7 +85,7 @@ Options:
 
   -h HEADERFORMAT   Custom format string to use for generating rc header files.
                     The string should have two placeholders: {textual_id}
-                    and {numeric_id}. E.g. "#define {textual_id} {numeric_id}\n"
+                    and {numeric_id}. E.g. "#define {textual_id} {numeric_id}"
                     Otherwise it will use the default "#define SYMBOL 1234"
 
 Conditional inclusion of resources only affects the output of files which

@@ -181,7 +181,7 @@ class RcHeaderFormatterUnittest(unittest.TestCase):
 
     # Using a custom rc_header format string.
     grd.AssignRcHeaderFormat(
-        '#define {textual_id} _Pragma("{textual_id}") {numeric_id}\n')
+        '#define {textual_id} _Pragma("{textual_id}") {numeric_id}')
     output = rc_header.FormatDefines(grd, grd.ShouldOutputAllResourceDefines(),
                                      grd.GetRcHeaderFormat())
     self.assertEqual(('#define IDR_LOGO _Pragma("IDR_LOGO") 300\n'

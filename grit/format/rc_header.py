@@ -53,7 +53,8 @@ def FormatDefines(root, output_all_resource_defines=True,
     items = root.ActiveDescendants()
 
   if not rc_header_format:
-    rc_header_format = "#define {textual_id} {numeric_id}\n"
+    rc_header_format = "#define {textual_id} {numeric_id}"
+  rc_header_format += "\n"
   seen = set()
   for item in items:
     if not isinstance(item, message.MessageNode):
