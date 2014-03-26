@@ -112,7 +112,7 @@ def Format(root, lang='en', output_dir='.'):
       raise Exception('env variable ANDROID_JAVA_TAGGED_ONLY must have value '
                       'true or false. Invalid value: %s' % tagged_only)
 
-  for item in root.Preorder():
+  for item in root.ActiveDescendants():
     with item:
       if ShouldOutputNode(item, tagged_only):
         yield _FormatMessage(item, lang)
