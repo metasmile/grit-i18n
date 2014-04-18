@@ -35,6 +35,12 @@ class ChromeMessagesJsonFormatUnittest(unittest.TestCase):
       <message name="IDS_STARTS_WITH_SPACE">
               ''' (<ph name="COUNT">%d<ex>2</ex></ph>)
       </message>
+      <message name="IDS_ENDS_WITH_SPACE">
+              (<ph name="COUNT">%d<ex>2</ex></ph>) '''
+      </message>
+      <message name="IDS_SPACE_AT_BOTH_ENDS">
+              ''' (<ph name="COUNT">%d<ex>2</ex></ph>) '''
+      </message>
       <message name="IDS_DOUBLE_QUOTES">
               A "double quoted" message.
       </message>
@@ -59,7 +65,13 @@ class ChromeMessagesJsonFormatUnittest(unittest.TestCase):
     "message": "%1$d error, %2$d warning"
   },
   "STARTS_WITH_SPACE": {
-    "message": "(%d)"
+    "message": " (%d)"
+  },
+  "ENDS_WITH_SPACE": {
+    "message": "(%d) "
+  },
+  "SPACE_AT_BOTH_ENDS": {
+    "message": " (%d) "
   },
   "DOUBLE_QUOTES": {
     "message": "A \\"double quoted\\" message."
