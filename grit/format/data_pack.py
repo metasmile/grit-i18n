@@ -127,7 +127,7 @@ def RePack(output_file, input_files, whitelist_file=None):
   whitelist = None
   if whitelist_file:
     whitelist = util.ReadFile(whitelist_file, util.RAW_TEXT).strip().split('\n')
-    whitelist = map(int, whitelist)
+    whitelist = set(map(int, whitelist))
   resources, encoding = RePackFromDataPackStrings(input_data_packs, whitelist)
   WriteDataPack(resources, output_file, encoding)
 
