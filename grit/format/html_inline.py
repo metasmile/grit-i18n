@@ -19,6 +19,12 @@ import mimetypes
 from grit import lazy_re
 from grit import util
 
+# There is a python bug that makes mimetypes crash if the Windows
+# registry contains non-Latin keys ( http://bugs.python.org/issue9291
+# ). Initing manually and blocking external mime-type databases will
+# prevent that bug and still give us the data we need.
+mimetypes.init([])
+
 DIST_DEFAULT = 'chromium'
 DIST_ENV_VAR = 'CHROMIUM_BUILD'
 DIST_SUBSTR = '%DISTRIBUTION%'
