@@ -4,6 +4,7 @@
 # found in the LICENSE file.
 
 
+import json
 from xml.dom import minidom
 from grit import lazy_re
 from grit.format.policy_templates.writers import xml_formatted_writer
@@ -287,8 +288,8 @@ class DocWriter(xml_formatted_writer.XMLFormattedWriter):
     self.AddElement(parent, 'dt', {}, 'Windows:')
     win = self._AddStyledElement(parent, 'dd', ['.monospace', '.pre'])
     key_name = self.config['win_reg_mandatory_key_name']
-    example = str(policy['example_value'])
-    self.AddText(win, '%s\\%s = "%s"' % (key_name, policy['name'], example))
+    example = json.dumps(policy['example_value'])
+    self.AddText(win, '%s\\%s = %s' % (key_name, policy['name'], example))
 
   def _AddDictionaryExampleLinux(self, parent, policy):
     '''Adds an example value for Linux of a 'dict' policy to a DOM node.
@@ -300,7 +301,7 @@ class DocWriter(xml_formatted_writer.XMLFormattedWriter):
     '''
     self.AddElement(parent, 'dt', {}, 'Linux:')
     linux = self._AddStyledElement(parent, 'dd', ['.monospace'])
-    example = str(policy['example_value'])
+    example = json.dumps(policy['example_value'])
     self.AddText(linux, '%s: %s' % (policy['name'], example))
 
   def _AddDictionaryExample(self, parent, policy):

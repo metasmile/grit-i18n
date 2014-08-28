@@ -6,6 +6,7 @@
 '''Unit tests for grit.format.policy_templates.writers.doc_writer'''
 
 
+import json
 import os
 import sys
 if __name__ == '__main__':
@@ -688,14 +689,14 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
       },
     }
     self.writer._AddDictionaryExample(self.doc_root, policy)
-    value = str(policy['example_value'])
+    value = json.dumps(policy['example_value']).replace('"', '&quot;')
     self.assertEquals(
       self.doc_root.toxml(),
       '<root>'
         '<dl style="style_dd dl;">'
           '<dt>Windows:</dt>'
           '<dd style="style_.monospace;style_.pre;">MockKey\PolicyName = '
-              '&quot;' + value + '&quot;'
+              + value +
           '</dd>'
           '<dt>Linux:</dt>'
           '<dd style="style_.monospace;">PolicyName: ' + value + '</dd>'
