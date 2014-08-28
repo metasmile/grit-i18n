@@ -645,13 +645,15 @@ class DocWriter(xml_formatted_writer.XMLFormattedWriter):
       'dict': 'Dictionary',
       'external': 'External data reference',
     }
+    reg_dict = 'REG_SZ; %s' % self._GetLocalizedMessage(
+        'complex_policies_on_windows')
     self._REG_TYPE_MAP = {
       'string': 'REG_SZ',
       'int': 'REG_DWORD',
       'main': 'REG_DWORD',
       'int-enum': 'REG_DWORD',
       'string-enum': 'REG_SZ',
-      'dict': 'REG_SZ, encoded as a JSON string',
+      'dict': reg_dict,
     }
     # The CSS style-sheet used for the document. It will be used in Google
     # Sites, which strips class attributes from HTML tags. To work around this,

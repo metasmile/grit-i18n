@@ -41,6 +41,7 @@ class DocWriterUnittest(writer_unittest_common.WriterUnittestCommon):
       })
     self.writer.messages = {
       'doc_back_to_top': {'text': '_test_back_to_top'},
+      'doc_complex_policies_on_windows': {'text': '_test_complex_policies_win'},
       'doc_data_type': {'text': '_test_data_type'},
       'doc_description': {'text': '_test_description'},
       'doc_description_column_title': {
@@ -413,6 +414,61 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
       '<dt style="style_dt;">_test_description</dt><dd>TestPolicyDesc</dd>'
       '<dt style="style_dt;">_test_example_value</dt>'
         '<dd>0x00000000 (Windows), false (Linux), &lt;false /&gt; (Mac)</dd>'
+      '</dl></root>')
+
+  def testAddDictPolicyDetails(self):
+    # Test if the definition list (<dl>) of policy details is created correctly
+    # for 'dict' policies.
+    policy = {
+      'type': 'dict',
+      'name': 'TestPolicyName',
+      'caption': 'TestPolicyCaption',
+      'desc': 'TestPolicyDesc',
+      'supported_on': [{
+        'product': 'chrome',
+        'platforms': ['win', 'mac', 'linux'],
+        'since_version': '8',
+        'until_version': '',
+      }],
+      'features': {'dynamic_refresh': False},
+      'example_value': { 'foo': 123 }
+    }
+    self.writer.messages['doc_since_version'] = {'text': '...$6...'}
+    self.writer._AddPolicyDetails(self.doc_root, policy)
+    self.assertEquals(
+      self.doc_root.toxml(),
+      '<root><dl>'
+      '<dt style="style_dt;">_test_data_type</dt><dd>Dictionary (REG_SZ; _test_complex_policies_win)</dd>'
+      '<dt style="style_dt;">_test_win_reg_loc</dt>'
+      '<dd style="style_.monospace;">MockKey\TestPolicyName</dd>'
+      '<dt style="style_dt;">_test_mac_linux_pref_name</dt>'
+        '<dd style="style_.monospace;">TestPolicyName</dd>'
+      '<dt style="style_dt;">_test_supported_on</dt>'
+      '<dd>'
+        '<ul style="style_ul;">'
+          '<li>Chrome (Windows, Mac, Linux) ...8...</li>'
+        '</ul>'
+      '</dd>'
+      '<dt style="style_dt;">_test_supported_features</dt>'
+        '<dd>_test_feature_dynamic_refresh: _test_not_supported</dd>'
+      '<dt style="style_dt;">_test_description</dt><dd>TestPolicyDesc</dd>'
+      '<dt style="style_dt;">_test_example_value</dt>'
+        '<dd>'
+          '<dl style="style_dd dl;">'
+            '<dt>Windows:</dt>'
+            '<dd style="style_.monospace;style_.pre;">MockKey\TestPolicyName = {&quot;foo&quot;: 123}</dd>'
+            '<dt>Linux:</dt>'
+            '<dd style="style_.monospace;">TestPolicyName: {&quot;foo&quot;: 123}</dd>'
+            '<dt>Mac:</dt>'
+            '<dd style="style_.monospace;style_.pre;">'
+              '&lt;key&gt;TestPolicyName&lt;/key&gt;\n'
+              '&lt;dict&gt;\n'
+              '  &lt;key&gt;foo&lt;/key&gt;\n'
+              '  &lt;integer&gt;123&lt;/integer&gt;\n'
+              '&lt;/dict&gt;'
+            '</dd>'
+          '</dl>'
+        '</dd>'
       '</dl></root>')
 
   def testAddPolicyNote(self):
