@@ -38,6 +38,7 @@ class DocWriterUnittest(writer_unittest_common.WriterUnittestCommon):
         'frame_name': 'Chrome Frame',
         'os_name': 'Chrome OS',
         'win_reg_mandatory_key_name': 'MockKey',
+        'win_reg_recommended_key_name': 'MockKeyRec',
       })
     self.writer.messages = {
       'doc_back_to_top': {'text': '_test_back_to_top'},
@@ -50,6 +51,7 @@ class DocWriterUnittest(writer_unittest_common.WriterUnittestCommon):
       'doc_example_value': {'text': '_test_example_value'},
       'doc_feature_dynamic_refresh': {'text': '_test_feature_dynamic_refresh'},
       'doc_feature_can_be_recommended': {'text': '_test_feature_recommended'},
+      'doc_feature_can_be_mandatory': {'text': '_test_feature_mandatory'},
       'doc_intro': {'text': '_test_intro'},
       'doc_mac_linux_pref_name': {'text': '_test_mac_linux_pref_name'},
       'doc_note': {'text': '_test_note'},
@@ -469,6 +471,62 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
             '</dd>'
           '</dl>'
         '</dd>'
+      '</dl></root>')
+
+  def testAddPolicyDetailsRecommendedOnly(self):
+    policy = {
+      'type': 'main',
+      'name': 'TestPolicyName',
+      'caption': 'TestPolicyCaption',
+      'desc': 'TestPolicyDesc',
+      'supported_on': [{
+        'product': 'chrome',
+        'platforms': ['win', 'mac', 'linux'],
+        'since_version': '8',
+        'until_version': '',
+      }, {
+        'product': 'chrome',
+        'platforms': ['android'],
+        'since_version': '30',
+        'until_version': '',
+      }, {
+        'product': 'chrome',
+        'platforms': ['ios'],
+        'since_version': '34',
+        'until_version': '',
+      }],
+      'features': {
+        'dynamic_refresh': False,
+        'can_be_mandatory': False,
+        'can_be_recommended': True
+      },
+      'example_value': False
+    }
+    self.writer.messages['doc_since_version'] = {'text': '...$6...'}
+    self.writer._AddPolicyDetails(self.doc_root, policy)
+    self.assertEquals(
+      self.doc_root.toxml(),
+      '<root><dl>'
+      '<dt style="style_dt;">_test_data_type</dt><dd>Boolean (REG_DWORD)</dd>'
+      '<dt style="style_dt;">_test_win_reg_loc</dt>'
+      '<dd style="style_.monospace;">MockKeyRec\TestPolicyName</dd>'
+      '<dt style="style_dt;">_test_mac_linux_pref_name</dt>'
+        '<dd style="style_.monospace;">TestPolicyName</dd>'
+      '<dt style="style_dt;">_test_supported_on</dt>'
+      '<dd>'
+        '<ul style="style_ul;">'
+          '<li>Chrome (Windows, Mac, Linux) ...8...</li>'
+          '<li>Chrome (Android) ...30...</li>'
+          '<li>Chrome (iOS) ...34...</li>'
+        '</ul>'
+      '</dd>'
+      '<dt style="style_dt;">_test_supported_features</dt>'
+        '<dd>_test_feature_mandatory: _test_not_supported,'
+        ' _test_feature_recommended: _test_supported,'
+        ' _test_feature_dynamic_refresh: _test_not_supported</dd>'
+      '<dt style="style_dt;">_test_description</dt><dd>TestPolicyDesc</dd>'
+      '<dt style="style_dt;">_test_example_value</dt>'
+        '<dd>0x00000000 (Windows), false (Linux), &lt;false /&gt; (Mac)</dd>'
       '</dl></root>')
 
   def testAddPolicyNote(self):
