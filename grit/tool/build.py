@@ -363,12 +363,21 @@ are exported to translation interchange files (e.g. XMB files), etc.
         for i in self.res.GetOutputFiles()])
 
     if asserted != actual:
-      print '''Asserted file list does not match.
+      missing = list(set(actual) - set(asserted))
+      extra = list(set(asserted) - set(actual))
+      error = '''Asserted file list does not match.
 
-Expected output files: %s
-
-Actual output files: %s
-''' % (asserted, actual)
+Expected output files:
+%s
+Actual output files:
+%s
+Missing output files:
+%s
+Extra output files:
+%s
+'''
+      print error % ('\n'.join(asserted), '\n'.join(actual), '\n'.join(missing),
+          '\n'.join(extra))
       return False
     return True
 
