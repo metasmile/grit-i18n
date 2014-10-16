@@ -77,6 +77,20 @@ class AdmlWriterUnittest(xml_writer_base_unittest.XmlWriterBaseTest):
         '</resources></policyDefinitionResources>')
     self.AssertXMLEquals(output, expected_output)
 
+  def testVersionAnnotation(self):
+    self.writer.config['version'] = '39.0.0.0'
+    self.writer.BeginTemplate()
+    self.writer.EndTemplate()
+    output = self.writer.GetTemplateText()
+    expected_output = (
+        '<?xml version="1.0" ?><policyDefinitionResources'
+        ' revision="1.0" schemaVersion="1.0"><!--test version: 39.0.0.0-->'
+        '<displayName/><description/><resources><stringTable>'
+        '<string id="SUPPORTED_TESTOS">Supported on'
+        ' Test OS or higher</string></stringTable><presentationTable/>'
+        '</resources></policyDefinitionResources>')
+    self.AssertXMLEquals(output, expected_output)
+
   def testPolicyGroup(self):
     empty_policy_group = {
       'name': 'PolicyGroup',

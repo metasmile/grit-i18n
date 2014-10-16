@@ -76,6 +76,42 @@ chromium="Chromium"
 chromium_recommended="Chromium - Recommended"''')
     self.CompareOutputs(output, expected_output)
 
+  def testVersionAnnotation(self):
+    # Test PListWriter in case of empty polices.
+    grd = self.PrepareTest('''
+      {
+        'policy_definitions': [],
+        'placeholders': [],
+        'messages': {
+          'win_supported_winxpsp2': {
+            'text': 'At least "Windows 3.11', 'desc': 'blah'
+          },
+          'doc_recommended': {
+            'text': 'Recommended', 'desc': 'bleh'
+          }
+        }
+      }''')
+    output = self.GetOutput(
+        grd, 'fr', {'_chromium': '1', 'version':'39.0.0.0'}, 'adm', 'en')
+    expected_output = '; chromium version: 39.0.0.0\n' + \
+        self.ConstructOutput(['MACHINE', 'USER'], '''
+  CATEGORY !!chromium
+    KEYNAME "Software\\Policies\\Chromium"
+
+  END CATEGORY
+
+  CATEGORY !!chromium_recommended
+    KEYNAME "Software\\Policies\\Chromium\\Recommended"
+
+  END CATEGORY
+
+
+''', '''[Strings]
+SUPPORTED_WINXPSP2="At least "Windows 3.11"
+chromium="Chromium"
+chromium_recommended="Chromium - Recommended"''')
+    self.CompareOutputs(output, expected_output)
+
   def testMainPolicy(self):
     # Tests a policy group with a single policy of type 'main'.
     grd = self.PrepareTest('''

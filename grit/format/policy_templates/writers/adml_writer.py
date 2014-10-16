@@ -161,6 +161,9 @@ class ADMLWriter(xml_formatted_writer.XMLFormattedWriter):
     dom_impl = minidom.getDOMImplementation('')
     self._doc = dom_impl.createDocument(None, 'policyDefinitionResources',
                                         None)
+    if self._GetChromiumVersionString() is not None:
+      self.AddComment(self._doc.documentElement, self.config['build'] + \
+          ' version: ' + self._GetChromiumVersionString())
     policy_definitions_resources_elem = self._doc.documentElement
     policy_definitions_resources_elem.attributes['revision'] = '1.0'
     policy_definitions_resources_elem.attributes['schemaVersion'] = '1.0'

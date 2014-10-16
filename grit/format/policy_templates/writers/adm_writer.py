@@ -152,6 +152,9 @@ class AdmWriter(template_writer.TemplateWriter):
     builder.AddLine('END POLICY', -1)
     builder.AddLine()
 
+  def WriteComment(self, comment):
+    self.lines.AddLine('; ' + comment)
+
   def WritePolicy(self, policy):
     if self.CanBeMandatory(policy):
       self._WritePolicy(policy,
@@ -205,6 +208,9 @@ class AdmWriter(template_writer.TemplateWriter):
     return lines
 
   def BeginTemplate(self):
+    if self._GetChromiumVersionString() is not None:
+      self.WriteComment(self.config['build'] + ' version: ' + \
+          self._GetChromiumVersionString())
     self._AddGuiString(self.config['win_supported_os'],
                        self.messages['win_supported_winxpsp2']['text'])
     category_path = self.config['win_mandatory_category_path']

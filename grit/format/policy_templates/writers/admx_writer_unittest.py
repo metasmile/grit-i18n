@@ -37,7 +37,8 @@ class AdmxWriterUnittest(xml_writer_base_unittest.XmlWriterBaseTest):
       'win_mandatory_category_path': ['test_category'],
       'win_recommended_category_path': ['test_recommended_category'],
       'admx_namespace': 'ADMXWriter.Test.Namespace',
-      'admx_prefix': 'test_prefix'
+      'admx_prefix': 'test_prefix',
+      'build': 'test_product',
     }
     self.writer = admx_writer.GetWriter(config)
     self.writer.Init()
@@ -60,6 +61,38 @@ class AdmxWriterUnittest(xml_writer_base_unittest.XmlWriterBaseTest):
     expected_output = (
         '<?xml version="1.0" ?>\n'
         '<policyDefinitions revision="1.0" schemaVersion="1.0">\n'
+        '  <policyNamespaces>\n'
+        '    <target namespace="ADMXWriter.Test.Namespace"'
+        ' prefix="test_prefix"/>\n'
+        '    <using namespace="Microsoft.Policies.Windows" prefix="windows"/>\n'
+        '  </policyNamespaces>\n'
+        '  <resources minRequiredRevision="1.0"/>\n'
+        '  <supportedOn>\n'
+        '    <definitions>\n'
+        '      <definition displayName="'
+        '$(string.SUPPORTED_TESTOS)" name="SUPPORTED_TESTOS"/>\n'
+        '    </definitions>\n'
+        '  </supportedOn>\n'
+        '  <categories>\n'
+        '    <category displayName="$(string.test_category)"'
+        ' name="test_category"/>\n'
+        '    <category displayName="$(string.test_recommended_category)"'
+        ' name="test_recommended_category"/>\n'
+        '  </categories>\n'
+        '  <policies/>\n'
+        '</policyDefinitions>')
+    self.AssertXMLEquals(output, expected_output)
+
+  def testEmptyVersion(self):
+    self.writer.config['version'] = '39.0.0.0'
+    self.writer.BeginTemplate()
+    self.writer.EndTemplate()
+
+    output = self.writer.GetTemplateText()
+    expected_output = (
+        '<?xml version="1.0" ?>\n'
+        '<policyDefinitions revision="1.0" schemaVersion="1.0">\n'
+        '  <!--test_product version: 39.0.0.0-->\n'
         '  <policyNamespaces>\n'
         '    <target namespace="ADMXWriter.Test.Namespace"'
         ' prefix="test_prefix"/>\n'
