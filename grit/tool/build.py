@@ -224,11 +224,13 @@ are exported to translation interchange files (e.g. XMB files), etc.
     # be written into the target files (skip markers).
     from grit.node import include
     from grit.node import message
+    from grit.node import structure
     for node in start_node:
       # Same trick data_pack.py uses to see what nodes actually result in
       # real items.
       if (isinstance(node, include.IncludeNode) or
-          isinstance(node, message.MessageNode)):
+          isinstance(node, message.MessageNode) or
+          isinstance(node, structure.StructureNode)):
         text_ids = node.GetTextualIds()
         # Mark the item to be skipped if it wasn't in the whitelist.
         if text_ids and text_ids[0] not in whitelist_names:
