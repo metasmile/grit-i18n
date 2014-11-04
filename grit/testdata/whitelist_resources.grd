@@ -35,11 +35,11 @@
       </if>
       <if expr="False">
         <structure name="IDR_STRUCTURE_IN_FALSE_IF_WHITELISTED"
-                   file="deleted.html"
+                   file="status.html"
                    type="chrome_html" >
         </structure>
         <structure name="IDR_STRUCTURE_IN_FALSE_IF_NOT_WHITELISTED"
-                   file="deleted.html"
+                   file="simple.html"
                    type="chrome_html" >
         </structure>
       </if>

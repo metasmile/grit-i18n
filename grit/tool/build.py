@@ -104,6 +104,11 @@ Options:
                     and {numeric_id}. E.g. "#define {textual_id} {numeric_id}"
                     Otherwise it will use the default "#define SYMBOL 1234"
 
+  --output-all-resource-defines
+  --no-output-all-resource-defines  If specified, overrides the value of the
+                    output_all_resource_defines attribute of the root <grit>
+                    element of the input .grd file.
+
 Conditional inclusion of resources only affects the output of files which
 control which resources get linked into a binary, e.g. it affects .rc files
 meant for compilation but it does not affect resource header files (that define
@@ -123,8 +128,11 @@ are exported to translation interchange files (e.g. XMB files), etc.
     depfile = None
     depdir = None
     rc_header_format = None
+    output_all_resource_defines = None
     (own_opts, args) = getopt.getopt(args, 'a:o:D:E:f:w:t:h:',
-        ('depdir=','depfile=','assert-file-list='))
+        ('depdir=','depfile=','assert-file-list=',
+         'output-all-resource-defines',
+         'no-output-all-resource-defines',))
     for (key, val) in own_opts:
       if key == '-a':
         assert_output_files.append(val)
@@ -146,6 +154,10 @@ are exported to translation interchange files (e.g. XMB files), etc.
         first_ids_file = val
       elif key == '-w':
         whitelist_filenames.append(val)
+      elif key == '--output-all-resource-defines':
+        output_all_resource_defines = True
+      elif key == '--no-output-all-resource-defines':
+        output_all_resource_defines = False
       elif key == '-t':
         target_platform = val
       elif key == '-h':
@@ -178,6 +190,12 @@ are exported to translation interchange files (e.g. XMB files), etc.
                                 first_ids_file=first_ids_file,
                                 defines=self.defines,
                                 target_platform=target_platform)
+
+    # If the output_all_resource_defines option is specified, override the value
+    # found in the grd file.
+    if output_all_resource_defines is not None:
+      self.res.SetShouldOutputAllResourceDefines(output_all_resource_defines)
+
     # Set an output context so that conditionals can use defines during the
     # gathering stage; we use a dummy language here since we are not outputting
     # a specific language.
