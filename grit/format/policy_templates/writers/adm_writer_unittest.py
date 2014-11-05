@@ -1020,5 +1020,103 @@ Policy2_Part="Caption of policy2."
 ''')
     self.CompareOutputs(output, expected_output)
 
+  def testDuplicatedStringEnumPolicy(self):
+    # Verifies that duplicated enum constants get merged, and that
+    # string constants get escaped.
+    grd = self.PrepareTest('''
+      {
+        'policy_definitions': [
+          {
+            'name': 'EnumPolicy.A',
+            'type': 'string-enum',
+            'caption': 'Caption of policy A.',
+            'desc': 'Description of policy A.',
+            'items': [
+              {'name': 'tls1.2', 'value': 'tls1.2', 'caption': 'tls1.2' },
+            ],
+            'supported_on': ['chrome.win:39-'],
+          },
+          {
+            'name': 'EnumPolicy.B',
+            'type': 'string-enum',
+            'caption': 'Caption of policy B.',
+            'desc': 'Description of policy B.',
+            'items': [
+              {'name': 'tls1.2', 'value': 'tls1.2', 'caption': 'tls1.2' },
+            ],
+            'supported_on': ['chrome.win:39-'],
+          },
+        ],
+        'placeholders': [],
+        'messages': {
+          'win_supported_winxpsp2': {
+            'text': 'At least Windows 3.14', 'desc': 'blah'
+          },
+          'doc_recommended': {
+            'text': 'Recommended', 'desc': 'bleh'
+          }
+        }
+      }''')
+    output = self.GetOutput(grd, 'fr', {'_google_chrome': '1'}, 'adm', 'en')
+    expected_output = self.ConstructOutput(
+        ['MACHINE', 'USER'], '''
+  CATEGORY !!google
+    CATEGORY !!googlechrome
+      KEYNAME "Software\\Policies\\Google\\Chrome"
+
+      POLICY !!EnumPolicy_A_Policy
+        #if version >= 4
+          SUPPORTED !!SUPPORTED_WINXPSP2
+        #endif
+        EXPLAIN !!EnumPolicy_A_Explain
+
+        PART !!EnumPolicy_A_Part  DROPDOWNLIST
+          VALUENAME "EnumPolicy.A"
+          ITEMLIST
+            NAME !!tls1_2_DropDown VALUE "tls1.2"
+          END ITEMLIST
+        END PART
+      END POLICY
+
+      POLICY !!EnumPolicy_B_Policy
+        #if version >= 4
+          SUPPORTED !!SUPPORTED_WINXPSP2
+        #endif
+        EXPLAIN !!EnumPolicy_B_Explain
+
+        PART !!EnumPolicy_B_Part  DROPDOWNLIST
+          VALUENAME "EnumPolicy.B"
+          ITEMLIST
+            NAME !!tls1_2_DropDown VALUE "tls1.2"
+          END ITEMLIST
+        END PART
+      END POLICY
+
+    END CATEGORY
+  END CATEGORY
+
+  CATEGORY !!google
+    CATEGORY !!googlechrome_recommended
+      KEYNAME "Software\\Policies\\Google\\Chrome\\Recommended"
+
+    END CATEGORY
+  END CATEGORY
+
+
+''', '''[Strings]
+SUPPORTED_WINXPSP2="At least Windows 3.14"
+google="Google"
+googlechrome="Google Chrome"
+googlechrome_recommended="Google Chrome - Recommended"
+EnumPolicy_A_Policy="Caption of policy A."
+EnumPolicy_A_Explain="Description of policy A."
+EnumPolicy_A_Part="Caption of policy A."
+tls1_2_DropDown="tls1.2"
+EnumPolicy_B_Policy="Caption of policy B."
+EnumPolicy_B_Explain="Description of policy B."
+EnumPolicy_B_Part="Caption of policy B."
+''')
+    self.CompareOutputs(output, expected_output)
+
 if __name__ == '__main__':
   unittest.main()

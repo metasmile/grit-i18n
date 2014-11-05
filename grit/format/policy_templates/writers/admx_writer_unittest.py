@@ -506,6 +506,67 @@ class AdmxWriterUnittest(xml_writer_base_unittest.XmlWriterBaseTest):
       ]
     }))
 
+  def testStringEncodings(self):
+    enum_policy_a = {
+      'name': 'SampleEnumPolicy.A',
+      'type': 'string-enum',
+        'items': [
+          {'name': 'tls1.2', 'value': 'tls1.2'}
+        ]
+    }
+    enum_policy_b = {
+      'name': 'SampleEnumPolicy.B',
+      'type': 'string-enum',
+        'items': [
+          {'name': 'tls1.2', 'value': 'tls1.2'}
+        ]
+    }
+
+    dom_impl = minidom.getDOMImplementation('')
+    self.writer._doc = dom_impl.createDocument(None, 'policyDefinitions', None)
+    self.writer._active_policies_elem = self.writer._doc.documentElement
+    self.writer._active_mandatory_policy_group_name = 'PolicyGroup'
+    self.writer.WritePolicy(enum_policy_a)
+    self.writer.WritePolicy(enum_policy_b)
+    output = self.writer.GetTemplateText()
+    expected_output = (
+        '<?xml version="1.0" ?>\n'
+        '<policyDefinitions>\n'
+        '  <policy class="TestClass" displayName="$(string.SampleEnumPolicy_A)"'
+          ' explainText="$(string.SampleEnumPolicy_A_Explain)"'
+          ' key="Software\\Policies\\Test" name="SampleEnumPolicy.A"'
+          ' presentation="$(presentation.SampleEnumPolicy.A)">\n'
+        '    <parentCategory ref="PolicyGroup"/>\n'
+        '    <supportedOn ref="SUPPORTED_TESTOS"/>\n'
+        '    <elements>\n'
+        '      <enum id="SampleEnumPolicy.A" valueName="SampleEnumPolicy.A">\n'
+        '        <item displayName="$(string.tls1_2)">\n'
+        '          <value>\n'
+        '            <string>tls1.2</string>\n'
+        '          </value>\n'
+        '        </item>\n'
+        '      </enum>\n'
+        '    </elements>\n'
+        '  </policy>\n'
+        '  <policy class="TestClass" displayName="$(string.SampleEnumPolicy_B)"'
+          ' explainText="$(string.SampleEnumPolicy_B_Explain)"'
+          ' key="Software\\Policies\\Test" name="SampleEnumPolicy.B"'
+          ' presentation="$(presentation.SampleEnumPolicy.B)">\n'
+        '    <parentCategory ref="PolicyGroup"/>\n'
+        '    <supportedOn ref="SUPPORTED_TESTOS"/>\n'
+        '    <elements>\n'
+        '      <enum id="SampleEnumPolicy.B" valueName="SampleEnumPolicy.B">\n'
+        '        <item displayName="$(string.tls1_2)">\n'
+        '          <value>\n'
+        '            <string>tls1.2</string>\n'
+        '          </value>\n'
+        '        </item>\n'
+        '      </enum>\n'
+        '    </elements>\n'
+        '  </policy>\n'
+        '</policyDefinitions>')
+    self.AssertXMLEquals(output, expected_output)
+
 
 if __name__ == '__main__':
   unittest.main()

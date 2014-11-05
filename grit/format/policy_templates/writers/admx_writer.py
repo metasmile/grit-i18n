@@ -32,6 +32,7 @@ class ADMXWriter(xml_formatted_writer.XMLFormattedWriter):
     Args:
       name: Name of the referenced ADML string.
     '''
+    name = name.replace('.', '_')
     return '$(string.' + name + ')'
 
   def _AdmlStringExplain(self, name):
@@ -39,6 +40,7 @@ class ADMXWriter(xml_formatted_writer.XMLFormattedWriter):
     Args:
       name: Name of the referenced ADML explanation.
     '''
+    name = name.replace('.', '_')
     return '$(string.' + name + '_Explain)'
 
   def _AdmlPresentation(self, name):

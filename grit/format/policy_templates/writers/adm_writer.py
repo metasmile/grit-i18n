@@ -75,7 +75,12 @@ class AdmWriter(template_writer.TemplateWriter):
     'dict': 'EDITTEXT'
   }
 
+  def _Escape(self, string):
+    return string.replace('.', '_')
+
   def _AddGuiString(self, name, value):
+    # The |name| must be escaped.
+    assert name == self._Escape(name)
     # Escape newlines in the value.
     value = value.replace('\n', '\\n')
     if name in self.strings_seen:
@@ -100,7 +105,7 @@ class AdmWriter(template_writer.TemplateWriter):
       key_name: The registry key backing the policy.
       builder: Builder to append lines to.
     '''
-    policy_part_name = policy['name'] + '_Part'
+    policy_part_name = self._Escape(policy['name'] + '_Part')
     self._AddGuiString(policy_part_name, policy['label'])
 
     # Print the PART ... END PART section:
@@ -124,9 +129,9 @@ class AdmWriter(template_writer.TemplateWriter):
           value_text = 'NUMERIC ' + str(item['value'])
         else:
           value_text = '"' + item['value'] + '"'
-        builder.AddLine('NAME !!%s_DropDown VALUE %s' %
-            (item['name'], value_text))
-        self._AddGuiString(item['name'] + '_DropDown', item['caption'])
+        string_id = self._Escape(item['name'] + '_DropDown')
+        builder.AddLine('NAME !!%s VALUE %s' % (string_id, value_text))
+        self._AddGuiString(string_id, item['caption'])
       builder.AddLine('END ITEMLIST', -1)
     builder.AddLine('END PART', -1)
 
@@ -135,10 +140,11 @@ class AdmWriter(template_writer.TemplateWriter):
       # This type can only be set through cloud policy.
       return
 
-    self._AddGuiString(policy['name'] + '_Policy', policy['caption'])
-    builder.AddLine('POLICY !!%s_Policy' % policy['name'], 1)
+    policy_name = self._Escape(policy['name'] + '_Policy')
+    self._AddGuiString(policy_name, policy['caption'])
+    builder.AddLine('POLICY !!%s' % policy_name, 1)
     self._WriteSupported(builder)
-    policy_explain_name = policy['name'] + '_Explain'
+    policy_explain_name = self._Escape(policy['name'] + '_Explain')
     self._AddGuiString(policy_explain_name, policy['desc'])
     builder.AddLine('EXPLAIN !!' + policy_explain_name)
 
@@ -167,7 +173,7 @@ class AdmWriter(template_writer.TemplateWriter):
                       self.recommended_policies)
 
   def BeginPolicyGroup(self, group):
-    category_name = group['name'] + '_Category'
+    category_name = self._Escape(group['name'] + '_Category')
     self._AddGuiString(category_name, group['caption'])
     self.policies.AddLine('CATEGORY !!' + category_name, 1)
 
@@ -176,7 +182,7 @@ class AdmWriter(template_writer.TemplateWriter):
     self.policies.AddLine('')
 
   def BeginRecommendedPolicyGroup(self, group):
-    category_name = group['name'] + '_Category'
+    category_name = self._Escape(group['name'] + '_Category')
     self._AddGuiString(category_name, group['caption'])
     self.recommended_policies.AddLine('CATEGORY !!' + category_name, 1)
 
