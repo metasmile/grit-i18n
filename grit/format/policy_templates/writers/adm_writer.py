@@ -122,6 +122,10 @@ class AdmWriter(template_writer.TemplateWriter):
     if policy['type'] == 'int':
       # The default max for NUMERIC values is 9999 which is too small for us.
       builder.AddLine('MIN 0 MAX 2000000000')
+    if policy['type'] in ('string', 'dict'):
+      # The default max for EDITTEXT values is 1023, which is too small for
+      # big JSON blobs and other string policies.
+      builder.AddLine('MAXLEN 1000000')
     if policy['type'] in ('int-enum', 'string-enum'):
       builder.AddLine('ITEMLIST', 1)
       for item in policy['items']:

@@ -309,7 +309,8 @@ class AdmxWriterUnittest(xml_writer_base_unittest.XmlWriterBaseTest):
         '  <parentCategory ref="PolicyGroup"/>\n'
         '  <supportedOn ref="SUPPORTED_TESTOS"/>\n'
         '  <elements>\n'
-        '    <text id="SampleStringPolicy" valueName="SampleStringPolicy"/>\n'
+        '    <text id="SampleStringPolicy" maxLength="1000000"'
+            ' valueName="SampleStringPolicy"/>\n'
         '  </elements>\n'
         '</policy>')
     self.AssertXMLEquals(output, expected_output)
@@ -487,8 +488,8 @@ class AdmxWriterUnittest(xml_writer_base_unittest.XmlWriterBaseTest):
         '  <parentCategory ref="PolicyGroup"/>\n'
         '  <supportedOn ref="SUPPORTED_TESTOS"/>\n'
         '  <elements>\n'
-        '    <text id="SampleDictionaryPolicy" '
-            'valueName="SampleDictionaryPolicy"/>\n'
+        '    <text id="SampleDictionaryPolicy" maxLength="1000000"'
+            ' valueName="SampleDictionaryPolicy"/>\n'
         '  </elements>\n'
         '</policy>')
     self.AssertXMLEquals(output, expected_output)

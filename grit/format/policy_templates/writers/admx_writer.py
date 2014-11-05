@@ -168,6 +168,7 @@ class ADMXWriter(xml_formatted_writer.XMLFormattedWriter):
     attributes = {
       'id': name,
       'valueName': name,
+      'maxLength': '1000000',
     }
     self.AddElement(parent, 'text', attributes)
 

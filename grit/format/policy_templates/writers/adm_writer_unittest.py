@@ -286,6 +286,7 @@ With a newline.""",
 
       PART !!StringPolicy_Part  EDITTEXT
         VALUENAME "StringPolicy"
+        MAXLEN 1000000
       END PART
     END POLICY
 
@@ -302,6 +303,7 @@ With a newline.""",
 
       PART !!StringPolicy_Part  EDITTEXT
         VALUENAME "StringPolicy"
+        MAXLEN 1000000
       END PART
     END POLICY
 
@@ -770,6 +772,7 @@ ListPolicy_Part="Label of list policy."
 
       PART !!DictionaryPolicy_Part  EDITTEXT
         VALUENAME "DictionaryPolicy"
+        MAXLEN 1000000
       END PART
     END POLICY
 
@@ -786,6 +789,7 @@ ListPolicy_Part="Label of list policy."
 
       PART !!DictionaryPolicy_Part  EDITTEXT
         VALUENAME "DictionaryPolicy"
+        MAXLEN 1000000
       END PART
     END POLICY
 
@@ -978,6 +982,7 @@ With a newline."""
 
         PART !!Policy2_Part  EDITTEXT
           VALUENAME "Policy2"
+          MAXLEN 1000000
         END PART
       END POLICY
 
