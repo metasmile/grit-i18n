@@ -109,6 +109,15 @@ Options:
                     output_all_resource_defines attribute of the root <grit>
                     element of the input .grd file.
 
+  --write-only-new flag
+                    If flag is non-0, write output files to a temporary file
+                    first, and copy it to the real output only if the new file
+                    is different from the old file.  This allows some build
+                    systems to realize that dependent build steps might be
+                    unnecessary, at the cost of comparing the output data at
+                    grit time.
+                    
+
 Conditional inclusion of resources only affects the output of files which
 control which resources get linked into a binary, e.g. it affects .rc files
 meant for compilation but it does not affect resource header files (that define
@@ -129,10 +138,12 @@ are exported to translation interchange files (e.g. XMB files), etc.
     depdir = None
     rc_header_format = None
     output_all_resource_defines = None
+    write_only_new = False
     (own_opts, args) = getopt.getopt(args, 'a:o:D:E:f:w:t:h:',
         ('depdir=','depfile=','assert-file-list=',
          'output-all-resource-defines',
-         'no-output-all-resource-defines',))
+         'no-output-all-resource-defines',
+         'write-only-new='))
     for (key, val) in own_opts:
       if key == '-a':
         assert_output_files.append(val)
@@ -166,6 +177,8 @@ are exported to translation interchange files (e.g. XMB files), etc.
         depdir = val
       elif key == '--depfile':
         depfile = val
+      elif key == '--write-only-new':
+        write_only_new = val != '0'
 
     if len(args):
       print 'This tool takes no tool-specific arguments.'
@@ -184,6 +197,8 @@ are exported to translation interchange files (e.g. XMB files), etc.
         self.VerboseOut('Using whitelist: %s\n' % whitelist_filename);
         whitelist_contents = util.ReadFile(whitelist_filename, util.RAW_TEXT)
         self.whitelist_names.update(whitelist_contents.strip().split('\n'))
+
+    self.write_only_new = write_only_new
 
     self.res = grd_reader.Parse(opts.input,
                                 debug=opts.extra_verbose,
@@ -235,6 +250,9 @@ are exported to translation interchange files (e.g. XMB files), etc.
     # The set of names that are whitelisted to actually be included in the
     # output.
     self.whitelist_names = None
+
+    # Whether to compare outputs to their old contents before writing.
+    self.write_only_new = False
 
   @staticmethod
   def AddWhitelistTags(start_node, whitelist_names):
@@ -341,13 +359,17 @@ are exported to translation interchange files (e.g. XMB files), etc.
       else:
         # CHROMIUM SPECIFIC CHANGE.
         # This clashes with gyp + vstudio, which expect the output timestamp
-        # to change on a rebuild, even if nothing has changed.
-        #files_match = filecmp.cmp(output.GetOutputFilename(),
-        #    output.GetOutputFilename() + '.tmp')
-        #if (output.GetType() != 'rc_header' or not files_match
-        #    or sys.platform != 'win32'):
-        shutil.copy2(output.GetOutputFilename() + '.tmp',
-                     output.GetOutputFilename())
+        # to change on a rebuild, even if nothing has changed, so only do
+        # it when opted in.
+        if not self.write_only_new:
+          write_file = True
+        else:
+          files_match = filecmp.cmp(output.GetOutputFilename(),
+              output.GetOutputFilename() + '.tmp')
+          write_file = not files_match
+        if write_file:
+          shutil.copy2(output.GetOutputFilename() + '.tmp',
+                       output.GetOutputFilename())
         os.remove(output.GetOutputFilename() + '.tmp')
 
       self.VerboseOut(' done.\n')
