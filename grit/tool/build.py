@@ -225,7 +225,7 @@ are exported to translation interchange files (e.g. XMB files), etc.
         return 2
 
     if depfile and depdir:
-      self.GenerateDepfile(depfile, depdir)
+      self.GenerateDepfile(depfile, depdir, first_ids_file)
 
     return 0
 
@@ -424,7 +424,7 @@ Extra output files:
     return True
 
 
-  def GenerateDepfile(self, depfile, depdir):
+  def GenerateDepfile(self, depfile, depdir, first_ids_file):
     '''Generate a depfile that contains the imlicit dependencies of the input
     grd. The depfile will be in the same format as a makefile, and will contain
     references to files relative to |depdir|. It will be put in |depfile|.
@@ -453,6 +453,10 @@ Extra output files:
     depfile = os.path.abspath(depfile)
     depdir = os.path.abspath(depdir)
     infiles = self.res.GetInputFiles()
+
+    # We want to trigger a rebuild if the first ids change.
+    if first_ids_file is not None:
+      infiles.append(first_ids_file)
 
     # Get the first output file relative to the depdir.
     outputs = self.res.GetOutputFiles()
