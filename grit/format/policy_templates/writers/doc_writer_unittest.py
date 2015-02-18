@@ -88,7 +88,7 @@ class DocWriterUnittest(writer_unittest_common.WriterUnittestCommon):
         self.writer._main_div.toxml(),
         '<div>'
           '<div>'
-            '<a name="top"/><br/>_test_intro<br/><br/><br/>'
+            '<a name="top"/><br/><p>_test_intro</p><br/><br/><br/>'
             '<table style="style_table;">'
               '<thead><tr style="style_tr;">'
                 '<td style="style_td;style_td.left;style_thead td;">'
@@ -113,7 +113,7 @@ class DocWriterUnittest(writer_unittest_common.WriterUnittestCommon):
         '<div>'
           '<!--test_product version: 39.0.0.0-->'
           '<div>'
-            '<a name="top"/><br/>_test_intro<br/><br/><br/>'
+            '<a name="top"/><br/><p>_test_intro</p><br/><br/><br/>'
             '<table style="style_table;">'
               '<thead><tr style="style_tr;">'
                 '<td style="style_td;style_td.left;style_thead td;">'
@@ -194,9 +194,9 @@ See http://policy-explanation.example.com for more details.
     self.writer._AddDescription(self.doc_root, policy)
     self.assertEquals(
         self.doc_root.toxml(),
-        '''<root>This policy disables foo, except in case of bar.
+        '''<root><p>This policy disables foo, except in case of bar.
 See <a href="http://policy-explanation.example.com">http://policy-explanation.example.com</a> for more details.
-<ul><li>0 = Disable foo</li><li>2 = Solve your problem</li><li>5 = Enable bar</li></ul></root>''')
+</p><ul><li>0 = Disable foo</li><li>2 = Solve your problem</li><li>5 = Enable bar</li></ul></root>''')
 
   def testAddDescriptionStringEnum(self):
     # Test if URLs are replaced and choices of 'int-enum' policies are listed
@@ -215,9 +215,9 @@ See http://policy-explanation.example.com for more details.
     self.writer._AddDescription(self.doc_root, policy)
     self.assertEquals(
         self.doc_root.toxml(),
-        '''<root>This policy disables foo, except in case of bar.
+        '''<root><p>This policy disables foo, except in case of bar.
 See <a href="http://policy-explanation.example.com">http://policy-explanation.example.com</a> for more details.
-<ul><li>&quot;one&quot; = Disable foo</li><li>&quot;two&quot; = Solve your problem</li><li>&quot;three&quot; = Enable bar</li></ul></root>''')
+</p><ul><li>&quot;one&quot; = Disable foo</li><li>&quot;two&quot; = Solve your problem</li><li>&quot;three&quot; = Enable bar</li></ul></root>''')
 
   def testAddFeatures(self):
     # Test if the list of features of a policy is handled correctly.
@@ -439,7 +439,7 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
       '</dd>'
       '<dt style="style_dt;">_test_supported_features</dt>'
         '<dd>_test_feature_dynamic_refresh: _test_not_supported</dd>'
-      '<dt style="style_dt;">_test_description</dt><dd>TestPolicyDesc</dd>'
+      '<dt style="style_dt;">_test_description</dt><dd><p>TestPolicyDesc</p></dd>'
       '<dt style="style_dt;">_test_example_value</dt>'
         '<dd>0x00000000 (Windows), false (Linux), &lt;false /&gt; (Mac)</dd>'
       '</dl></root>')
@@ -479,7 +479,7 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
       '</dd>'
       '<dt style="style_dt;">_test_supported_features</dt>'
         '<dd>_test_feature_dynamic_refresh: _test_not_supported</dd>'
-      '<dt style="style_dt;">_test_description</dt><dd>TestPolicyDesc</dd>'
+      '<dt style="style_dt;">_test_description</dt><dd><p>TestPolicyDesc</p></dd>'
       '<dt style="style_dt;">_test_example_value</dt>'
         '<dd>'
           '<dl style="style_dd dl;">'
@@ -550,7 +550,7 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
         '<dd>_test_feature_mandatory: _test_not_supported,'
         ' _test_feature_recommended: _test_supported,'
         ' _test_feature_dynamic_refresh: _test_not_supported</dd>'
-      '<dt style="style_dt;">_test_description</dt><dd>TestPolicyDesc</dd>'
+      '<dt style="style_dt;">_test_description</dt><dd><p>TestPolicyDesc</p></dd>'
       '<dt style="style_dt;">_test_example_value</dt>'
         '<dd>0x00000000 (Windows), false (Linux), &lt;false /&gt; (Mac)</dd>'
       '</dl></root>')
@@ -566,9 +566,9 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
     self.writer._AddPolicyNote(self.doc_root, policy)
     self.assertEquals(
         self.doc_root.toxml(),
-        '<root><div style="style_div.note;">...'
+        '<root><div style="style_div.note;"><p>...'
         '<a href="http://www.example.com/5">http://www.example.com/5</a>'
-        '...</div></root>')
+        '...</p></div></root>')
 
   def testAddPolicyRow(self):
     # Test if policies are correctly added to the summary table.
@@ -643,7 +643,7 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
             '<dt style="style_dt;">_test_supported_features</dt>'
             '<dd>_test_feature_dynamic_refresh: _test_not_supported</dd>'
             '<dt style="style_dt;">_test_description</dt>'
-            '<dd>PolicyDesc</dd>'
+            '<dd><p>PolicyDesc</p></dd>'
             '<dt style="style_dt;">_test_example_value</dt>'
             '<dd>&quot;False&quot;</dd>'
           '</dl>'
@@ -701,7 +701,7 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
             '<dt style="style_dt;">_test_supported_features</dt>'
             '<dd>_test_feature_dynamic_refresh: _test_not_supported</dd>'
             '<dt style="style_dt;">_test_description</dt>'
-            '<dd>PolicyDesc</dd>'
+            '<dd><p>PolicyDesc</p></dd>'
             '<dt style="style_dt;">_test_example_value</dt>'
             '<dd>0x0000007b (Windows)</dd>'
           '</dl>'
@@ -746,7 +746,7 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
             '<dt style="style_dt;">_test_supported_features</dt>'
             '<dd>_test_feature_dynamic_refresh: _test_not_supported</dd>'
             '<dt style="style_dt;">_test_description</dt>'
-            '<dd>PolicyDesc</dd>'
+            '<dd><p>PolicyDesc</p></dd>'
             '<dt style="style_dt;">_test_example_value</dt>'
             '<dd>123 (Mac)</dd>'
           '</dl>'
@@ -791,7 +791,7 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
             '<dt style="style_dt;">_test_supported_features</dt>'
             '<dd>_test_feature_dynamic_refresh: _test_not_supported</dd>'
             '<dt style="style_dt;">_test_description</dt>'
-            '<dd>PolicyDesc</dd>'
+            '<dd><p>PolicyDesc</p></dd>'
             '<dt style="style_dt;">_test_example_value</dt>'
             '<dd>123 (Linux)</dd>'
           '</dl>'
@@ -878,6 +878,12 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
         '</dl>'
       '</root>')
 
+  def testParagraphs(self):
+    text = 'Paragraph 1\n\nParagraph 2\n\nParagraph 3'
+    self.writer._AddParagraphs(self.doc_root, text)
+    self.assertEquals(
+        self.doc_root.toxml(),
+        '<root><p>Paragraph 1</p><p>Paragraph 2</p><p>Paragraph 3</p></root>')
 
 if __name__ == '__main__':
   unittest.main()

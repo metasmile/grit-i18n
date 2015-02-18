@@ -66,11 +66,13 @@ class DocWriter(xml_formatted_writer.XMLFormattedWriter):
       parent: The DOM node to which the text will be added.
       text: The string to be added.
     '''
+    # A simple regexp to search for URLs. It is enough for now.
+    url_matcher = lazy_re.compile('(http://[^\\s]*[^\\s\\.])')
+
     # Iterate through all the URLs and replace them with links.
-    out = []
     while True:
       # Look for the first URL.
-      res = self._url_matcher.search(text)
+      res = url_matcher.search(text)
       if not res:
         break
       # Calculate positions of the substring of the URL.
@@ -85,6 +87,20 @@ class DocWriter(xml_formatted_writer.XMLFormattedWriter):
       text = text[end:]
     self.AddText(parent, text)
 
+  def _AddParagraphs(self, parent, text):
+    '''Break description into paragraphs and replace URLs with links.
+
+    Args:
+      parent: The DOM node to which the text will be added.
+      text: The string to be added.
+    '''
+    # Split text into list of paragraphs.
+    entries = text.split('\n\n')
+    for entry in entries:
+      # Create a new paragraph node.
+      paragraph = self.AddElement(parent, 'p')
+      # Insert text to the paragraph with processing the URLs.
+      self._AddTextWithLinks(paragraph, entry)
 
   def _AddStyledElement(self, parent, name, style_ids, attrs=None, text=None):
     '''Adds an XML element to a parent, with CSS style-sheets included.
@@ -114,8 +130,8 @@ class DocWriter(xml_formatted_writer.XMLFormattedWriter):
       parent: The DOM node for which the feature list will be added.
       policy: The data structure of a policy.
     '''
-    # Replace URLs with links in the description.
-    self._AddTextWithLinks(parent, policy['desc'])
+    # Add description by paragraphs (URLs will be substituted by links).
+    self._AddParagraphs(parent, policy['desc'])
     # Add list of enum items.
     if policy['type'] in ('string-enum', 'int-enum', 'string-enum-list'):
       ul = self.AddElement(parent, 'ul')
@@ -508,7 +524,7 @@ class DocWriter(xml_formatted_writer.XMLFormattedWriter):
     problem_href = policy['problem_href']
     div = self._AddStyledElement(parent, 'div', ['div.note'])
     note = self._GetLocalizedMessage('note').replace('$6', problem_href)
-    self._AddTextWithLinks(div, note)
+    self._AddParagraphs(div, note)
 
   def _AddPolicyRow(self, parent, policy):
     '''Adds a row for the policy in the summary table.
@@ -597,7 +613,7 @@ class DocWriter(xml_formatted_writer.XMLFormattedWriter):
     summary_div = self.AddElement(self._main_div, 'div')
     self.AddElement(summary_div, 'a', {'name': 'top'})
     self.AddElement(summary_div, 'br')
-    self._AddTextWithLinks(
+    self._AddParagraphs(
         summary_div,
         self._GetLocalizedMessage('intro'))
     self.AddElement(summary_div, 'br')
@@ -690,8 +706,6 @@ class DocWriter(xml_formatted_writer.XMLFormattedWriter):
       'ul': 'padding-left: 0px; margin-left: 0px;'
     }
 
-    # A simple regexp to search for URLs. It is enough for now.
-    self._url_matcher = lazy_re.compile('(http://[^\\s]*[^\\s\\.])')
 
   def GetTemplateText(self):
     # Return the text representation of the main <div> tag.
