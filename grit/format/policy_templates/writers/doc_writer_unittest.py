@@ -55,6 +55,9 @@ class DocWriterUnittest(writer_unittest_common.WriterUnittestCommon):
       'doc_feature_can_be_mandatory': {'text': '_test_feature_mandatory'},
       'doc_intro': {'text': '_test_intro'},
       'doc_mac_linux_pref_name': {'text': '_test_mac_linux_pref_name'},
+      'doc_android_restriction_name': {
+        'text': '_test_android_restriction_name'
+      },
       'doc_note': {'text': '_test_note'},
       'doc_name_column_title': {'text': '_test_name_column_title'},
       'doc_not_supported': {'text': '_test_not_supported'},
@@ -258,7 +261,7 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
             'MockKey\\PolicyName\\1 = &quot;Foo&quot;\n'
             'MockKey\\PolicyName\\2 = &quot;Bar&quot;'
           '</dd>'
-          '<dt>Linux:</dt>'
+          '<dt>Android/Linux:</dt>'
           '<dd style="style_.monospace;">'
             '[&quot;Foo&quot;, &quot;Bar&quot;]'
           '</dd>'
@@ -278,25 +281,29 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
       'name': 'PolicyName',
       'type': 'main',
       'example_value': True,
-      'supported_on': [ { 'platforms': ['win', 'mac', 'linux'] } ]
+      'supported_on': [ { 'platforms': ['win', 'mac', 'linux', 'android'] } ]
     }
     e1 = self.writer.AddElement(self.doc_root, 'e1')
     self.writer._AddExample(e1, policy)
     self.assertEquals(
         e1.toxml(),
-        '<e1>0x00000001 (Windows), true (Linux), &lt;true /&gt; (Mac)</e1>')
+        '<e1>0x00000001 (Windows),'
+        ' true (Linux), true (Android),'
+        ' &lt;true /&gt; (Mac)</e1>')
 
     policy = {
       'name': 'PolicyName',
       'type': 'main',
       'example_value': False,
-      'supported_on': [ { 'platforms': ['win', 'mac', 'linux'] } ]
+      'supported_on': [ { 'platforms': ['win', 'mac', 'linux', 'android'] } ]
     }
     e2 = self.writer.AddElement(self.doc_root, 'e2')
     self.writer._AddExample(e2, policy)
     self.assertEquals(
         e2.toxml(),
-        '<e2>0x00000000 (Windows), false (Linux), &lt;false /&gt; (Mac)</e2>')
+        '<e2>0x00000000 (Windows),'
+        ' false (Linux), false (Android),'
+        ' &lt;false /&gt; (Mac)</e2>')
 
   def testIntEnumExample(self):
     # Test representation of 'int-enum' example values.
@@ -304,12 +311,12 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
       'name': 'PolicyName',
       'type': 'int-enum',
       'example_value': 16,
-      'supported_on': [ { 'platforms': ['win', 'mac', 'linux'] } ]
+      'supported_on': [ { 'platforms': ['win', 'mac', 'linux', 'android'] } ]
     }
     self.writer._AddExample(self.doc_root, policy)
     self.assertEquals(
         self.doc_root.toxml(),
-        '<root>0x00000010 (Windows), 16 (Linux), 16 (Mac)</root>')
+        '<root>0x00000010 (Windows), 16 (Linux), 16 (Android), 16 (Mac)</root>')
 
   def testStringEnumExample(self):
     # Test representation of 'string-enum' example values.
@@ -335,7 +342,7 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
     self.assertEquals(
         self.doc_root.toxml(),
         '<root><dl style="style_dd dl;">'
-        '<dt>Linux:</dt>'
+        '<dt>Android/Linux:</dt>'
         '<dd style="style_.monospace;">'
         '[&quot;one&quot;, &quot;two&quot;]'
         '</dd></dl></root>')
@@ -352,7 +359,7 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
     self.assertEquals(
         self.doc_root.toxml(),
         '<root><dl style="style_dd dl;">'
-        '<dt>Linux:</dt>'
+        '<dt>Android/Linux:</dt>'
         '<dd style="style_.monospace;">'
         '[&quot;one&quot;, &quot;two&quot;]'
         '</dd></dl></root>')
@@ -375,12 +382,12 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
       'name': 'PolicyName',
       'type': 'int',
       'example_value': 26,
-      'supported_on': [ { 'platforms': ['win', 'mac', 'linux'] } ]
+      'supported_on': [ { 'platforms': ['win', 'mac', 'linux', 'android'] } ]
     }
     self.writer._AddExample(self.doc_root, policy)
     self.assertEquals(
         self.doc_root.toxml(),
-        '<root>0x0000001a (Windows), 26 (Linux), 26 (Mac)</root>')
+        '<root>0x0000001a (Windows), 26 (Linux), 26 (Android), 26 (Mac)</root>')
 
   def testAddPolicyAttribute(self):
     # Test creating a policy attribute term-definition pair.
@@ -424,10 +431,13 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
     self.assertEquals(
       self.doc_root.toxml(),
       '<root><dl>'
-      '<dt style="style_dt;">_test_data_type</dt><dd>Boolean (REG_DWORD)</dd>'
+      '<dt style="style_dt;">_test_data_type</dt>'
+        '<dd>Boolean [Windows:REG_DWORD]</dd>'
       '<dt style="style_dt;">_test_win_reg_loc</dt>'
       '<dd style="style_.monospace;">MockKey\TestPolicyName</dd>'
       '<dt style="style_dt;">_test_mac_linux_pref_name</dt>'
+        '<dd style="style_.monospace;">TestPolicyName</dd>'
+      '<dt style="style_dt;">_test_android_restriction_name</dt>'
         '<dd style="style_.monospace;">TestPolicyName</dd>'
       '<dt style="style_dt;">_test_supported_on</dt>'
       '<dd>'
@@ -441,7 +451,8 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
         '<dd>_test_feature_dynamic_refresh: _test_not_supported</dd>'
       '<dt style="style_dt;">_test_description</dt><dd><p>TestPolicyDesc</p></dd>'
       '<dt style="style_dt;">_test_example_value</dt>'
-        '<dd>0x00000000 (Windows), false (Linux), &lt;false /&gt; (Mac)</dd>'
+        '<dd>0x00000000 (Windows), false (Linux),'
+        ' false (Android), &lt;false /&gt; (Mac)</dd>'
       '</dl></root>')
 
   def testAddDictPolicyDetails(self):
@@ -466,7 +477,8 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
     self.assertEquals(
       self.doc_root.toxml(),
       '<root><dl>'
-      '<dt style="style_dt;">_test_data_type</dt><dd>Dictionary (REG_SZ; _test_complex_policies_win)</dd>'
+      '<dt style="style_dt;">_test_data_type</dt>'
+        '<dd>Dictionary [Windows:REG_SZ] (_test_complex_policies_win)</dd>'
       '<dt style="style_dt;">_test_win_reg_loc</dt>'
       '<dd style="style_.monospace;">MockKey\TestPolicyName</dd>'
       '<dt style="style_dt;">_test_mac_linux_pref_name</dt>'
@@ -485,7 +497,7 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
           '<dl style="style_dd dl;">'
             '<dt>Windows:</dt>'
             '<dd style="style_.monospace;style_.pre;">MockKey\TestPolicyName = {&quot;foo&quot;: 123}</dd>'
-            '<dt>Linux:</dt>'
+            '<dt>Android/Linux:</dt>'
             '<dd style="style_.monospace;">TestPolicyName: {&quot;foo&quot;: 123}</dd>'
             '<dt>Mac:</dt>'
             '<dd style="style_.monospace;style_.pre;">'
@@ -533,10 +545,13 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
     self.assertEquals(
       self.doc_root.toxml(),
       '<root><dl>'
-      '<dt style="style_dt;">_test_data_type</dt><dd>Boolean (REG_DWORD)</dd>'
+      '<dt style="style_dt;">_test_data_type</dt>'
+        '<dd>Boolean [Windows:REG_DWORD]</dd>'
       '<dt style="style_dt;">_test_win_reg_loc</dt>'
       '<dd style="style_.monospace;">MockKeyRec\TestPolicyName</dd>'
       '<dt style="style_dt;">_test_mac_linux_pref_name</dt>'
+        '<dd style="style_.monospace;">TestPolicyName</dd>'
+      '<dt style="style_dt;">_test_android_restriction_name</dt>'
         '<dd style="style_.monospace;">TestPolicyName</dd>'
       '<dt style="style_dt;">_test_supported_on</dt>'
       '<dd>'
@@ -552,7 +567,8 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
         ' _test_feature_dynamic_refresh: _test_not_supported</dd>'
       '<dt style="style_dt;">_test_description</dt><dd><p>TestPolicyDesc</p></dd>'
       '<dt style="style_dt;">_test_example_value</dt>'
-        '<dd>0x00000000 (Windows), false (Linux), &lt;false /&gt; (Mac)</dd>'
+        '<dd>0x00000000 (Windows), false (Linux),'
+        ' false (Android), &lt;false /&gt; (Mac)</dd>'
       '</dl></root>')
 
   def testAddPolicyNote(self):
@@ -629,7 +645,7 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
           '<span>PolicyCaption</span>'
           '<dl>'
             '<dt style="style_dt;">_test_data_type</dt>'
-            '<dd>String (REG_SZ)</dd>'
+            '<dd>String [Windows:REG_SZ]</dd>'
             '<dt style="style_dt;">_test_win_reg_loc</dt>'
             '<dd style="style_.monospace;">MockKey\\PolicyName</dd>'
             '<dt style="style_dt;">_test_mac_linux_pref_name</dt>'
@@ -689,7 +705,7 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
           '<span>PolicyCaption</span>'
           '<dl>'
             '<dt style="style_dt;">_test_data_type</dt>'
-            '<dd>Integer (REG_DWORD)</dd>'
+            '<dd>Integer [Windows:REG_DWORD]</dd>'
             '<dt style="style_dt;">_test_win_reg_loc</dt>'
             '<dd style="style_.monospace;">MockKey\\PolicyName</dd>'
             '<dt style="style_dt;">_test_supported_on</dt>'
@@ -799,6 +815,52 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
         '</div>'
       '</root>')
 
+  def testAddPolicySectionForAndroidOnly(self):
+    policy = {
+      'name': 'PolicyName',
+      'caption': 'PolicyCaption',
+      'desc': 'PolicyDesc',
+      'type': 'int',
+      'supported_on': [{
+        'product': 'chrome',
+        'platforms': ['android'],
+        'since_version': '33',
+        'until_version': '',
+      }],
+      'features': {'dynamic_refresh': False},
+      'example_value': 123
+    }
+    self.writer.messages['doc_since_version'] = {'text': '..$6..'}
+    self.writer._AddPolicySection(self.doc_root, policy)
+    self.assertTrue(self.writer.IsPolicySupportedOnPlatform(policy, 'android'))
+    self.assertEquals(
+      self.doc_root.toxml(),
+      '<root>'
+        '<div style="margin-left: 0px">'
+          '<h3><a name="PolicyName"/>PolicyName</h3>'
+          '<span>PolicyCaption</span>'
+          '<dl>'
+            '<dt style="style_dt;">_test_data_type</dt>'
+            '<dd>Integer</dd>'
+            '<dt style="style_dt;">_test_android_restriction_name</dt>'
+            '<dd style="style_.monospace;">PolicyName</dd>'
+            '<dt style="style_dt;">_test_supported_on</dt>'
+            '<dd>'
+              '<ul style="style_ul;">'
+                '<li>Chrome (Android) ..33..</li>'
+              '</ul>'
+            '</dd>'
+            '<dt style="style_dt;">_test_supported_features</dt>'
+            '<dd>_test_feature_dynamic_refresh: _test_not_supported</dd>'
+            '<dt style="style_dt;">_test_description</dt>'
+            '<dd><p>PolicyDesc</p></dd>'
+            '<dt style="style_dt;">_test_example_value</dt>'
+            '<dd>123 (Android)</dd>'
+          '</dl>'
+          '<a href="#top">_test_back_to_top</a>'
+        '</div>'
+      '</root>')
+
   def testAddDictionaryExample(self):
     policy = {
       'name': 'PolicyName',
@@ -838,7 +900,7 @@ See <a href="http://policy-explanation.example.com">http://policy-explanation.ex
           '<dd style="style_.monospace;style_.pre;">MockKey\PolicyName = '
               + value +
           '</dd>'
-          '<dt>Linux:</dt>'
+          '<dt>Android/Linux:</dt>'
           '<dd style="style_.monospace;">PolicyName: ' + value + '</dd>'
           '<dt>Mac:</dt>'
           '<dd style="style_.monospace;style_.pre;">'

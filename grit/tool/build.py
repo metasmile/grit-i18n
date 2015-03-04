@@ -39,7 +39,7 @@ _format_modules = {
 _format_modules.update(
     (type, 'policy_templates.template_formatter') for type in
         [ 'adm', 'admx', 'adml', 'reg', 'doc', 'json',
-          'plist', 'plist_strings', 'ios_plist' ])
+          'plist', 'plist_strings', 'ios_plist', 'android_policy' ])
 
 
 def GetFormatter(type):
@@ -320,7 +320,7 @@ are exported to translation interchange files (e.g. XMB files), etc.
           'resource_map_source', 'resource_file_map_source'):
         encoding = 'cp1252'
       elif output.GetType() in ('android', 'c_format', 'js_map_format', 'plist',
-                                'plist_strings', 'doc', 'json'):
+                                'plist_strings', 'doc', 'json', 'android_policy'):
         encoding = 'utf_8'
       elif output.GetType() in ('chrome_messages_json'):
         # Chrome Web Store currently expects BOM for UTF-8 files :-(
