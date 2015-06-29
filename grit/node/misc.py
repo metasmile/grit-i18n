@@ -331,7 +331,9 @@ class GritNode(base.Node):
       for node in self.ActiveDescendants():
         if isinstance(node, (io.FileNode, include.IncludeNode, misc.PartNode,
                              structure.StructureNode, variant.SkeletonNode)):
-          input_files.add(node.GetInputPath())
+          input_path = node.GetInputPath()
+          if input_path is not None:
+            input_files.add(input_path)
     self.SetOutputLanguage(old_output_language)
     return sorted(map(self.ToRealPath, input_files))
 
